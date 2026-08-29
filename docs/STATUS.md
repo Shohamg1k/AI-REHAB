@@ -1,16 +1,25 @@
 # Status
 
-**Last updated:** 2026-08-27
-**Milestone:** pre-M0
-**Phase:** planning complete, scope selection pending, no code written
+**Last updated:** 2026-08-29
+**Milestone:** M0 → M1, in progress (building the MVP directly, single agent session)
+**Phase:** scope confirmed as the recommended 15-feature MVP; `packages/contracts` implemented and merged; core engine, exercises, eval, and the patient app are being built on top of it in this same session.
 
 ---
 
 ## Where we are
 
-The product is fully specified and the repository is documented, but **nothing has been built**. The PRD has been rewritten to v2.0 with fourteen new features, the open-source foundations are chosen, and the interface contracts are specified on paper.
+MVP scope is confirmed as the recommended 15-feature set in [`FEATURES.md`](FEATURES.md#recommended-mvp--15-features), unchanged from the recommendation. [`docs/MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md) is being executed close to verbatim, with two blockers resolved by its own stated fallback (see "Decisions made without a human" below) rather than left open.
 
-The immediate gate is **MVP scope selection** — which of the 61 features in [`FEATURES.md`](FEATURES.md) are in. A recommended 15-feature MVP is on the table (FEATURES.md §Recommended MVP) but has not been confirmed.
+`packages/contracts` is implemented — every type in [`CONTRACTS.md`](CONTRACTS.md) as TypeScript + Zod, one file per domain, barrel export, 8 passing tests. Two small additions beyond the paper spec (`ExerciseSpec.provisional`/`provisionalNote`, a concrete `CompensationRule` shape, and a `mostSevere()` helper for `SafetyVerdict`) are documented inline in CONTRACTS.md where they appear.
+
+## Decisions made without a human, per the build prompt's own fallback
+
+- **The three M1 exercises.** No physiotherapist was available (still true — see Blocked below). Per `MVP-BUILD-PROMPT.md` §7, proceeded with the roadmap's suggested three — seated knee extension, standing shoulder abduction, sit-to-stand — using placeholder joint-angle ranges grounded in standard ROM references and cross-checked against a working MediaPipe rehab prototype ([RehabAR](https://github.com/Apoorva-Nayak07/RehabAR)) for plausibility, not copied from it. Every spec is marked `provisional: true` with a `provisionalNote`, and the UI surfaces that badge — it is never presented as clinically validated. **This still needs a physiotherapist's sign-off before any real patient uses it.**
+- **Pose model tier (ADR-0007).** Cannot physically benchmark a three-year-old Android phone or an iPhone from this environment. Shipped `pose_landmarker_lite` as the default (fastest, most likely to clear 24fps on the low end) with the tier trivially swappable, and left the spike's actual device measurement as an open task for a human running the app. See ADR-0007.
+
+## What upstream repos actually contributed
+
+Per the user's request to draw on [STGCN-rehab](https://github.com/fokhruli/STGCN-rehab), [avakanski's rehab framework](https://github.com/avakanski/A-Deep-Learning-Framework-for-Assessing-Physical-Rehabilitation-Exercises), [RehabAR](https://github.com/Apoorva-Nayak07/RehabAR), and OpenRehabAgent: the first two are offline deep-learning *quality-score regressors* trained on UI-PRMD/KIMORE (TensorFlow/Keras, batch evaluation, no real-time path) — valuable as the eventual I2 fixture-scoring benchmark (already noted in UPSTREAM.md §3) but incompatible with ADR-0001 (no model call in the per-frame path) as a live scoring engine, so no code was vendored from them for the fast loop. RehabAR is closest in shape to this product (browser MediaPipe, 3 exercises, voice feedback) and its `pose_server.py` angle thresholds informed the provisional ranges above as a sanity check. OpenRehabAgent remains correctly out of scope for the MVP per FEATURES.md (B1/D1/D2/E5 are all fast-follow, not MVP) — nothing from it is vendored yet.
 
 ## What exists
 

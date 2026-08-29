@@ -4,7 +4,7 @@ The typed seams between packages. **These are written before the code that uses 
 
 Everything here lives in `packages/contracts` as TypeScript types plus Zod schemas. The API validates with the same schemas the frontend builds against, so a schema change breaks the build rather than production.
 
-> **Status:** specified, not yet implemented. `packages/contracts` is the first pull request.
+> **Status:** implemented in `packages/contracts` (TypeScript + Zod, one file per domain, barrel at `src/index.ts`). Two additions landed during implementation, noted where they appear below — everything else here matches the shipped schemas.
 
 ---
 
@@ -84,6 +84,15 @@ type ExerciseSpec = {
   displayName: string;
   rationale: string;                  // C6 — the "why this exercise" sentence
 
+  // Added during implementation (not in the original spec). The three M1
+  // exercises were authored without a physiotherapist — see docs/STATUS.md
+  // "Blocked" — so every reference range in this build is a placeholder.
+  // `provisional: true` is the load-bearing flag: the UI must surface it
+  // (badge on camera setup + summary) rather than presenting the score as
+  // clinically validated. See docs/MVP-BUILD-PROMPT.md §7.
+  provisional: boolean;
+  provisionalNote?: string;
+
   // upstream-compatible metadata (mirrors exercise_catalog.Exercise)
   targetRegions: BodyRegion[];
   contraindicatedRegions: BodyRegion[];
@@ -141,6 +150,21 @@ type SafetyThresholds = {
   consecutiveFailedRepsToBlock: number;
 };
 ```
+
+`CompensationRule` (referenced by `ExerciseSpec.compensations`, drives A5) had no shape specified on paper. A5 is fast-follow, not MVP, but the DSL needed *something* today so an M1 spec isn't a breaking change later. Implemented as:
+
+```ts
+type CompensationRule = {
+  id: string;
+  label: string;
+  joint: JointName;
+  detect: 'trunk_lean_exceeds' | 'asymmetry_exceeds' | 'joint_substitution';
+  threshold: number;
+  severity: number;                   // 0..1
+};
+```
+
+Every MVP exercise ships with `compensations: []` — no detector runs against it yet. Revisit this shape when A5 is actually built; it is a placeholder, not a commitment.
 
 ---
 
@@ -245,6 +269,8 @@ type SafetyVerdict = {
 - `core/safety` must be a pure function. No I/O, no clock reads beyond the passed `t`, no randomness, no model calls. Enforced by a dependency lint: `packages/core/safety` may not import anything that performs network I/O.
 - Nothing downstream may transform `block` or `escalate` into a lesser verdict.
 - Every `ruleId` has at least one fixture in `packages/eval` demonstrating it firing. **A new rule without a fixture does not merge.**
+
+`packages/contracts` ships a `mostSevere(a, b)` helper alongside this type — the mechanical enforcement of the second rule wherever two verdicts for the same frame need combining (e.g. the realtime gate evaluating several thresholds at once). It orders `allow < downgrade < block < escalate` and always returns the more severe of the two.
 
 ---
 
