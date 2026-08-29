@@ -1,77 +1,114 @@
 # Status
 
 **Last updated:** 2026-08-29
-**Milestone:** M0 → M1, in progress (building the MVP directly, single agent session)
-**Phase:** scope confirmed as the recommended 15-feature MVP; `packages/contracts` implemented and merged; core engine, exercises, eval, and the patient app are being built on top of it in this same session.
+**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end.
+**Phase:** implementation complete for the confirmed MVP scope; real-device validation and clinical sign-off are the two things still genuinely open, both flagged below rather than guessed at.
 
 ---
 
 ## Where we are
 
-MVP scope is confirmed as the recommended 15-feature set in [`FEATURES.md`](FEATURES.md#recommended-mvp--15-features), unchanged from the recommendation. [`docs/MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md) is being executed close to verbatim, with two blockers resolved by its own stated fallback (see "Decisions made without a human" below) rather than left open.
+Everything in [`MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md)'s 15-feature scope is implemented, tested, and wired together in one working app. A patient can open `apps/patient`, pick one of three exercises, go through camera setup, do a coached set with live rep counting and corrective cues, bookmark a painful rep, report pain, and see a summary — all local-only, all logged to an append-only IndexedDB event log.
 
-`packages/contracts` is implemented — every type in [`CONTRACTS.md`](CONTRACTS.md) as TypeScript + Zod, one file per domain, barrel export, 8 passing tests. Two small additions beyond the paper spec (`ExerciseSpec.provisional`/`provisionalNote`, a concrete `CompensationRule` shape, and a `mostSevere()` helper for `SafetyVerdict`) are documented inline in CONTRACTS.md where they appear.
+**What shipped, package by package:**
 
-## Decisions made without a human, per the build prompt's own fallback
+| Package | What's in it | Tests |
+|---|---|---|
+| `packages/contracts` | Every type in `CONTRACTS.md` as TypeScript + Zod | 8 |
+| `packages/core` | A1 pose smoothing/angles/capture-quality, A4 rep FSM, A2 form scoring, A3 cue selection, E1 safety gate (a dependency leaf, per ARCHITECTURE.md §3) | 42 |
+| `packages/exercises` | A6 — three provisional `ExerciseSpec`s + a cross-field validator | 8 |
+| `packages/eval` | I2 — synthetic fixture generation (exact geometric construction, not approximation) + replay harness + safety-rule coverage checker | 9 |
+| `apps/patient` | The UI: welcome, exercise picker, camera setup, live session, pain check-in, summary. Pose worker running MediaPipe + the full core pipeline every frame. G1 event log. | 3 (+ 11 fixtures via `pnpm eval`) |
 
-- **The three M1 exercises.** No physiotherapist was available (still true — see Blocked below). Per `MVP-BUILD-PROMPT.md` §7, proceeded with the roadmap's suggested three — seated knee extension, standing shoulder abduction, sit-to-stand — using placeholder joint-angle ranges grounded in standard ROM references and cross-checked against a working MediaPipe rehab prototype ([RehabAR](https://github.com/Apoorva-Nayak07/RehabAR)) for plausibility, not copied from it. Every spec is marked `provisional: true` with a `provisionalNote`, and the UI surfaces that badge — it is never presented as clinically validated. **This still needs a physiotherapist's sign-off before any real patient uses it.**
-- **Pose model tier (ADR-0007).** Cannot physically benchmark a three-year-old Android phone or an iPhone from this environment. Shipped `pose_landmarker_lite` as the default (fastest, most likely to clear 24fps on the low end) with the tier trivially swappable, and left the spike's actual device measurement as an open task for a human running the app. See ADR-0007.
+**70 unit/component tests + 11 fixture replays, all passing.** Full CI pipeline (`pnpm run ci`: boundaries → build → typecheck → lint → test → eval) verified green from a clean checkout (`rm -rf packages/*/dist apps/patient/dist`).
 
-## What upstream repos actually contributed
+**Run it:** `pnpm install && pnpm --filter @ai-rehab/patient run dev` (or `pnpm run dev:patient` from root), then open the printed localhost URL in a browser with a camera. See [`README.md`](../README.md).
 
-Per the user's request to draw on [STGCN-rehab](https://github.com/fokhruli/STGCN-rehab), [avakanski's rehab framework](https://github.com/avakanski/A-Deep-Learning-Framework-for-Assessing-Physical-Rehabilitation-Exercises), [RehabAR](https://github.com/Apoorva-Nayak07/RehabAR), and OpenRehabAgent: the first two are offline deep-learning *quality-score regressors* trained on UI-PRMD/KIMORE (TensorFlow/Keras, batch evaluation, no real-time path) — valuable as the eventual I2 fixture-scoring benchmark (already noted in UPSTREAM.md §3) but incompatible with ADR-0001 (no model call in the per-frame path) as a live scoring engine, so no code was vendored from them for the fast loop. RehabAR is closest in shape to this product (browser MediaPipe, 3 exercises, voice feedback) and its `pose_server.py` angle thresholds informed the provisional ranges above as a sanity check. OpenRehabAgent remains correctly out of scope for the MVP per FEATURES.md (B1/D1/D2/E5 are all fast-follow, not MVP) — nothing from it is vendored yet.
+## What's genuinely verified vs. what isn't
+
+Be precise about this — it's the difference between "built" and "trustworthy."
+
+**Verified:**
+- Every package's unit tests pass, including the safety gate's four-verdict-tier behavior and the rep segmenter's double-count guard.
+- The eval harness's 11 fixtures replay through the *real* `packages/core` pipeline (not a mock) and every configured veto-tier safety rule fires at least once — mechanically enforced by `packages/eval/src/coverage.ts`, not just asserted in a commit message.
+- The full app was run in a real browser (this session's sandboxed Browser tool): Welcome → exercise picker → camera setup all render correctly with zero console errors, and camera-permission denial is handled as the designed "we need your camera" state, not a crash.
+- `pnpm run ci` passes end to end from a clean checkout, including in the order GitHub Actions will actually run it.
+
+**Not verified — needs a human with real hardware:**
+- **Live pose detection itself.** This sandbox has no camera. The MediaPipe worker code is written, typechecks, and bundles (205KB chunk, builds cleanly), but nobody has watched a real skeleton track a real body yet. This is the single most important thing to check first.
+- **The M0 spike** (ADR-0007): fps and landmark jitter on a mid-range laptop, an older Android phone, and an iPhone, in good and poor light. Shipped `pose_landmarker_lite` as the safest default tier, but that's a guess informed by "cheapest tier," not a measurement. If it doesn't clear ~24fps on the worst device, the tier needs to change or the plan does (see ADR-0007's original contingency).
+- **Whether the three exercises' rep-phase thresholds and target ranges actually feel right against a real body.** They're internally consistent (every fixture passes, the geometry is exact) but were tuned against synthetic trajectories, not a recorded human. Expect to retune after the first real session.
+
+## Decisions made without a human, per the build prompt's own stated fallback
+
+- **The three M1 exercises.** No physiotherapist was available (still true — see Blocked). Per `MVP-BUILD-PROMPT.md` §7, proceeded with the roadmap's suggested three — seated knee extension, standing shoulder abduction, sit-to-stand — using placeholder joint-angle ranges grounded in standard ROM references, cross-checked for plausibility (not copied) against a working MediaPipe rehab prototype ([RehabAR](https://github.com/Apoorva-Nayak07/RehabAR)). Every spec ships `provisional: true` with a `provisionalNote`, and the UI surfaces it (camera setup card, "why this exercise" card) — never presented as clinically validated. **Still needs a physiotherapist's sign-off before a real patient uses it.**
+- **Pose model tier (ADR-0007).** No physical device to benchmark. Shipped `pose_landmarker_lite`, documented as an interim placeholder in the ADR, not a spike result.
+- **MVP scope confirmation.** `docs/FEATURES.md`'s Pick column was empty (scope selection was step 1 of "Next actions"). Filled it in exactly per the doc's own "Recommended MVP" section — no features added or cut beyond what was already recommended there.
+
+## What the upstream repos the user pointed to actually contributed
+
+Per the request to draw on [STGCN-rehab](https://github.com/fokhruli/STGCN-rehab), [avakanski's rehab framework](https://github.com/avakanski/A-Deep-Learning-Framework-for-Assessing-Physical-Rehabilitation-Exercises), [RehabAR](https://github.com/Apoorva-Nayak07/RehabAR), and OpenRehabAgent: the first two are offline deep-learning *quality-score regressors* trained on UI-PRMD/KIMORE (TensorFlow/Keras, batch evaluation, no real-time path) — valuable as a future I2 benchmark (already noted in `UPSTREAM.md` §3) but structurally incompatible with ADR-0001 (no model call in the per-frame path) as a live scoring engine, so nothing was vendored from them into the fast loop. RehabAR is closest in shape to this product (browser MediaPipe, 3 exercises, voice feedback); its `pose_server.py` angle thresholds were a sanity check on the provisional ranges above, not a source of code. OpenRehabAgent remains correctly out of scope for the MVP per `FEATURES.md` (B1/D1/D2/E5 are all fast-follow) — nothing vendored yet; that work starts at M2/M3.
+
+## A real bug the eval harness caught, worth knowing about
+
+`packages/core/src/pose/landmarkAdapter.ts`'s joint-angle convention (the interior angle between two rays from a vertex) is **mathematically bounded to 0–180°** — it cannot represent "past straight" hyperextension. Two of the original exercise specs configured a `maxAngle` safety threshold *above* 180° for knee/hip, which is unreachable, dead configuration — caught only by empirically running the eval harness and seeing a fixture fail in a way hand-checking the math missed. Removed those thresholds (see the specs' inline comments); true hyperextension detection needs a signed-angle or velocity-based approach this MVP doesn't build. Worth remembering before configuring a `maxAngle` on any future knee/hip/elbow exercise.
 
 ## What exists
 
 | | |
 |---|---|
 | `docs/PRD.md` | v2.0 — 61 features across 9 groups, two-loop architecture, regulatory posture |
-| `docs/FEATURES.md` | The selection sheet. Effort, dependencies, recommendation per feature |
+| `docs/FEATURES.md` | Scope confirmed — Pick column filled in (15 IN, 46 OUT) |
 | `docs/ARCHITECTURE.md` | Stack, package boundaries, testing strategy |
-| `docs/CONTRACTS.md` | Every shared type, specified but not implemented |
-| `docs/UPSTREAM.md` | OpenRehabAgent integration plan + datasets + licence obligations |
+| `docs/CONTRACTS.md` | Every shared type — implemented, not just specified |
+| `docs/UPSTREAM.md` | OpenRehabAgent integration plan + datasets + licence obligations (not yet vendored — M2/M3 work) |
 | `docs/ROADMAP.md` | M0–M6, exit criteria, workstream split |
-| `docs/MVP-BUILD-PROMPT.md` | The handoff prompt for whoever builds M0+M1 |
-| `docs/source/AI_Rehab_Coach_PRD.docx` | The original v1.0 document, preserved unchanged |
+| `docs/MVP-BUILD-PROMPT.md` | The prompt this session executed, close to verbatim |
+| `NOTICE` | MediaPipe (Apache-2.0) attribution — added when `@mediapipe/tasks-vision` was added as a real dependency |
 | `CLAUDE.md` | Agent working agreement |
-
-**No code.** No `packages/`, no `apps/`, no `services/`. First commit of code is `packages/contracts`.
+| `packages/{contracts,core,exercises,eval}`, `apps/patient` | Code. See the table above. |
 
 ## Next actions
 
-In order. The first two are not engineering.
+In order.
 
-1. **Confirm MVP scope** — mark the Pick column in `docs/FEATURES.md`, then regenerate `docs/MVP-BUILD-PROMPT.md` to match.
-2. **Choose the three M1 exercises** with a physiotherapist. Suggested: seated knee extension, standing shoulder abduction, sit-to-stand — two of which appear in UI-PRMD, giving us fixtures for free.
-3. **Answer the regulatory posture question** well enough to pick a database region. Does not block M1 (local-only, no server), but blocks M2.
-4. **Scaffold the monorepo** and land `packages/contracts` — see `docs/CONTRACTS.md`.
-5. **Run the M0 pose spike.** MediaPipe in a Web Worker, measured fps and jitter on a mid-range laptop, an older Android phone, and an iPhone, in poor lighting. This is a genuine go/no-go on browser-first.
+1. **Run it with a real camera.** Nothing else on this list matters until someone confirms the skeleton actually tracks a body and reps actually count. This is the single highest-value next step.
+2. **Run the M0 device spike for real** (ADR-0007) — a mid-range laptop, an older Android phone, an iPhone, good and poor light. Confirms or changes the `pose_landmarker_lite` choice.
+3. **Get a physiotherapist to review the three `ExerciseSpec`s** — reference ranges, phase thresholds, safety limits. Everything is marked `provisional` specifically so this review has something concrete to react to rather than a blank page.
+4. **Retune against a real recorded session** once 1–3 are done — the rep-phase thresholds and target ranges were tuned against synthetic trajectories; expect them to need adjustment.
+5. **Answer the regulatory posture question** (ADR-0006) — doesn't block anything else in the MVP (local-only, no server), but blocks M2's first database migration.
+6. Once 1–4 are resolved, M2 (the data spine) is next per `ROADMAP.md` — but don't start it before someone has actually used M1.
 
 ## Blocked
 
 | Item | Blocks | Needs |
 |---|---|---|
 | Regulatory posture + data residency (ADR-0006) | M2 database migration, any production deployment | A jurisdiction-specific answer. Founder decision + possibly counsel. |
-| The three M1 exercises | All of Stream A's M1 work | A physiotherapist |
-| Clinical advisor | M3 safety thresholds, escalation copy, report vocabulary | A named person. Start the conversation now; needed by week 8. |
-| Academic dataset terms (ADR-0008) | I2 fixture library from UI-PRMD/KIMORE | Read the terms. Determines whether they can seed a commercial product's CI. |
+| Physiotherapist sign-off on the three `ExerciseSpec`s | Trusting the scores this MVP already produces | A physiotherapist. Everything needed for the review is already written — see Next action 3. |
+| Real-device fps/jitter measurement | Confidence in the `lite` tier choice; ADR-0007 closing | Physical hardware — a laptop, an Android phone, an iPhone. |
+| Clinical advisor | M3 safety thresholds, escalation copy, report vocabulary | A named person. Start the conversation now; needed by week 8 of a from-scratch timeline. |
+| Academic dataset terms (ADR-0008) | Using UI-PRMD/KIMORE as real (not synthetic) I2 fixtures | Read the terms. Determines whether they can seed a commercial product's CI. |
 
 ## Open decisions
 
-See `docs/adr/`. ADR-0006, 0007, and 0008 are open; 0001–0005 are accepted.
+See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default shipped (see its file) but is still open pending real measurement. 0001–0005 are accepted.
 
 ## Recently decided
 
-- **Build on OpenRehabAgent** (MIT, Python) as the slow loop rather than reimplementing pain inference, session supervision, and progression. Its `PoseAgent.process_landmarks()` accepts external landmark arrays, which is a clean seam. Vendored, not depended on — upstream has 4 commits and won't move. → ADR-0003, `docs/UPSTREAM.md`
+- **Executed the MVP build in one session rather than staging scope confirmation as a separate step.** The build prompt already specified exactly what to do if the physiotherapist/exercise-choice blocker was still open when building started (`MVP-BUILD-PROMPT.md` §7: use plausible placeholder ranges, mark `provisional: true`, surface it in the UI) — so scope confirmation and M0+M1 build happened together instead of waiting on a human decision the doc had already anticipated.
+- **Build on OpenRehabAgent** (MIT, Python) as the slow loop rather than reimplementing pain inference, session supervision, and progression — deferred to M2/M3, not started yet. → ADR-0003, `docs/UPSTREAM.md`
 - **Two-loop split.** Fast deterministic TypeScript in the browser; slow generative Python + Claude on the server. No model call in the per-frame path. → ADR-0001
-- **Deterministic progression before a learned policy.** Upstream's Q-learning agent is kept as the reference implementation of the eventual replacement; we ship a rule table and log `(state, action, outcome)` from day one. → ADR-0004
-- **Pain inference generates questions, not verdicts** (feature B6). No ground truth exists for movement-based pain estimation; the inference's job is to make the right check-in question get asked, and the patient's answer is what gets recorded.
+- **Deterministic progression before a learned policy.** → ADR-0004 (not yet built — D1/D2 are fast-follow)
+- **Pain inference generates questions, not verdicts** (feature B6). B1 (inference) is not built in the MVP; B2/B5 (self-report + bookmarking) are, and are the whole pain-data story until B1 exists.
+- **Fixtures store `world` (metric) landmarks only, not the full `PoseFrame`.** Sufficient to drive reps/form/safety, which is what I2's stated purpose covers; capture-quality already has direct unit coverage. See `packages/eval/src/fixture.ts`.
 
 ## Known risks being carried
 
-- The M0 spike may show the browser can't hit the frame budget on the target device floor. Contingency: mobile shell (I3) moves from Q2 to now.
-- Upstream's pain-localisation weights (`pose 0.65 / self_report 0.35`, and the per-region coefficients) are invented, not fitted. They need re-weighting against KIMORE before B1 ships — or B1 ships as a question generator only, which is the plan anyway.
-- The exercise catalogues in §4 of `docs/UPSTREAM.md` provide metadata but **no reference ranges**. Every supported exercise needs a physiotherapist to author its `ExerciseSpec`. This is the real constraint on library size, not engineering.
+- **The M0 spike hasn't actually run.** The browser-first bet is unconfirmed on real hardware. If `lite` can't clear ~24fps on the device floor, ADR-0007's original contingency applies: the mobile shell (I3) moves from Q2 to now.
+- **Every exercise spec is provisional.** Scores this MVP produces are internally consistent but not clinically validated. Do not let this run in front of a real patient without the sign-off in Next action 3.
+- **The joint-angle convention can't represent hyperextension** (see "A real bug the eval harness caught" above). Any future exercise needing that safety check needs a different approach, not just a `maxAngle` above 180.
+- Upstream OpenRehabAgent's pain-localisation weights are invented, not fitted, and B1 isn't built yet regardless — re-weighting against KIMORE is B1's problem to solve when it's built, not before.
+- The exercise catalogues in `UPSTREAM.md` §4 provide metadata but no reference ranges. Library size is still gated by physiotherapist time, not engineering — building more `ExerciseSpec`s is cheap; validating them is not.
 
 ---
 

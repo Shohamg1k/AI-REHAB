@@ -1,6 +1,10 @@
 # ADR-0007 — Pose model tier and device floor
 
-**Status:** OPEN — settled by the M0 spike · Raised 2026-08-27
+**Status:** OPEN — interim default shipped, real measurement still pending · Raised 2026-08-27
+
+## Interim decision (2026-08-29)
+
+Shipped with `pose_landmarker_lite` hardcoded in `apps/patient/src/worker/poseWorker.ts` — the fastest tier, chosen as the safest default pending an actual device measurement. **This is not the M0 spike.** The agent session that built M0+M1 had no physical device access (no camera, no phone, no laptop to benchmark) and could not run it. The spike as specified below is still the open task; `lite` is a placeholder informed by "cheapest tier most likely to clear the floor," not a measurement.
 
 ## Context
 

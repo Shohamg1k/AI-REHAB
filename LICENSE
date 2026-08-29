@@ -22,7 +22,11 @@ SOFTWARE.
 
 ---
 
-This project incorporates and adapts OpenRehabAgent
+This project plans to incorporate and adapt OpenRehabAgent
 (https://github.com/rishavbhandari6789/OpenRehabAgent), Copyright (c) its
-authors, also licensed under the MIT License. See docs/UPSTREAM.md for the
-list of adapted components and how they diverge from upstream.
+authors, also licensed under the MIT License, as its slow-loop server
+component (M2/M3 — not yet built; see docs/STATUS.md). See docs/UPSTREAM.md
+for the planned adopt/adapt/replace decision per file, updated to a list of
+actually-adapted components and their divergence from upstream once vendored.
+
+This project also uses MediaPipe Tasks Vision (Apache-2.0) — see NOTICE.

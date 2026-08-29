@@ -10,7 +10,21 @@ A patient performs their prescribed exercises in front of a laptop or phone came
 
 ## Status
 
-**Pre-M0 — planning complete, no code yet.** Read [`docs/STATUS.md`](docs/STATUS.md) for the current position and next actions.
+**M0 + M1 built — the 15-feature MVP runs end to end.** A patient can pick an exercise, get camera setup coaching, do a coached set with live rep counting and corrective cues, bookmark a painful rep, and see a summary — all local-only. Read [`docs/STATUS.md`](docs/STATUS.md) for exactly what's verified vs. still needs a human with real hardware (short version: nobody has pointed a real camera at it yet, and no physiotherapist has reviewed the three exercises).
+
+### Run it
+
+```bash
+pnpm install
+pnpm --filter @ai-rehab/patient run dev
+```
+
+Open the printed URL in a browser with a camera. Everything runs client-side — no server, no account, nothing leaves the device.
+
+```bash
+pnpm run ci      # boundaries, build, typecheck, lint, test, eval — what CI runs
+pnpm run eval    # just the I2 fixture replay report
+```
 
 ---
 
@@ -30,6 +44,28 @@ Start with **[`CLAUDE.md`](CLAUDE.md)** if you are an agent, or **[`docs/STATUS.
 | [`docs/MVP-BUILD-PROMPT.md`](docs/MVP-BUILD-PROMPT.md) | Self-contained handoff prompt for building M0 + M1. |
 | [`docs/adr/`](docs/adr/) | Architecture decision records. Why things are the way they are. |
 | [`docs/source/`](docs/source/) | The original v1.0 PRD, preserved unchanged. |
+
+---
+
+## Repository layout
+
+```
+packages/
+  contracts/   Shared types + Zod schemas. Depends on nothing. Everything else depends on this.
+  core/        The fast loop: pose smoothing, joint angles, rep segmentation,
+               form scoring, cue selection, the safety gate. Pure TypeScript —
+               no DOM, no network, no I/O (enforced by scripts/lint-boundaries.mjs).
+  exercises/   The exercise DSL (A6) — three ExerciseSpecs as data, plus a validator.
+  eval/        I2 — the fixture replay harness. `pnpm eval` runs it.
+apps/
+  patient/     The React app. src/worker/ runs MediaPipe + the whole core
+               pipeline in a Web Worker; src/screens/ is the patient-facing
+               flow; src/lib/db.ts is the local IndexedDB event log (G1).
+docs/          Product, architecture, contracts, ADRs. Read CLAUDE.md first.
+design/        UX spec + Figma-exported screen artboards.
+```
+
+Each package's `package.json` `description` field says what it owns in one line — worth skimming before adding a file to make sure it's going in the right place.
 
 ---
 
@@ -59,8 +95,8 @@ The split is the whole design. A model call in the per-frame path would make cor
 
 ## Built on
 
-- **[OpenRehabAgent](https://github.com/rishavbhandari6789/OpenRehabAgent)** (MIT) — the slow loop. Pain localisation, session supervision, progression policy, feedback tracking. Vendored and extended.
-- **[MediaPipe Tasks Vision](https://ai.google.dev/edge/mediapipe)** (Apache-2.0) — on-device pose landmarking.
+- **[OpenRehabAgent](https://github.com/rishavbhandari6789/OpenRehabAgent)** (MIT) — the slow loop this project will build on: pain localisation, session supervision, progression policy, feedback tracking. Planned integration, not yet vendored — the MVP has no server or slow loop (B1/D1/D2/E5 are fast-follow, not MVP scope). See `docs/UPSTREAM.md`.
+- **[MediaPipe Tasks Vision](https://ai.google.dev/edge/mediapipe)** (Apache-2.0) — on-device pose landmarking. In active use, via `@mediapipe/tasks-vision` — see `NOTICE`.
 - **[UI-PRMD](https://webpages.uidaho.edu/ui-prmd/)** and **[KIMORE](https://vrai.dii.univpm.it/content/kimore-dataset)** — rehabilitation movement datasets with correct/incorrect pairs and clinician-scored quality, seeding the evaluation fixture library.
 
 Full attribution and licence obligations in [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
@@ -77,4 +113,4 @@ The short version: branch per feature ID, keep `packages/core` pure, a new safet
 
 ## Licence
 
-MIT — see [`LICENSE`](LICENSE). Incorporates OpenRehabAgent, also MIT.
+MIT — see [`LICENSE`](LICENSE). Uses MediaPipe (Apache-2.0, see [`NOTICE`](NOTICE)); plans to incorporate OpenRehabAgent (also MIT) once the slow loop is built.
