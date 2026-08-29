@@ -1,0 +1,24 @@
+{
+  "name": "@ai-rehab/exercises",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The exercise DSL library (A6) — exercises as data. See docs/ARCHITECTURE.md §3.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-rehab/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}
