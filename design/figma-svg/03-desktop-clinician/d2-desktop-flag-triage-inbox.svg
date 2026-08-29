@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900">
+<defs></defs>
+<rect id="div-0" x="0" y="0" width="1440" height="900" rx="6" fill="#f6f8fb"/>
+<rect id="col-1" x="0" y="0" width="232" height="900" fill="#ffffff"/>
+<rect id="div-2" x="24" y="24" width="28" height="28" rx="9" fill="#0f766e"/>
+<text id="t-t-3" x="62" y="40.66" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Rehab Coach</text>
+<rect id="row-4" x="16" y="74" width="199" height="41" rx="10" fill="#e3f2ef"/>
+<text id="row-5" x="28" y="97.65" font-family="Inter" font-size="15" font-weight="600" fill="#0b5d57" xml:space="preserve">Triage</text>
+<rect id="pill-p-dang-num-6" x="179" y="84.09" width="24" height="20.8" rx="10.4" fill="#fdecea"/>
+<text id="pill-p-dang-num-7" x="187" y="96.11" font-family="Inter" font-size="12" font-weight="600" fill="#b42318" xml:space="preserve">7</text>
+<text id="row-8" x="28" y="140.65" font-family="Inter" font-size="15" font-weight="400" fill="#475569" xml:space="preserve">Caseload</text>
+<text id="t-c-num-9" x="187" y="139.11" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">34</text>
+<text id="row-10" x="28" y="183.65" font-family="Inter" font-size="15" font-weight="400" fill="#475569" xml:space="preserve">Programs</text>
+<text id="row-11" x="28" y="226.65" font-family="Inter" font-size="15" font-weight="400" fill="#475569" xml:space="preserve">Reports</text>
+<text id="row-12" x="28" y="269.65" font-family="Inter" font-size="15" font-weight="400" fill="#475569" xml:space="preserve">Audit log</text>
+<rect id="card-tight-13" x="16" y="787.41" width="199" height="88.59" rx="16" fill="#eef2f7"/>
+<text id="t-c-14" x="30" y="811.43" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">SIGNED IN</text>
+<text id="t-b-15" x="30" y="837.85" font-family="Inter" font-size="15" font-weight="500" fill="#0f172a" xml:space="preserve">Ruth Alvarez</text>
+<text id="t-c-16" x="30" y="855.22" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Physiotherapist · Northgate</text>
+<rect id="row-17" x="232" y="0" width="1208" height="93.59" fill="#ffffff"/>
+<text id="t-h-18" x="264" y="43.54" font-family="Inter" font-size="24" font-weight="700" fill="#0f172a" letter-spacing="-0.3" xml:space="preserve">Needs you today</text>
+<text id="t-s-19" x="264" y="69.44" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">7 flags across 34 patients · ranked by what changed, not by when it arrived</text>
+<rect id="pill-p-mute-20" x="1227" y="35.2" width="72" height="30.19" rx="15.095" fill="#eef2f7"/>
+<text id="pill-p-mute-21" x="1239" y="52.93" font-family="Inter" font-size="13" font-weight="600" fill="#475569" xml:space="preserve">All flags</text>
+<rect id="pill-p-mute-22" x="1315" y="35.2" width="93" height="30.19" rx="15.095" fill="#eef2f7"/>
+<text id="pill-p-mute-23" x="1327" y="52.93" font-family="Inter" font-size="13" font-weight="600" fill="#475569" xml:space="preserve">Last 7 days</text>
+<rect id="pill-p-dang-24" x="264" y="113.59" width="76" height="30.19" rx="15.095" fill="#fdecea"/>
+<text id="pill-p-dang-25" x="276" y="131.32" font-family="Inter" font-size="13" font-weight="600" fill="#b42318" xml:space="preserve">Safety 2</text>
+<rect id="pill-p-pain-26" x="348" y="113.59" width="97" height="30.19" rx="15.095" fill="#fdede3"/>
+<text id="pill-p-pain-27" x="360" y="131.32" font-family="Inter" font-size="13" font-weight="600" fill="#c2410c" xml:space="preserve">Pain spike 2</text>
+<rect id="pill-p-warn-28" x="453" y="113.59" width="95" height="30.19" rx="15.095" fill="#fdf0dc"/>
+<text id="pill-p-warn-29" x="465" y="131.32" font-family="Inter" font-size="13" font-weight="600" fill="#b45309" xml:space="preserve">ROM drop 1</text>
+<rect id="pill-p-mute-30" x="556" y="113.59" width="80" height="30.19" rx="15.095" fill="#eef2f7"/>
+<text id="pill-p-mute-31" x="568" y="131.32" font-family="Inter" font-size="13" font-weight="600" fill="#475569" xml:space="preserve">Missed 2</text>
+<rect id="card-tight-32" x="264" y="153.78" width="852" height="124.17" rx="16" fill="#ffffff" stroke="#f3b4ac" stroke-width="1"/>
+<rect id="stripe-33" x="279" y="168.78" width="4" height="94.17" rx="2" fill="#b42318"/>
+<text id="t-t-34" x="297" y="186.54" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Maya Okonjo</text>
+<rect id="pill-p-dang-35" x="414" y="168.78" width="102" height="30.19" rx="15.095" fill="#fdecea"/>
+<text id="pill-p-dang-36" x="426" y="186.51" font-family="Inter" font-size="13" font-weight="600" fill="#b42318" xml:space="preserve">Safety block</text>
+<text id="t-c-num-37" x="867" y="185.49" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">today 09:12</text>
+<text id="t-s-38" x="297" y="215.41" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Sit to stand stopped on reps 6–8 — knee flexion 96° against your 90° cap. She reported 2/5</text>
+<text id="t-s-39" x="297" y="235" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">discomfort and finished the session.</text>
+<text id="t-c-40" x="297" y="256.18" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Ranks first: a threshold you set personally was crossed three times in one set.</text>
+<rect id="btn-41" x="951" y="173.86" width="150" height="38" rx="12" fill="#0f766e"/>
+<text id="btn-42" x="985" y="195.5" font-family="Inter" font-size="14" font-weight="500" fill="#ffffff" xml:space="preserve">Open replay</text>
+<rect id="btn-sec-43" x="951" y="219.86" width="150" height="38" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-44" x="976" y="241.5" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Mark reviewed</text>
+<rect id="card-tight-45" x="264" y="287.95" width="852" height="124.17" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<rect id="stripe-46" x="279" y="302.95" width="4" height="94.17" rx="2" fill="#c2410c"/>
+<text id="t-t-47" x="297" y="320.71" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Daniel Reyes</text>
+<rect id="pill-p-pain-48" x="411" y="302.95" width="86" height="30.19" rx="15.095" fill="#fdede3"/>
+<text id="pill-p-pain-49" x="423" y="320.68" font-family="Inter" font-size="13" font-weight="600" fill="#c2410c" xml:space="preserve">Pain spike</text>
+<text id="t-c-num-50" x="867" y="319.66" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">today 07:48</text>
+<text id="t-s-51" x="297" y="349.58" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Shoulder abduction — reported 4/5, up from a 1.6 average over three weeks. Two reps flagged</text>
+<text id="t-s-52" x="297" y="369.17" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">mid-set.</text>
+<text id="t-c-53" x="297" y="390.35" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Ranks second: a self-reported jump, not an inference.</text>
+<rect id="btn-54" x="951" y="308.03" width="150" height="38" rx="12" fill="#0f766e"/>
+<text id="btn-55" x="985" y="329.67" font-family="Inter" font-size="14" font-weight="500" fill="#ffffff" xml:space="preserve">Open replay</text>
+<rect id="btn-sec-56" x="951" y="354.03" width="150" height="38" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-57" x="969.5" y="375.67" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Message patient</text>
+<rect id="card-tight-58" x="264" y="422.13" width="852" height="114" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<rect id="stripe-59" x="279" y="437.13" width="4" height="84" rx="2" fill="#b45309"/>
+<text id="t-t-60" x="297" y="454.88" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Aisha Farooq</text>
+<rect id="pill-p-warn-61" x="414" y="437.13" width="86" height="30.19" rx="15.095" fill="#fdf0dc"/>
+<text id="pill-p-warn-62" x="426" y="454.85" font-family="Inter" font-size="13" font-weight="600" fill="#b45309" xml:space="preserve">ROM drop</text>
+<text id="t-c-num-63" x="880" y="453.83" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">yesterday</text>
+<text id="t-s-64" x="297" y="483.75" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Knee extension down 11° on the operated side across two sessions, with no pain reported.</text>
+<text id="t-c-65" x="297" y="504.93" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Ranks third: capture quality was good both sessions, so the drop is unlikely to be measurement noise.</text>
+<rect id="btn-66" x="951" y="437.13" width="150" height="38" rx="12" fill="#0f766e"/>
+<text id="btn-67" x="988.5" y="458.77" font-family="Inter" font-size="14" font-weight="500" fill="#ffffff" xml:space="preserve">Open trend</text>
+<rect id="btn-sec-68" x="951" y="483.13" width="150" height="38" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-69" x="976" y="504.77" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Mark reviewed</text>
+<rect id="card-tight-70" x="264" y="546.13" width="852" height="104.58" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" opacity="0.72"/>
+<rect id="stripe-71" x="279" y="561.13" width="4" height="74.58" rx="2" fill="#8a97a8"/>
+<text id="t-t-72" x="297" y="578.88" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Tom Wheeler</text>
+<rect id="pill-p-mute-73" x="414" y="561.13" width="138" height="30.19" rx="15.095" fill="#eef2f7"/>
+<text id="pill-p-mute-74" x="426" y="578.86" font-family="Inter" font-size="13" font-weight="600" fill="#475569" xml:space="preserve">Missed 3 sessions</text>
+<text id="t-c-num-75" x="899" y="577.83" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">3 days</text>
+<text id="t-s-76" x="297" y="607.75" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">No sessions since Friday. Two weeks of full adherence before that.</text>
+<text id="t-c-77" x="297" y="628.93" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Ranks low: nothing clinical changed — a nudge has already gone out.</text>
+<rect id="btn-sec-78" x="951" y="579.41" width="150" height="38" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-79" x="969.5" y="601.05" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Message patient</text>
+<rect id="card-tight-80" x="264" y="660.7" width="852" height="104.58" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" opacity="0.72"/>
+<rect id="stripe-81" x="279" y="675.7" width="4" height="74.58" rx="2" fill="#8a97a8"/>
+<text id="t-t-82" x="297" y="693.46" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Priya Nair</text>
+<rect id="pill-p-mute-83" x="387" y="675.7" width="125" height="30.19" rx="15.095" fill="#eef2f7"/>
+<text id="pill-p-mute-84" x="399" y="693.43" font-family="Inter" font-size="13" font-weight="600" fill="#475569" xml:space="preserve">Low confidence</text>
+<text id="t-c-num-85" x="899" y="692.41" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">2 days</text>
+<text id="t-s-86" x="297" y="722.33" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Three sessions captured in poor light — scores held out of her trend rather than averaged in.</text>
+<text id="t-c-87" x="297" y="743.5" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Ranks low: a setup problem, not a clinical one. Send the camera guide.</text>
+<rect id="btn-sec-88" x="951" y="693.98" width="150" height="38" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-89" x="988" y="715.63" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Send guide</text>
+<rect id="disc-90" x="264" y="836.41" width="852" height="43.59" rx="10" fill="#eef2f7"/>
+<text id="disc-91" x="298" y="860.85" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Reports and flags are coaching data, not clinical assessments. Nothing here is a diagnosis.</text>
+<rect id="card-tight-92" x="1148" y="113.59" width="260" height="177.8" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<text id="t-t-93" x="1163" y="143.16" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">This week</text>
+<text id="t-s-grow-94" x="1163" y="175.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Sessions completed</text>
+<text id="t-b-num-95" x="1363" y="176.04" font-family="Inter" font-size="15" font-weight="600" fill="#0f172a" xml:space="preserve">218</text>
+<text id="t-s-grow-96" x="1163" y="206.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Adherence</text>
+<text id="t-b-num-97" x="1358" y="207.04" font-family="Inter" font-size="15" font-weight="600" fill="#0f172a" xml:space="preserve">81%</text>
+<text id="t-s-grow-98" x="1163" y="237.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Flags cleared</text>
+<text id="t-b-num-99" x="1373" y="238.04" font-family="Inter" font-size="15" font-weight="600" fill="#0f172a" xml:space="preserve">12</text>
+<text id="t-s-grow-100" x="1163" y="268.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Low-confidence sessions</text>
+<text id="t-b-num-101" x="1383" y="269.04" font-family="Inter" font-size="15" font-weight="600" fill="#0f172a" xml:space="preserve">9</text>
+<rect id="card-tight-102" x="1148" y="305.39" width="260" height="180.59" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<text id="t-t-103" x="1163" y="334.96" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Caseload adherence</text>
+<svg id="svg-104" x="1163" y="354.19" width="230" height="90" viewBox="0 0 240 90" preserveAspectRatio="xMidYMid meet">
+                <line x1="0" y1="22" x2="240" y2="22" stroke="#E2E8F0"></line>
+                <line x1="0" y1="52" x2="240" y2="52" stroke="#E2E8F0"></line>
+                <path d="M0 62 L40 55 L80 58 L120 44 L160 40 L200 34 L240 26 L240 90 L0 90 Z" fill="#E3F2EF"></path>
+                <polyline points="0,62 40,55 80,58 120,44 160,40 200,34 240,26" fill="none" stroke="#0F766E" stroke-width="2.5"></polyline>
+                <circle cx="240" cy="26" r="4.5" fill="#0F766E"></circle>
+              </svg>
+<text id="t-c-105" x="1163" y="464.21" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Eight weeks · trending up 9 points</text>
+<rect id="card-tight-106" x="1148" y="499.98" width="260" height="110.97" rx="16" fill="#eef2f7"/>
+<text id="t-l-107" x="1162" y="525.71" font-family="Inter" font-size="13" font-weight="600" fill="#0f172a" xml:space="preserve">Clearing a flag is logged</text>
+<text id="t-s-108" x="1162" y="550.61" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Who cleared it, when, and what</text>
+<text id="t-s-109" x="1162" y="570.21" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">they saw is written to the audit trail</text>
+<text id="t-s-110" x="1162" y="589.8" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">the patient can also read.</text>
+</svg>

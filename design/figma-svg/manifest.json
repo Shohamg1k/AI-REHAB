@@ -1,0 +1,331 @@
+[
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m1-welcome",
+    "w": 390,
+    "h": 844,
+    "bytes": 17290
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m2-today",
+    "w": 390,
+    "h": 844,
+    "bytes": 18826
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m3-why-this-exercise",
+    "w": 390,
+    "h": 844,
+    "bytes": 17534
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m4-camera-setup",
+    "w": 390,
+    "h": 844,
+    "bytes": 16628
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m5-live-session",
+    "w": 390,
+    "h": 844,
+    "bytes": 17323
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m6-safety-block",
+    "w": 390,
+    "h": 844,
+    "bytes": 16008
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m7-rest-check-in",
+    "w": 390,
+    "h": 844,
+    "bytes": 18443
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m8-session-summary",
+    "w": 390,
+    "h": 844,
+    "bytes": 18913
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m9-progress",
+    "w": 390,
+    "h": 844,
+    "bytes": 20295
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "m10-sharing-privacy",
+    "w": 390,
+    "h": 844,
+    "bytes": 18715
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "t2-tablet-live-session",
+    "w": 1194,
+    "h": 834,
+    "bytes": 19710
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "t3-tablet-rest-check-in",
+    "w": 1194,
+    "h": 834,
+    "bytes": 18671
+  },
+  {
+    "dir": "01-mobile-tablet",
+    "name": "t1-tablet-today",
+    "w": 834,
+    "h": 1194,
+    "bytes": 22676
+  },
+  {
+    "dir": "02-coverage",
+    "name": "a8-rom-baseline-session-one",
+    "w": 390,
+    "h": 844,
+    "bytes": 17477
+  },
+  {
+    "dir": "02-coverage",
+    "name": "e5-supervisor-today-s-allowed-set",
+    "w": 390,
+    "h": 844,
+    "bytes": 18968
+  },
+  {
+    "dir": "02-coverage",
+    "name": "c1-between-sets-conversation",
+    "w": 390,
+    "h": 844,
+    "bytes": 17512
+  },
+  {
+    "dir": "02-coverage",
+    "name": "c3-ask-a-question",
+    "w": 390,
+    "h": 844,
+    "bytes": 17855
+  },
+  {
+    "dir": "02-coverage",
+    "name": "d1-what-changed-in-your-plan",
+    "w": 390,
+    "h": 844,
+    "bytes": 18662
+  },
+  {
+    "dir": "02-coverage",
+    "name": "b1-pain-map-and-why-we-asked",
+    "w": 390,
+    "h": 844,
+    "bytes": 20479
+  },
+  {
+    "dir": "02-coverage",
+    "name": "g1-your-record",
+    "w": 390,
+    "h": 844,
+    "bytes": 19805
+  },
+  {
+    "dir": "02-coverage",
+    "name": "f9-messages-from-ruth",
+    "w": 390,
+    "h": 844,
+    "bytes": 17280
+  },
+  {
+    "dir": "02-coverage",
+    "name": "a2-score-breakdown",
+    "w": 390,
+    "h": 446,
+    "bytes": 16461
+  },
+  {
+    "dir": "02-coverage",
+    "name": "a5-compensation-caught",
+    "w": 390,
+    "h": 300,
+    "bytes": 13159
+  },
+  {
+    "dir": "02-coverage",
+    "name": "e2-instability-detected",
+    "w": 390,
+    "h": 430,
+    "bytes": 14127
+  },
+  {
+    "dir": "02-coverage",
+    "name": "g7-not-enough-signal",
+    "w": 390,
+    "h": 330,
+    "bytes": 14013
+  },
+  {
+    "dir": "02-coverage",
+    "name": "g6-offline",
+    "w": 390,
+    "h": 330,
+    "bytes": 14183
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h2-milestone",
+    "w": 390,
+    "h": 430,
+    "bytes": 14126
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h3-re-engagement-nudge",
+    "w": 390,
+    "h": 300,
+    "bytes": 14256
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h7-save-your-guest-session",
+    "w": 390,
+    "h": 420,
+    "bytes": 14444
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h8-reach-practice",
+    "w": 390,
+    "h": 560,
+    "bytes": 14544
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h10-wearable-pairing",
+    "w": 390,
+    "h": 420,
+    "bytes": 14321
+  },
+  {
+    "dir": "02-coverage",
+    "name": "c4-coach-accessibility",
+    "w": 390,
+    "h": 700,
+    "bytes": 16761
+  },
+  {
+    "dir": "02-coverage",
+    "name": "h5-caregiver-view",
+    "w": 390,
+    "h": 560,
+    "bytes": 16186
+  },
+  {
+    "dir": "02-coverage",
+    "name": "f1-weekly-report",
+    "w": 1440,
+    "h": 900,
+    "bytes": 26172
+  },
+  {
+    "dir": "02-coverage",
+    "name": "f2-export-packet",
+    "w": 760,
+    "h": 560,
+    "bytes": 16518
+  },
+  {
+    "dir": "02-coverage",
+    "name": "f5-audit-trail",
+    "w": 1180,
+    "h": 620,
+    "bytes": 19278
+  },
+  {
+    "dir": "02-coverage",
+    "name": "i1-exercise-authoring-studio",
+    "w": 1440,
+    "h": 900,
+    "bytes": 24552
+  },
+  {
+    "dir": "02-coverage",
+    "name": "i2-evaluation-harness",
+    "w": 1180,
+    "h": 700,
+    "bytes": 19572
+  },
+  {
+    "dir": "02-coverage",
+    "name": "g3-roles-tenancy-and-drop-out-risk",
+    "w": 1180,
+    "h": 620,
+    "bytes": 18893
+  },
+  {
+    "dir": "02-coverage",
+    "name": "i3-one-core-three-shells",
+    "w": 1180,
+    "h": 360,
+    "bytes": 16142
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "v1-t1-tablet-today",
+    "w": 834,
+    "h": 1194,
+    "bytes": 11763
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "v1-t2-tablet-live-session",
+    "w": 1194,
+    "h": 834,
+    "bytes": 7241
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "v1-t3-tablet-rest-check-in",
+    "w": 1194,
+    "h": 834,
+    "bytes": 8698
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "d1-desktop-live-session",
+    "w": 1440,
+    "h": 900,
+    "bytes": 7641
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "d2-desktop-flag-triage-inbox",
+    "w": 1440,
+    "h": 900,
+    "bytes": 16192
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "d3-desktop-session-replay",
+    "w": 1440,
+    "h": 900,
+    "bytes": 10702
+  },
+  {
+    "dir": "03-desktop-clinician",
+    "name": "d4-desktop-program-builder",
+    "w": 1440,
+    "h": 900,
+    "bytes": 18609
+  }
+]

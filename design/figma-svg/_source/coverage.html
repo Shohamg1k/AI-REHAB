@@ -1,0 +1,1437 @@
+<title>Rehab Coach Feature Coverage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* ---------------- page chrome ---------------- */
+:root{
+  --ink:#141B1C; --ink-2:#48585A; --ink-3:#7B8B8D;
+  --paper:#E8ECEC; --paper-2:#DFE5E4; --rule:#C7D0CF; --mark:#0D6E68;
+  --shadow:0 1px 2px rgba(20,27,28,.10),0 14px 36px rgba(20,27,28,.13);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ink:#E9EEED; --ink-2:#A2B1B0; --ink-3:#748381;
+  --paper:#0E1414; --paper-2:#151D1D; --rule:#283433; --mark:#57C6BC;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 18px 46px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --ink:#E9EEED; --ink-2:#A2B1B0; --ink-3:#748381;
+  --paper:#0E1414; --paper-2:#151D1D; --rule:#283433; --mark:#57C6BC;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 18px 46px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:56px 28px 96px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:"Newsreader",Georgia,serif;font-weight:400;font-size:clamp(34px,5vw,52px);line-height:1.06;margin:12px 0 0;letter-spacing:-.015em;text-wrap:balance}
+.lede{max-width:64ch;color:var(--ink-2);font-size:17px;margin:16px 0 0}
+.masthead{border-bottom:1px solid var(--rule);padding-bottom:30px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:22px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:500}
+.meta a{color:var(--mark);text-decoration:none;border-bottom:1px solid currentColor}
+.meta a:focus-visible{outline:2px solid var(--mark);outline-offset:3px}
+.changes{margin-top:30px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.chg{background:var(--paper-2);padding:16px 18px;border-top:2px solid var(--mark)}
+.chg h4{margin:0 0 6px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.chg p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+h2.grp{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:30px;margin:70px 0 0;letter-spacing:-.01em}
+h2.grp+p{color:var(--ink-2);max-width:66ch;margin:8px 0 0;font-size:15px}
+.rail{display:flex;gap:34px;align-items:flex-start;margin-top:34px;flex-wrap:wrap}
+.unit{width:390px;flex:none}
+.unit.wide{width:100%;max-width:1194px}
+.ucap{border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:14px;display:flex;gap:10px;align-items:baseline}
+.ucap .id{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--mark);letter-spacing:.06em}
+.ucap h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.ucap .dim{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.unote{color:var(--ink-2);font-size:13.5px;margin:12px 0 0;max-width:56ch}
+.plate{position:relative;overflow:hidden}
+.plate>.ab{position:absolute;top:0;left:0;transform-origin:0 0;box-shadow:var(--shadow);border-radius:4px}
+
+/* ---------------- app design system v2 ---------------- */
+.ab{
+  --page:#ECF0F1; --surf:#FFFFFF; --sunk:#E2E8E9; --line:#D6DEDF; --line-2:#C2CCCD;
+  --ink:#101617; --ink2:#47575A; --ink3:#7C8C8F;
+  --teal:#0D6E68; --teal-d:#084A46; --teal-w:#DCEBE8;
+  --ok:#1F7A4D; --ok-w:#E1F0E7; --warn:#A75A0B; --warn-w:#F8EBD9;
+  --dang:#A32218; --dang-w:#F8E5E2; --pain:#B5410A; --pain-w:#F9E7DC;
+  --night:#0C1414; --night-2:#16211F; --night-3:#233230;
+  --skl:#3BE3D2; --jnt:#FFC24D;
+  font-family:"IBM Plex Sans",system-ui,sans-serif; color:var(--ink); background:var(--page);
+  overflow:hidden; line-height:1.42;
+}
+.ab *{box-sizing:border-box}
+.ab .r{display:flex;align-items:center;gap:10px}
+.ab .c{display:flex;flex-direction:column}
+.ab .g{flex:1}
+.ab .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+/* type */
+.ab .d1{font-size:29px;font-weight:600;letter-spacing:-.03em;line-height:1.14}
+.ab .h1{font-size:22px;font-weight:600;letter-spacing:-.025em;line-height:1.2}
+.ab .h2{font-size:17px;font-weight:600;letter-spacing:-.015em}
+.ab .b1{font-size:15px;font-weight:400}
+.ab .b2{font-size:13.5px;color:var(--ink2);line-height:1.45}
+.ab .lb{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.ab .cap{font-size:12px;color:var(--ink3)}
+/* surfaces — hairline only where a boundary is real */
+.ab .card{background:var(--surf);border-radius:10px;padding:14px}
+.ab .card.hair{box-shadow:inset 0 0 0 1px var(--line)}
+.ab .card.lift{box-shadow:0 1px 1px rgba(16,22,23,.04),0 6px 16px rgba(16,22,23,.07)}
+.ab .sunk{background:var(--sunk);border-radius:10px;padding:14px}
+.ab .sep{height:1px;background:var(--line)}
+/* controls */
+.ab .btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:8px;font-size:15px;font-weight:500;background:var(--teal);color:#fff}
+.ab .btn.sec{background:var(--surf);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.ab .btn.dang{background:var(--dang-w);color:var(--dang);box-shadow:inset 0 0 0 1px #E7BBB4}
+.ab .btn.dk{background:var(--night-3);color:#fff}
+.ab .btn.sm{height:38px;font-size:13.5px;padding:0 14px}
+.ab .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:4px;font-size:11.5px;font-weight:500;font-family:"IBM Plex Mono",monospace;letter-spacing:.02em}
+.ab .k-ok{background:var(--ok-w);color:var(--ok)}
+.ab .k-warn{background:var(--warn-w);color:var(--warn)}
+.ab .k-dang{background:var(--dang-w);color:var(--dang)}
+.ab .k-pain{background:var(--pain-w);color:var(--pain)}
+.ab .k-mute{background:var(--sunk);color:var(--ink2)}
+.ab .k-teal{background:var(--teal-w);color:var(--teal-d)}
+.ab .k-dk{background:rgba(255,255,255,.12);color:#E5EEEC}
+/* camera viewport */
+.ab .cam{position:relative;overflow:hidden;border-radius:20px;background:#2A3439}
+.ab .cam.sq{border-radius:0}
+.ab .cam svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.ab .ovl{position:absolute}
+.ab .live{display:inline-flex;align-items:center;gap:6px;background:rgba(12,20,20,.62);backdrop-filter:blur(6px);color:#fff;padding:5px 9px;border-radius:4px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em}
+.ab .live i{width:7px;height:7px;border-radius:50%;background:#FF5C4D;display:block}
+.ab .readout{background:rgba(12,20,20,.68);backdrop-filter:blur(6px);color:#fff;border-radius:8px;padding:8px 11px}
+.ab .cuebar{display:flex;gap:11px;align-items:center;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-radius:12px;padding:11px 13px}
+.ab .cuebar .ic{width:26px;height:26px;border-radius:6px;background:var(--warn-w);display:flex;align-items:center;justify-content:center;flex:none}
+.ab .tick{height:4px;border-radius:2px;flex:1}
+.ab .track{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.ab .track i{display:block;height:100%;border-radius:3px}
+.ab .disc{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--ink3);line-height:1.4}
+.ab .disc svg{flex:none;margin-top:1px}
+.ab .navbar{display:flex;background:var(--surf);box-shadow:inset 0 1px 0 var(--line);padding:8px 0 20px}
+.ab .navbar .it{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--ink3)}
+.ab .navbar .it.on{color:var(--teal)}
+.ab .stat{display:flex;align-items:center;padding:12px 22px 4px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500}
+.ab .stat .g{text-align:right}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C8A90"/><stop offset="0.55" stop-color="#5D6A72"/><stop offset="1" stop-color="#47535B"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C5349"/><stop offset="1" stop-color="#3A342E"/>
+    </linearGradient>
+    <linearGradient id="daylight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9FB3BC"/><stop offset="1" stop-color="#778B96"/>
+    </linearGradient>
+    <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39454E"/><stop offset="1" stop-color="#28323A"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".45"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"/>
+      <feComponentTransfer in="g"><feFuncA type="linear" slope=".085"/></feComponentTransfer>
+    </filter>
+
+    <!-- the room + the patient, as the camera sees them -->
+    <symbol id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="url(#wall)"/>
+      <path d="M0 470 L400 440 L400 600 L0 600 Z" fill="url(#floor)"/>
+      <path d="M0 470 L400 440" stroke="#6B6157" stroke-width="3" opacity=".7"/>
+      <path d="M18 60 L150 40 L150 250 L18 262 Z" fill="url(#daylight)"/>
+      <rect x="300" y="330" width="86" height="14" rx="4" fill="#3E4950" opacity=".85"/>
+      <!-- chair the patient stands up from -->
+      <g opacity=".92">
+        <rect x="150" y="386" width="116" height="15" rx="4" fill="#4E453C"/>
+        <rect x="243" y="288" width="16" height="102" rx="5" fill="#463E36"/>
+        <rect x="157" y="398" width="10" height="96" rx="4" fill="#3E372F"/>
+        <rect x="249" y="398" width="10" height="92" rx="4" fill="#443C34"/>
+      </g>
+      <!-- patient: mid sit-to-stand, facing camera -->
+      <g filter="url(#soft)">
+        <ellipse cx="200" cy="176" rx="80" ry="26" fill="#000" opacity=".0"/>
+        <path d="M186 178 h28 v26 h-28 z" fill="#C39A78"/>
+        <ellipse cx="200" cy="152" rx="27" ry="30" fill="#C89E7B"/>
+        <path d="M173 146 q27 -30 54 0 q2 -34 -27 -34 q-29 0 -27 34 z" fill="#3A2E28"/>
+        <path d="M168 200 q32 -14 64 0 l10 108 q-42 12 -84 0 z" fill="url(#shirt)"/>
+        <path d="M170 206 q-16 34 -22 70 q-3 16 6 24 l14 -6 q-6 -8 -3 -18 q8 -30 18 -56 z" fill="url(#shirt)"/>
+        <path d="M230 206 q16 34 22 70 q3 16 -6 24 l-14 -6 q6 -8 3 -18 q-8 -30 -18 -56 z" fill="url(#shirt)"/>
+        <ellipse cx="160" cy="306" rx="9" ry="11" fill="#C39A78"/>
+        <ellipse cx="240" cy="306" rx="9" ry="11" fill="#C39A78"/>
+        <path d="M158 306 q42 -16 84 0 l-4 34 q-38 12 -76 0 z" fill="url(#pants)"/>
+        <path d="M164 336 q16 8 32 2 l6 96 h-30 z" fill="url(#pants)"/>
+        <path d="M236 336 q-16 8 -32 2 l-6 96 h30 z" fill="url(#pants)"/>
+        <path d="M174 430 h28 l-4 62 h-22 z" fill="#2E3840"/>
+        <path d="M198 430 h28 l-2 62 h-22 z" fill="#333D45"/>
+        <path d="M168 490 h34 q6 0 6 8 v6 h-44 q0 -14 4 -14 z" fill="#EDEFF0"/>
+        <path d="M200 490 h34 q4 0 4 14 h-44 v-6 q0 -8 6 -8 z" fill="#E4E7E8"/>
+      </g>
+      <ellipse cx="200" cy="502" rx="72" ry="12" fill="#241F1A" opacity=".45"/>
+      <rect width="400" height="600" fill="url(#vig)"/>
+      <rect width="400" height="600" filter="url(#grain)" opacity=".55"/>
+    </symbol>
+
+    <!-- pose overlay, aligned to the figure above -->
+    <symbol id="pose" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round" opacity=".95">
+        <path d="M200 182 L200 236"/>
+        <path d="M168 202 L232 202"/><path d="M168 202 L200 236"/><path d="M232 202 L200 236"/>
+        <path d="M168 202 L154 268"/><path d="M154 268 L160 306"/>
+        <path d="M232 202 L246 268"/><path d="M246 268 L240 306"/>
+        <path d="M200 236 L170 318"/><path d="M200 236 L230 318"/><path d="M170 318 L230 318"/>
+        <path d="M170 318 L182 428"/><path d="M182 428 L184 492"/>
+        <path d="M230 318 L216 428"/><path d="M216 428 L214 492"/>
+      </g>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="152" r="5.4"/><circle cx="200" cy="236" r="5.4"/>
+        <circle cx="168" cy="202" r="5.4"/><circle cx="232" cy="202" r="5.4"/>
+        <circle cx="154" cy="268" r="5"/><circle cx="246" cy="268" r="5"/>
+        <circle cx="160" cy="306" r="5"/><circle cx="240" cy="306" r="5"/>
+        <circle cx="170" cy="318" r="5.4"/><circle cx="230" cy="318" r="5.4"/>
+        <circle cx="182" cy="428" r="5.4"/><circle cx="216" cy="428" r="5.4"/>
+        <circle cx="184" cy="492" r="5"/><circle cx="214" cy="492" r="5"/>
+      </g>
+    </symbol>
+
+    <!-- skeleton only, for replay: no video was ever stored -->
+    <symbol id="poseonly" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round">
+        <path d="M200 182 L200 236"/><path d="M168 202 L232 202"/><path d="M168 202 L200 236"/><path d="M232 202 L200 236"/>
+        <path d="M168 202 L154 268"/><path d="M154 268 L160 306"/><path d="M232 202 L246 268"/><path d="M246 268 L240 306"/>
+        <path d="M200 236 L170 318"/><path d="M200 236 L230 318"/><path d="M170 318 L230 318"/>
+        <path d="M170 318 L182 428"/><path d="M182 428 L184 492"/><path d="M230 318 L216 428"/><path d="M216 428 L214 492"/>
+      </g>
+      <circle cx="200" cy="152" r="17" fill="none" stroke="#3BE3D2" stroke-width="2.6"/>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="236" r="5"/><circle cx="168" cy="202" r="5"/><circle cx="232" cy="202" r="5"/>
+        <circle cx="154" cy="268" r="4.6"/><circle cx="246" cy="268" r="4.6"/><circle cx="160" cy="306" r="4.6"/><circle cx="240" cy="306" r="4.6"/>
+        <circle cx="170" cy="318" r="5"/><circle cx="230" cy="318" r="5"/><circle cx="216" cy="428" r="5"/><circle cx="184" cy="492" r="4.6"/><circle cx="214" cy="492" r="4.6"/>
+      </g>
+      <circle cx="182" cy="428" r="9" fill="#B5410A" stroke="#0C1414" stroke-width="2"/>
+    </symbol>
+
+    <!-- line icons -->
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.8h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15.5 9.2a4 4 0 010 5.6M18 6.8a7.5 7.5 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 2.8v6c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8.4v4.4M12 15.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5.2 4 5.2 8.6a5.2 5.2 0 01-10.4 0c0-1.8.9-3.1 1.8-4.2.5 1 1.3 1.7 2.1 1.9-.4-2.4.2-4.6 1.3-6.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2l11 6.8-11 6.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5V10M12 16.5V5.5M17 16.5v-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7.8a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-body" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.4v7m0 0l-3 6.2m3-6.2l3 6.2M6.5 10.2L12 8.6l5.5 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<style>
+.ab.ph{display:flex;flex-direction:column}
+.ab .cam svg.lay{position:absolute;inset:0;width:100%;height:100%}
+.ab .pad{padding:0 20px}
+.ab .exrow{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surf);border-radius:10px}
+.ab .thumb{width:46px;height:46px;border-radius:8px;background:var(--sunk);flex:none;display:flex;align-items:center;justify-content:center;color:var(--ink3)}
+.ab .seg{display:flex;background:var(--sunk);border-radius:8px;padding:3px}
+.ab .seg>div{flex:1;text-align:center;padding:8px 0;border-radius:6px;font-size:13.5px;font-weight:500;color:var(--ink2)}
+.ab .seg>div.on{background:var(--surf);color:var(--ink);box-shadow:0 1px 2px rgba(16,22,23,.12)}
+.ab .corner{position:absolute;width:26px;height:26px;border:2px solid rgba(255,255,255,.85)}
+</style><style>
+.mx{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.mx th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:0 10px 8px 0;border-bottom:1px solid var(--rule)}
+.mx td{padding:7px 10px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+.mx td.fid{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--mark);width:44px;white-space:nowrap}
+.mx td.nm{color:var(--ink);width:210px}
+.mx td.wh{width:132px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-2)}
+.mx tr.grp td{background:var(--paper-2);font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);font-weight:600;padding:9px 10px 9px 8px}
+.mx .new{color:var(--mark)}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.tools{--page:#ECF0F1}
+</style>
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">AI Rehab Coach · coverage audit · 61 features</div>
+    <h1>Every feature, on a screen</h1>
+    <p class="lede">An audit of all nine feature groups in <code>docs/FEATURES.md</code> against the design, plus the twenty-seven screens and states built to close the gaps. Where a feature was already covered, the matrix says which screen; where it was not, it is drawn below.</p>
+    <div class="meta">
+      <span><b>Audited</b> PRD · FEATURES · ROADMAP · ARCHITECTURE · CONTRACTS · UPSTREAM · STATUS · ADR 0001–0008</span>
+      <span><b>Result</b> 61 of 61 demonstrated</span>
+    </div>
+    <div class="changes">
+      <div class="chg"><h4>Contracts drove the detail</h4><p>Screens show real fields: <code>FormScore.breakdown</code>, <code>SafetyVerdict.threshold</code>, <code>AdaptationDecision.alternatives</code>, <code>PainSignal.basis</code>. Where a type carries a reason, the UI shows the reason.</p></div>
+      <div class="chg"><h4>Some features are states, not screens</h4><p>Offline sync, low confidence, a milestone, a compensation cue — these live inside other screens. They are drawn as the states they are, at the size they appear.</p></div>
+      <div class="chg"><h4>Internal tools count</h4><p>I1 and I2 decide whether the catalogue reaches twenty exercises or two hundred, and whether scoring changes ship blind. Both got a real interface.</p></div>
+      <div class="chg"><h4>Blocked items are marked</h4><p>ADR-0006 gates consent copy and F6. Those screens carry a visible note rather than pretending the decision was made.</p></div>
+    </div>
+  </header>
+
+  <h2 class="grp">Coverage matrix</h2>
+  <p>Every feature ID in the catalogue, and where it is demonstrated. <b>Screens</b> links to the mobile and tablet set; <b>Clinician</b> to the desktop set; <b>Below</b> means it is on this page.</p>
+  <div class="legend">
+    <span>● = added in PRD v2.0</span><span>MVP = in the recommended 15</span>
+  </div>
+  <table class="mx">
+    <thead><tr><th class="fid">ID</th><th class="nm">Feature</th><th class="wh">Where</th><th>How it is shown</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="4">A · Motion capture and form analysis</td></tr>
+      <tr><td class="fid">A1</td><td class="nm">Live pose tracking</td><td class="wh">Screens M5 T2</td><td>Self-view with the skeleton drawn over the patient's own body, full-bleed.</td></tr>
+      <tr><td class="fid">A2</td><td class="nm">Per-rep form scoring</td><td class="wh">Below · A2</td><td>Score with its <code>breakdown[]</code> — every criterion, its target band, observed value and ok/warn/fail status.</td></tr>
+      <tr><td class="fid">A3</td><td class="nm">Live corrective coaching</td><td class="wh">Screens M5 T2</td><td>Cue banner with caption; cooldown stated so it cannot nag.</td></tr>
+      <tr><td class="fid">A4</td><td class="nm">Rep and set counting</td><td class="wh">Screens M5</td><td>Mono rep readout plus a ten-tick set strip with per-rep state.</td></tr>
+      <tr><td class="fid">A5</td><td class="nm"><span class="new">●</span> Compensation detection</td><td class="wh">Below · A5</td><td>Trunk-lean substitution caught mid-set, named in the patient's own terms.</td></tr>
+      <tr><td class="fid">A6</td><td class="nm">Exercise library and DSL</td><td class="wh">Below · I1</td><td>The <code>ExerciseSpec</code> as an authored object: phases, criteria, cues, safety.</td></tr>
+      <tr><td class="fid">A7</td><td class="nm"><span class="new">●</span> Camera setup coach</td><td class="wh">Screens M4</td><td>Four checks, framing marks on the picture, five-tick quality meter.</td></tr>
+      <tr><td class="fid">A8</td><td class="nm"><span class="new">●</span> Personal ROM baseline</td><td class="wh">Below · A8</td><td>First-session capture, then every later score read against the patient's own range.</td></tr>
+      <tr><td class="fid">A9</td><td class="nm"><span class="new">●</span> Session replay</td><td class="wh">Screens M7 T3</td><td>Skeleton scrub with flagged reps as timeline markers — no video, and it says why.</td></tr>
+      <tr><td class="fid">A10</td><td class="nm"><span class="new">●</span> Bilateral comparison</td><td class="wh">Screens M9</td><td>Operated versus uninjured side as a headline pair.</td></tr>
+      <tr class="grp"><td colspan="4">B · Pain localisation and inference</td></tr>
+      <tr><td class="fid">B1</td><td class="nm">Movement-based pain estimation</td><td class="wh">Below · B1</td><td>The inference disclosed as what it is: a low-confidence prior with its <code>basis[]</code>, generating a question.</td></tr>
+      <tr><td class="fid">B2</td><td class="nm">Self-report fusion</td><td class="wh">Screens M7</td><td>1–5 scale with words plus a tap-to-point body map.</td></tr>
+      <tr><td class="fid">B3</td><td class="nm">Region-level pain mapping</td><td class="wh">Below · B3</td><td>Body map coloured by region across sessions, per rep and per session.</td></tr>
+      <tr><td class="fid">B4</td><td class="nm">Pain trend visualisation</td><td class="wh">Screens M9 · Below B3</td><td>Per-region direction over weeks, improving / stable / worsening.</td></tr>
+      <tr><td class="fid">B5</td><td class="nm"><span class="new">●</span> Pain-linked rep bookmarking</td><td class="wh">Screens M5 M7</td><td>One control mid-set; the tagged rep and its skeleton return in the break.</td></tr>
+      <tr><td class="fid">B6</td><td class="nm"><span class="new">●</span> Inference as question generator</td><td class="wh">Screens M7 · Below B1</td><td>Recorded value is always the patient's answer; the estimate only picks the question.</td></tr>
+      <tr class="grp"><td colspan="4">C · Conversational engagement</td></tr>
+      <tr><td class="fid">C1</td><td class="nm">Session narration</td><td class="wh">Below · C1</td><td>Narration turns between sets, in the coach's selected voice.</td></tr>
+      <tr><td class="fid">C2</td><td class="nm">Rest-period check-ins</td><td class="wh">Below · C1</td><td>“How did that set feel?” as conversation, feeding the same record as the scale.</td></tr>
+      <tr><td class="fid">C3</td><td class="nm">Voice Q&amp;A</td><td class="wh">Below · C3</td><td>Plain-language answer with a visible refusal to diagnose.</td></tr>
+      <tr><td class="fid">C4</td><td class="nm">Adjustable coaching persona</td><td class="wh">Below · C4</td><td>Encouraging / clinical / concise, with a sample line for each.</td></tr>
+      <tr><td class="fid">C5</td><td class="nm">Difficulty-aware tone shifts</td><td class="wh">Below · C1</td><td>Tone change is shown with the reason that triggered it.</td></tr>
+      <tr><td class="fid">C6</td><td class="nm"><span class="new">●</span> “Why this exercise” cards</td><td class="wh">Screens M3</td><td>One honest sentence before the set, from <code>ExerciseSpec.rationale</code>.</td></tr>
+      <tr class="grp"><td colspan="4">D · Adaptive recommendation</td></tr>
+      <tr><td class="fid">D1</td><td class="nm">Session-to-session adaptation</td><td class="wh">Below · D1</td><td>What changed since last time and what caused each change.</td></tr>
+      <tr><td class="fid">D2</td><td class="nm">Progression policy</td><td class="wh">Below · D1</td><td>The rule table exposed: state, direction, and the alternatives that were blocked, with reasons.</td></tr>
+      <tr><td class="fid">D3</td><td class="nm">Plateau and regression detection</td><td class="wh">Below · D1</td><td>Three flat weeks named as a plateau, with the change it triggers.</td></tr>
+      <tr><td class="fid">D4</td><td class="nm">Pre-session readiness check</td><td class="wh">Screens M2 T1</td><td>Ten-second check that visibly changes today's intensity.</td></tr>
+      <tr class="grp"><td colspan="4">E · Safety supervision</td></tr>
+      <tr><td class="fid">E1</td><td class="nm">Real-time safety gating</td><td class="wh">Screens M6</td><td>Block sheet with rule, threshold, observed value and consecutive-rep count.</td></tr>
+      <tr><td class="fid">E2</td><td class="nm">Fall / instability detection</td><td class="wh">Below · E2</td><td>Instability verdict with the escalation path, from a standing exercise.</td></tr>
+      <tr><td class="fid">E3</td><td class="nm">Escalation guidance</td><td class="wh">Screens M6 · Below E2</td><td>Contact your clinician; emergency number for severe. Never “push through”.</td></tr>
+      <tr><td class="fid">E4</td><td class="nm">Non-diagnostic framing</td><td class="wh">Every screen</td><td>Present on every patient screen and every report, in snapshot-tested copy.</td></tr>
+      <tr><td class="fid">E5</td><td class="nm">Session-level supervisor</td><td class="wh">Below · E5</td><td>Exercises filtered out of today's program, each with the reason it was withheld.</td></tr>
+      <tr><td class="fid">E6</td><td class="nm"><span class="new">●</span> Clinician threshold overrides</td><td class="wh">Screens M3 · Clinician D4</td><td>Tighten only; the loosening direction is not an available control.</td></tr>
+      <tr class="grp"><td colspan="4">F · Clinician reporting and tools</td></tr>
+      <tr><td class="fid">F1</td><td class="nm">Session and weekly reports</td><td class="wh">Below · F1</td><td>Weekly report: adherence, form trend, pain heat, flagged events.</td></tr>
+      <tr><td class="fid">F2</td><td class="nm">Exportable clinician packet</td><td class="wh">Below · F2</td><td>Export dialog — what is included, what is never included, and who it is logged to.</td></tr>
+      <tr><td class="fid">F3</td><td class="nm">Multi-session trend view</td><td class="wh">Below · F1</td><td>Progressing / plateaued / regressing across the whole program.</td></tr>
+      <tr><td class="fid">F4</td><td class="nm">Plain-language explanations</td><td class="wh">Below · F1 · Screens M8</td><td>Movement data rewritten without clinical claims, both sides.</td></tr>
+      <tr><td class="fid">F5</td><td class="nm">Full audit trail</td><td class="wh">Below · F5</td><td>Every score, cue, verdict and decision, with actor and reason.</td></tr>
+      <tr><td class="fid">F6</td><td class="nm"><span class="new">●</span> Program builder</td><td class="wh">Clinician D4</td><td>Build from templates, set sets/reps, apply per-patient limits.</td></tr>
+      <tr><td class="fid">F7</td><td class="nm"><span class="new">●</span> Flag triage inbox</td><td class="wh">Clinician D2</td><td>Ranked daily worklist with the ranking rationale on every row.</td></tr>
+      <tr><td class="fid">F8</td><td class="nm"><span class="new">●</span> Rep-anchored annotations</td><td class="wh">Clinician D3</td><td>Comment attaches to the rep under the playhead.</td></tr>
+      <tr><td class="fid">F9</td><td class="nm">Clinician-to-patient messaging</td><td class="wh">Below · F9</td><td>The patient's side of the thread, anchored to the rep it is about.</td></tr>
+      <tr class="grp"><td colspan="4">G · Data, platform and trust</td></tr>
+      <tr><td class="fid">G1</td><td class="nm">Structured session event log</td><td class="wh">Below · G1</td><td>The append-only log itself, readable by the patient, typed as in CONTRACTS.</td></tr>
+      <tr><td class="fid">G2</td><td class="nm">Shared state and projections</td><td class="wh">Below · G1</td><td>Each view named as a projection over the log it is built from.</td></tr>
+      <tr><td class="fid">G3</td><td class="nm">Auth and roles</td><td class="wh">Below · G3</td><td>Patient, clinician, caregiver — three roles, three different views of one record.</td></tr>
+      <tr><td class="fid">G4</td><td class="nm">Multi-tenancy and RLS</td><td class="wh">Below · G3</td><td>Clinic scope visible in the clinician chrome; caseload cannot cross it.</td></tr>
+      <tr><td class="fid">G5</td><td class="nm"><span class="new">●</span> Consent and sharing centre</td><td class="wh">Screens M10</td><td>Per-recipient, revocable, with a patient-readable access log.</td></tr>
+      <tr><td class="fid">G6</td><td class="nm">Offline / low-bandwidth</td><td class="wh">Below · G6</td><td>Session runs offline; the sync queue says exactly what is waiting.</td></tr>
+      <tr><td class="fid">G7</td><td class="nm"><span class="new">●</span> Confidence gating</td><td class="wh">Below · G7 · Screens M4</td><td>A low-confidence rep shows “not enough signal”, never a number, and is held out of the trend.</td></tr>
+      <tr class="grp"><td colspan="4">H · Engagement and retention</td></tr>
+      <tr><td class="fid">H1</td><td class="nm">Streaks and calendar</td><td class="wh">Screens M2 M9</td><td>Week strip and streak count.</td></tr>
+      <tr><td class="fid">H2</td><td class="nm">Milestone celebrations</td><td class="wh">Below · H2</td><td>A milestone tied to a real measurement, not a generic badge.</td></tr>
+      <tr><td class="fid">H3</td><td class="nm">Gentle re-engagement nudges</td><td class="wh">Below · H3</td><td>Supportive, specific, and it offers a smaller session rather than guilt.</td></tr>
+      <tr><td class="fid">H4</td><td class="nm">Post-session summary card</td><td class="wh">Screens M8</td><td>Four readings, each with its reason.</td></tr>
+      <tr><td class="fid">H5</td><td class="nm">Caregiver visibility</td><td class="wh">Below · H5</td><td>Adherence only. No scores, no pain detail, and it says so.</td></tr>
+      <tr><td class="fid">H6</td><td class="nm"><span class="new">●</span> Drop-out risk scoring</td><td class="wh">Below · H6</td><td>Clinician-side risk band with the pattern behind it, firing before abandonment.</td></tr>
+      <tr><td class="fid">H7</td><td class="nm"><span class="new">●</span> Guest session</td><td class="wh">Screens M1 · Below H7</td><td>Full tracked session first; the offer to save it comes after.</td></tr>
+      <tr><td class="fid">H8</td><td class="nm">Gamified variety packs</td><td class="wh">Below · H8</td><td>Reach targets over the same pose engine and the same safety gate.</td></tr>
+      <tr><td class="fid">H9</td><td class="nm">Multi-language and accessibility</td><td class="wh">Below · C4</td><td>Language, large text, high contrast, captions — captions never optional.</td></tr>
+      <tr><td class="fid">H10</td><td class="nm">Wearable integration</td><td class="wh">Below · H10</td><td>Optional pairing, clearly marked as context rather than measurement.</td></tr>
+      <tr class="grp"><td colspan="4">I · Internal tooling and scale</td></tr>
+      <tr><td class="fid">I1</td><td class="nm"><span class="new">●</span> Exercise authoring studio</td><td class="wh">Below · I1</td><td>Record, auto-derive angle ranges and phases, tune tolerances, publish.</td></tr>
+      <tr><td class="fid">I2</td><td class="nm"><span class="new">●</span> Evaluation harness</td><td class="wh">Below · I2</td><td>Fixture replay in CI with the rep-accuracy diff posted to the pull request.</td></tr>
+      <tr><td class="fid">I3</td><td class="nm"><span class="new">●</span> Mobile shell</td><td class="wh">Below · I3</td><td>Same core, three shells; the numbers do not change across them.</td></tr>
+    </tbody>
+  </table>
+<h2 class="grp">Screens that were missing</h2>
+<p>Eight patient screens covering the pain, conversation, adaptation, supervisor and data-trust features that had no surface before.</p>
+<div class="rail">
+
+<div class="unit">
+  <div class="ucap"><span class="id">A8</span><h3>ROM baseline · session one</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="lb">First session · baseline</span>
+      <span class="d1">Let's measure<br>your range</span>
+      <span class="b2">Bend and straighten as far as is comfortable. Nothing here is scored — we are finding your starting point, not marking it.</span>
+    </div>
+    <div class="pad c" style="gap:12px;padding-top:14px">
+      <div class="cam" style="height:196px">
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+        <div class="ovl live" style="top:10px;left:10px"><i></i>MEASURING · LEFT KNEE</div>
+        <div class="ovl readout mono" style="bottom:10px;right:10px;font-size:19px;font-weight:600">104°</div>
+      </div>
+      <div class="card hair c" style="gap:12px">
+        <span class="lb">Your range today</span>
+        <div class="c" style="gap:5px">
+          <div class="r"><span class="b2 g">Left knee (operated)</span><span class="mono" style="font-size:15px;font-weight:600;color:var(--pain)">104°</span></div>
+          <div class="track"><i style="width:66%;background:var(--pain)"></i></div>
+        </div>
+        <div class="c" style="gap:5px">
+          <div class="r"><span class="b2 g">Right knee</span><span class="mono" style="font-size:15px;font-weight:600;color:var(--ok)">128°</span></div>
+          <div class="track"><i style="width:88%;background:var(--ok)"></i></div>
+        </div>
+        <div class="sep"></div>
+        <span class="b2">Every score from now on is read against <b style="color:var(--ink)">these numbers</b>, not against an average of other people. That is what makes week-one progress visible.</span>
+      </div>
+      <div class="sunk c" style="gap:6px">
+        <div class="r" style="gap:7px"><svg width="14" height="14" style="color:var(--ink2)"><use href="#i-chart"/></svg><span class="lb">Re-measured every four weeks</span></div>
+        <span class="b2">Ruth can ask for a re-measure sooner. Old baselines stay in your record so the change is visible.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:18px">
+      <div class="btn">Save baseline and continue</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>A range of movement measurement, not an assessment of your recovery.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>A8.</b> The screen deliberately withholds a score. A number on session one would be read as a verdict on an injury, which is exactly what the product must not do.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">E5</span><h3>Supervisor · today's allowed set</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="lb">Thursday · week 3</span>
+      <span class="d1">Today's program</span>
+      <span class="b2">Two of your five exercises are not offered today. Here is why.</span>
+    </div>
+    <div class="pad c" style="gap:10px;padding-top:14px">
+      <div class="r"><span class="lb g">Available now</span><span class="mono" style="font-size:11px;color:var(--ok)">3 EXERCISES</span></div>
+      <div class="exrow"><div class="thumb" style="background:var(--teal-w);color:var(--teal)"><svg width="22" height="22"><use href="#i-body"/></svg></div><div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Seated knee extension</span><span class="mono" style="font-size:11px;color:var(--ink3)">3 × 10 · LOW INTENSITY</span></div><svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg></div>
+      <div class="exrow"><div class="thumb" style="background:var(--teal-w);color:var(--teal)"><svg width="22" height="22"><use href="#i-body"/></svg></div><div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Heel slides</span><span class="mono" style="font-size:11px;color:var(--ink3)">2 × 12 · MOBILITY</span></div><svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg></div>
+      <div class="exrow"><div class="thumb" style="background:var(--teal-w);color:var(--teal)"><svg width="22" height="22"><use href="#i-body"/></svg></div><div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Seated march</span><span class="mono" style="font-size:11px;color:var(--ink3)">2 × 10 · CONTROL</span></div><svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg></div>
+      <div class="r" style="padding-top:6px"><span class="lb g">Held back today</span><span class="mono" style="font-size:11px;color:var(--warn)">2 EXERCISES</span></div>
+      <div class="card hair c" style="gap:8px;opacity:.94">
+        <div class="r" style="gap:11px">
+          <div class="thumb" style="background:var(--warn-w);color:var(--warn)"><svg width="20" height="20"><use href="#i-lock"/></svg></div>
+          <div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Sit to stand</span><span class="mono" style="font-size:11px;color:var(--warn)">PAIN BURDEN · KNEE 0.61</span></div>
+        </div>
+        <span class="b2">Your knee reports averaged above the caution threshold over the last two sessions. It comes back automatically when they settle.</span>
+      </div>
+      <div class="card hair c" style="gap:8px;opacity:.94">
+        <div class="r" style="gap:11px">
+          <div class="thumb" style="background:var(--warn-w);color:var(--warn)"><svg width="20" height="20"><use href="#i-lock"/></svg></div>
+          <div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Step-up, 15 cm</span><span class="mono" style="font-size:11px;color:var(--warn)">INTENSITY CEILING · HIGH</span></div>
+        </div>
+        <span class="b2">Above the intensity Ruth has allowed while the knee is settling.</span>
+      </div>
+      <div class="sunk c" style="gap:6px">
+        <div class="r" style="gap:7px"><svg width="14" height="14" style="color:var(--ink2)"><use href="#i-shield"/></svg><span class="lb">The supervisor decides first</span></div>
+        <span class="b2">The engine that plans your session can only choose from what this list allows. It cannot add something back.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="btn">Start seated knee extension</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>E5.</b> Upstream's <code>SupervisorAgent</code> made visible. Withheld exercises are shown rather than silently absent — a missing exercise with no explanation reads as a bug, or worse, as the app deciding something about you.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">C1</span><h3>Between sets · conversation</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:6px;padding-bottom:12px">
+      <div class="c g" style="gap:2px"><span class="h1">Rest — 42s</span><span class="mono" style="font-size:11px;color:var(--ink3)">SET 2 OF 3 DONE</span></div>
+      <span class="chip k-mute">CONCISE</span>
+    </div>
+    <div class="pad c" style="gap:12px">
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--teal);flex:none"></div>
+        <div class="card hair" style="border-radius:10px 10px 10px 3px;padding:12px"><span style="font-size:14.5px">That set was your steadiest yet — the lowering took a full three seconds on seven of eight.</span></div>
+      </div>
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--teal);flex:none"></div>
+        <div class="card hair" style="border-radius:10px 10px 10px 3px;padding:12px"><span style="font-size:14.5px">How did that set feel?</span></div>
+      </div>
+      <div class="r" style="gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">Fine</span>
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">Hard work</span>
+        <span class="chip" style="padding:8px 12px;font-size:13px;background:var(--teal);color:#fff">Tiring, not painful</span>
+      </div>
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--teal);flex:none"></div>
+        <div class="card hair" style="border-radius:10px 10px 10px 3px;padding:12px"><span style="font-size:14.5px">Then we will keep the last set at eight rather than pushing to ten. Tired is fine. Sore is not.</span></div>
+      </div>
+      <div class="card c" style="gap:7px;background:var(--warn-w)">
+        <div class="r" style="gap:7px"><svg width="14" height="14" style="color:var(--warn)"><use href="#i-sound"/></svg><span class="lb" style="color:var(--warn)">Tone changed</span></div>
+        <span class="b2" style="color:#7A4208">You have found this exercise hard three sessions running, so the coach has switched from encouraging to concise. You can change this any time in settings.</span>
+      </div>
+      <div class="sunk c" style="gap:6px">
+        <span class="lb">Recorded from this exchange</span>
+        <span class="mono" style="font-size:11px;color:var(--ink2);line-height:1.65">readiness · “tiring, not painful”<br>pain_reported · none volunteered<br>set 3 · reps 10 → 8 · reason: patient report</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="btn">Start set 3</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Conversation is coaching, not clinical advice.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>C1, C2, C5.</b> The tone shift is announced rather than silent — a coach that changes personality without saying why reads as broken. What the exchange wrote to the log is shown underneath it.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">C3</span><h3>Ask a question</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:6px;padding-bottom:12px;gap:12px">
+      <svg width="20" height="20" style="color:var(--ink)"><use href="#i-back"/></svg>
+      <span class="h2 g">Ask about your program</span>
+    </div>
+    <div class="pad c" style="gap:12px">
+      <div class="r" style="gap:10px;justify-content:flex-end">
+        <div class="card" style="background:var(--teal);border-radius:10px 10px 3px 10px;padding:12px"><span style="font-size:14.5px;color:#fff">Why does standing up over and over help my knee?</span></div>
+      </div>
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--teal);flex:none"></div>
+        <div class="card hair c" style="border-radius:10px 10px 10px 3px;padding:12px;gap:8px">
+          <span style="font-size:14.5px">Standing up loads the muscle on the front of your thigh through the exact range you use for stairs and getting out of a chair. Practising it rebuilds strength in the position you actually need it, rather than in one that only exists in exercises.</span>
+          <span style="font-size:14.5px">Ruth chose it for you as the second exercise for that reason — it is in your program notes.</span>
+        </div>
+      </div>
+      <div class="r" style="gap:10px;justify-content:flex-end">
+        <div class="card" style="background:var(--teal);border-radius:10px 10px 3px 10px;padding:12px"><span style="font-size:14.5px;color:#fff">Do you think my knee is healing properly?</span></div>
+      </div>
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--teal);flex:none"></div>
+        <div class="card c" style="border-radius:10px 10px 10px 3px;padding:12px;gap:9px;background:var(--warn-w)">
+          <span style="font-size:14.5px;color:#7A4208">That is not something I can judge — I can see how you move, not how you are healing. What I can tell you is what the measurements have done: your left knee has gained 9° in three weeks and your discomfort reports have come down.</span>
+          <div class="sep" style="background:#E8CFA8"></div>
+          <span class="b2" style="color:#7A4208">Ruth sees all of it. Ask her — I can send this question with your next report.</span>
+        </div>
+      </div>
+      <div class="r" style="gap:8px">
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">Send to Ruth</span>
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">What is a form score?</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="card hair r" style="gap:10px;padding:12px"><svg width="18" height="18" style="color:var(--teal)"><use href="#i-sound"/></svg><span class="b2 g">Hold to speak, or type</span></div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Answers are general explanations, never a diagnosis or a treatment decision.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>C3.</b> The second answer is the one that matters: the refusal is designed, styled, and still useful — it hands back measurements and routes to the human, rather than dead-ending.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">D1</span><h3>What changed in your plan</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="lb">Updated overnight</span>
+      <span class="d1">Three things<br>changed</span>
+    </div>
+    <div class="pad c" style="gap:10px;padding-top:14px">
+      <div class="card hair c" style="gap:8px">
+        <div class="r"><span class="h2 g" style="font-size:15px">Seated knee extension</span><span class="chip k-ok">PROGRESSED</span></div>
+        <div class="r" style="gap:8px"><span class="mono" style="font-size:13px;color:var(--ink3)">3 × 10</span><svg width="14" height="14" style="color:var(--ink3)"><use href="#i-chev"/></svg><span class="mono" style="font-size:13px;font-weight:600">3 × 12</span></div>
+        <span class="b2">Form above 80 for four sessions and no discomfort above 2. The rule allows one step up.</span>
+      </div>
+      <div class="card hair c" style="gap:8px">
+        <div class="r"><span class="h2 g" style="font-size:15px">Sit to stand</span><span class="chip k-warn">HELD</span></div>
+        <div class="r" style="gap:8px"><span class="mono" style="font-size:13px;color:var(--ink3)">2 × 8</span><svg width="14" height="14" style="color:var(--ink3)"><use href="#i-chev"/></svg><span class="mono" style="font-size:13px;font-weight:600">2 × 8</span></div>
+        <span class="b2">Two safety blocks and one 4/5 report this week. Nothing increases while that is true.</span>
+      </div>
+      <div class="card hair c" style="gap:8px">
+        <div class="r"><span class="h2 g" style="font-size:15px">Standing hamstring curl</span><span class="chip k-pain">PLATEAU</span></div>
+        <div class="r" style="gap:8px"><span class="mono" style="font-size:13px;color:var(--ink3)">3 × 10</span><svg width="14" height="14" style="color:var(--ink3)"><use href="#i-chev"/></svg><span class="mono" style="font-size:13px;font-weight:600">SWAPPED</span></div>
+        <span class="b2">Three weeks flat with no change in range. Replaced with bridging, which loads the same muscle differently.</span>
+      </div>
+      <div class="sunk c" style="gap:8px">
+        <span class="lb">How the decision was made</span>
+        <span class="mono" style="font-size:11px;color:var(--ink2);line-height:1.7">policy · rules_v1<br>state · knee | pain-low | prev-sit-to-stand<br>direction · progress<br>blocked · step-up 15cm — intensity ceiling<br>blocked · deep squat — knee cap 90°</span>
+        <div class="sep"></div>
+        <span class="b2">A rule table, not a model. Ruth can read every threshold that fired and change any of them.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="btn">Start today's session</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Program adjustments are coaching decisions from rules your clinician set.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>D1, D2, D3.</b> ADR-0004 says progression must be explainable as a rule with a threshold. The trace at the bottom is that promise kept — and it is the same <code>(state, action, outcome)</code> tuple the learned policy will eventually train on.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">B1</span><h3>Pain map and why we asked</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="lb">Last 6 weeks</span>
+      <span class="d1">Where it has<br>been hurting</span>
+    </div>
+    <div class="pad c" style="gap:11px;padding-top:12px">
+      <div class="card hair r" style="gap:14px;align-items:flex-start">
+        <div style="width:118px;height:186px;flex:none;position:relative">
+          <svg viewBox="0 0 118 186" style="width:100%;height:100%">
+            <ellipse cx="59" cy="20" rx="13" ry="14" fill="#C8D2D3"/>
+            <rect x="42" y="37" width="34" height="48" rx="9" fill="#C8D2D3"/>
+            <rect x="27" y="40" width="12" height="38" rx="6" fill="#C8D2D3"/>
+            <rect x="79" y="40" width="12" height="38" rx="6" fill="#C8D2D3"/>
+            <rect x="44" y="87" width="14" height="60" rx="7" fill="#C8D2D3"/>
+            <rect x="61" y="87" width="14" height="60" rx="7" fill="#C8D2D3"/>
+            <rect x="42" y="70" width="34" height="16" rx="6" fill="#E4C9A8"/>
+            <circle cx="51" cy="112" r="15" fill="#B5410A" opacity=".92"/>
+            <circle cx="68" cy="112" r="9" fill="#E3B48E" opacity=".8"/>
+          </svg>
+        </div>
+        <div class="c g" style="gap:10px">
+          <span class="lb">By region</span>
+          <div class="c" style="gap:4px"><div class="r"><span class="b2 g">Left knee</span><span class="mono" style="font-size:12px;font-weight:600;color:var(--pain)">2.1</span></div><div class="track" style="height:5px"><i style="width:70%;background:var(--pain)"></i></div><span class="mono" style="font-size:10px;color:var(--ok)">↓ IMPROVING</span></div>
+          <div class="c" style="gap:4px"><div class="r"><span class="b2 g">Lower back</span><span class="mono" style="font-size:12px;font-weight:600;color:var(--warn)">1.4</span></div><div class="track" style="height:5px"><i style="width:45%;background:var(--warn)"></i></div><span class="mono" style="font-size:10px;color:var(--ink3)">→ STABLE</span></div>
+          <div class="c" style="gap:4px"><div class="r"><span class="b2 g">Right knee</span><span class="mono" style="font-size:12px;font-weight:600;color:var(--ink3)">0.4</span></div><div class="track" style="height:5px"><i style="width:14%;background:var(--line-2)"></i></div><span class="mono" style="font-size:10px;color:var(--ink3)">→ STABLE</span></div>
+        </div>
+      </div>
+      <div class="card hair c" style="gap:9px">
+        <div class="r" style="gap:7px"><svg width="15" height="15" style="color:var(--ink2)"><use href="#i-body"/></svg><span class="lb">Why we asked about your knee on Tuesday</span></div>
+        <span class="b2">During set 2 the movement changed in three ways we watch for:</span>
+        <div class="c" style="gap:6px">
+          <div class="r" style="gap:8px"><span class="mono" style="font-size:10.5px;color:var(--pain);margin-top:2px">01</span><span class="b2">You took 1.4s longer on the way down than in set 1</span></div>
+          <div class="r" style="gap:8px"><span class="mono" style="font-size:10.5px;color:var(--pain);margin-top:2px">02</span><span class="b2">Left–right load looked uneven by 18%</span></div>
+          <div class="r" style="gap:8px"><span class="mono" style="font-size:10.5px;color:var(--pain);margin-top:2px">03</span><span class="b2">Your range dropped 11° from your own baseline</span></div>
+        </div>
+        <div class="sep"></div>
+        <span class="b2"><b style="color:var(--ink)">That is a hunch, not a reading.</b> Guarding looks the same as tiredness, an unfamiliar movement or a slippery floor. It was never recorded as a pain score — it only decided which question to ask you.</span>
+        <div class="r" style="gap:8px"><span class="chip k-mute">CONFIDENCE 0.31</span><span class="chip k-pain">YOU ANSWERED 2/5</span></div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Pain reports you gave us. Not a diagnosis, and not a measure of injury.</span></div>
+    </div>
+    <div class="navbar">
+      <div class="it"><svg width="21" height="21"><use href="#i-home"/></svg>Today</div>
+      <div class="it on"><svg width="21" height="21"><use href="#i-chart"/></svg>Progress</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-list"/></svg>Program</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-lock"/></svg>Sharing</div>
+    </div>
+  </div></div>
+  <p class="unote"><b>B1, B3, B4, B6.</b> The whole B6 argument on one card: the three signals that fired, their confidence, the sentence saying they are not a reading, and the answer that was actually recorded.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">G1</span><h3>Your record</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="lb">Tuesday · session 24</span>
+      <span class="d1">Your record</span>
+      <span class="b2">Everything the app knows about this session, in the order it happened. Nothing is edited or removed — corrections are added as new lines.</span>
+    </div>
+    <div class="pad c" style="gap:10px;padding-top:14px">
+      <div class="card hair c" style="gap:9px">
+        <div class="r"><span class="lb g">Event log</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">142 EVENTS</span></div>
+        <div class="c" style="gap:7px">
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">00:00</span><span class="mono" style="font-size:11px;color:var(--teal);width:96px">session_started</span><span class="b2 g" style="font-size:12px">program · knee wk3</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">00:18</span><span class="mono" style="font-size:11px;color:var(--teal);width:96px">setup_completed</span><span class="b2 g" style="font-size:12px">quality 0.86 · ok</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">00:24</span><span class="mono" style="font-size:11px;color:var(--teal);width:96px">readiness</span><span class="b2 g" style="font-size:12px">energy 3 · pain 2</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">03:11</span><span class="mono" style="font-size:11px;color:var(--teal);width:96px">rep_completed</span><span class="b2 g" style="font-size:12px">#5 · score 74 · warn</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">03:19</span><span class="mono" style="font-size:11px;color:var(--warn);width:96px">cue_delivered</span><span class="b2 g" style="font-size:12px">slow the descent</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">03:26</span><span class="mono" style="font-size:11px;color:var(--pain);width:96px">pain_bookmarked</span><span class="b2 g" style="font-size:12px">rep 6 · by you</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">03:41</span><span class="mono" style="font-size:11px;color:var(--dang);width:96px">safety_verdict</span><span class="b2 g" style="font-size:12px">block · knee 96°</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">05:02</span><span class="mono" style="font-size:11px;color:var(--pain);width:96px">pain_reported</span><span class="b2 g" style="font-size:12px">knee 2/5 · yours</span></div>
+          <div class="r" style="gap:9px"><span class="mono" style="font-size:10.5px;color:var(--ink3);width:44px">11:24</span><span class="mono" style="font-size:11px;color:var(--teal);width:96px">session_ended</span><span class="b2 g" style="font-size:12px">completed</span></div>
+        </div>
+      </div>
+      <div class="sunk c" style="gap:8px">
+        <span class="lb">Everything else is built from this</span>
+        <div class="r" style="gap:6px;flex-wrap:wrap">
+          <span class="chip k-mute">SUMMARY CARD</span><span class="chip k-mute">FORM TREND</span><span class="chip k-mute">PAIN MAP</span><span class="chip k-mute">RUTH'S REPORT</span><span class="chip k-mute">STREAK</span>
+        </div>
+        <span class="b2">No view holds its own copy of the truth. If a number looks wrong, this is the list it came from.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="btn sec">Download this session as a file</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-lock"/></svg><span>No frames, no images. Joint positions, scores and decisions only.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>G1, G2, F5.</b> The append-only log, shown to the patient rather than only to the clinician. The projection chips make G2 legible: five views, one source.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">F9</span><h3>Messages from Ruth</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:6px;padding-bottom:12px;gap:11px">
+      <svg width="20" height="20" style="color:var(--ink)"><use href="#i-back"/></svg>
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--teal-w)"></div>
+      <div class="c g" style="gap:1px"><span class="h2" style="font-size:16px">Ruth Alvarez</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">PHYSIOTHERAPIST · NORTHGATE</span></div>
+    </div>
+    <div class="pad c" style="gap:12px">
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--teal-w);flex:none"></div>
+        <div class="card hair c" style="border-radius:10px 10px 10px 3px;padding:12px;gap:9px">
+          <span style="font-size:14.5px">This is the rep I want you to slow down — let yourself sit back rather than dropping. Keep the cap where it is for another week.</span>
+          <div class="r" style="gap:10px;background:var(--sunk);border-radius:8px;padding:8px">
+            <div style="width:44px;height:44px;border-radius:6px;background:#08100F;flex:none;position:relative;overflow:hidden">
+              <svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%"><use href="#poseonly" width="400" height="600"/></svg>
+            </div>
+            <div class="c g" style="gap:1px"><span class="mono" style="font-size:11px;font-weight:600">REP 6 · SET 2</span><span class="b2" style="font-size:12px">Tuesday · tap to replay</span></div>
+            <svg width="16" height="16" style="color:var(--ink3)"><use href="#i-play"/></svg>
+          </div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">MONDAY 14:22</span>
+        </div>
+      </div>
+      <div class="r" style="gap:10px;justify-content:flex-end">
+        <div class="card" style="background:var(--teal);border-radius:10px 10px 3px 10px;padding:12px"><span style="font-size:14.5px;color:#fff">Got it. It felt like it was going too fast at the bottom.</span></div>
+      </div>
+      <div class="r" style="gap:10px;align-items:flex-start">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--teal-w);flex:none"></div>
+        <div class="card hair c" style="border-radius:10px 10px 10px 3px;padding:12px;gap:6px">
+          <span style="font-size:14.5px">That is exactly it. Count to three on the way down and it will settle. Good week otherwise — the left side is catching up.</span>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">MONDAY 16:05</span>
+        </div>
+      </div>
+      <div class="sunk c" style="gap:6px">
+        <span class="lb">About these messages</span>
+        <span class="b2">Ruth writes these herself after reading your sessions. They are not generated, and the app never answers on her behalf.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="card hair r" style="gap:10px;padding:12px"><span class="b2 g">Reply to Ruth</span><svg width="18" height="18" style="color:var(--teal)"><use href="#i-chev"/></svg></div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>For anything urgent, contact the clinic directly rather than messaging here.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>F9, F8.</b> The clinician's annotation arrives anchored to the rep it is about, replayable in place — which is what makes “this rep” mean something.</p>
+</div>
+
+</div>
+<h2 class="grp">States, not screens</h2>
+<p>Twelve features are moments inside other screens rather than destinations. Drawn here at the size they actually appear.</p>
+<div class="rail">
+
+<div class="unit">
+  <div class="ucap"><span class="id">A2</span><h3>Score breakdown</h3><span class="dim">390×446</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:446px;padding:16px">
+    <div class="card hair c" style="gap:12px;height:100%">
+      <div class="r">
+        <div class="c g" style="gap:2px"><span class="h2">Rep 7</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">SIT TO STAND · SET 2</span></div>
+        <div class="c" style="align-items:flex-end"><span class="mono" style="font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1">86</span><span class="mono" style="font-size:10px;color:var(--ok)">GOOD</span></div>
+      </div>
+      <div class="sep"></div>
+      <div class="c" style="gap:10px">
+        <div class="c" style="gap:4px">
+          <div class="r"><span class="b2 g" style="font-size:13px">Peak knee angle</span><span class="mono" style="font-size:11.5px;font-weight:600">88°</span><span class="chip k-ok" style="padding:2px 6px">OK</span></div>
+          <div class="track" style="height:5px;position:relative"><i style="width:74%;background:var(--ok)"></i><span style="position:absolute;left:60%;right:22%;top:0;bottom:0;background:rgba(31,122,77,.22)"></span></div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">TARGET 80–95 · WEIGHT 0.35</span>
+        </div>
+        <div class="c" style="gap:4px">
+          <div class="r"><span class="b2 g" style="font-size:13px">Lowering tempo</span><span class="mono" style="font-size:11.5px;font-weight:600">2.1s</span><span class="chip k-warn" style="padding:2px 6px">WARN</span></div>
+          <div class="track" style="height:5px;position:relative"><i style="width:52%;background:var(--warn)"></i><span style="position:absolute;left:66%;right:8%;top:0;bottom:0;background:rgba(167,90,11,.2)"></span></div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">TARGET 2.8–3.5s · WEIGHT 0.25</span>
+        </div>
+        <div class="c" style="gap:4px">
+          <div class="r"><span class="b2 g" style="font-size:13px">Left–right symmetry</span><span class="mono" style="font-size:11.5px;font-weight:600">0.12</span><span class="chip k-ok" style="padding:2px 6px">OK</span></div>
+          <div class="track" style="height:5px"><i style="width:88%;background:var(--ok)"></i></div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">TARGET 0–0.20 · WEIGHT 0.25</span>
+        </div>
+        <div class="c" style="gap:4px">
+          <div class="r"><span class="b2 g" style="font-size:13px">Trunk lean</span><span class="mono" style="font-size:11.5px;font-weight:600">18°</span><span class="chip k-ok" style="padding:2px 6px">OK</span></div>
+          <div class="track" style="height:5px"><i style="width:60%;background:var(--ok)"></i></div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">TARGET 0–25° · WEIGHT 0.15</span>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <span class="b2" style="font-size:12.5px"><b style="color:var(--ink)">Why 86 — </b>everything in range except the descent, which was 0.7s quicker than asked. That is the whole gap.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>A2.</b> <code>FormScore.breakdown[]</code> rendered literally — criterion, observed value, target band, status and weight. The band is drawn on the track so “in range” is visible rather than asserted.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">A5</span><h3>Compensation caught</h3><span class="dim">390×300</span></div>
+  <div class="plate"><div class="ab" style="width:390px;height:300px;background:var(--night)">
+    <div class="cam sq" style="height:300px">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:linear-gradient(180deg,rgba(12,20,20,.3) 0%,rgba(12,20,20,0) 30%,rgba(12,20,20,.85) 100%)"></div>
+      <div class="ovl live mono" style="top:12px;left:12px;background:rgba(167,90,11,.92);color:#fff"><i style="background:#FFD98A"></i>TRUNK LEAN 41° / LIMIT 25°</div>
+      <div class="ovl" style="left:12px;right:12px;bottom:12px">
+        <div class="cuebar" style="align-items:flex-start">
+          <div class="ic"><svg width="15" height="15" style="color:var(--warn)"><use href="#i-body"/></svg></div>
+          <div class="c" style="gap:3px">
+            <span style="font-size:14px;font-weight:500">You are swinging your back to get up — let the leg do it</span>
+            <span class="cap" style="font-size:11px">compensation · trunk substitution · 3 of last 4 reps</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>A5.</b> The rule fires on <code>ExerciseSpec.compensations</code>, but the cue says it in the patient's words. “Trunk substitution” is what the log records; “swinging your back” is what gets said out loud.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">E2</span><h3>Instability detected</h3><span class="dim">390×430</span></div>
+  <div class="plate"><div class="ab" style="width:390px;height:430px;background:var(--night)">
+    <div class="cam sq" style="height:430px">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:rgba(12,20,20,.78)"></div>
+      <div class="ovl c" style="left:0;right:0;bottom:0;background:var(--surf);border-radius:18px 18px 0 0;padding:18px;gap:12px">
+        <div class="r" style="gap:11px;align-items:flex-start">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--dang-w);display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" style="color:var(--dang)"><use href="#i-shield"/></svg></div>
+          <div class="c" style="gap:3px">
+            <span class="h1" style="color:var(--dang);font-size:20px">Steady yourself</span>
+            <span class="b2">You lost balance twice in this set. We have stopped the standing exercises for today.</span>
+          </div>
+        </div>
+        <div class="sunk c" style="gap:5px">
+          <span class="mono" style="font-size:10.5px;color:var(--ink2);line-height:1.6">RULE · instability_velocity<br>LIMIT 0.45 m/s · OBSERVED 0.71 m/s<br>VERDICT · block → seated alternative</span>
+        </div>
+        <span class="b2">Hold something solid before you move. If you have fallen or feel faint, contact Ruth — and call your local emergency number if you are hurt.</span>
+        <div class="c" style="gap:8px">
+          <div class="btn dang">I am fine — switch to seated</div>
+          <div class="btn sec">Contact Ruth</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>E2, E3.</b> The first control is not “continue” — it is the safe alternative. The verdict shows its rule, limit and observed value because <code>SafetyVerdict.threshold</code> carries all three.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">G7</span><h3>Not enough signal</h3><span class="dim">390×330</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:330px;padding:16px;gap:12px">
+    <div class="card hair c" style="gap:10px">
+      <div class="r">
+        <div class="c g" style="gap:2px"><span class="h2">Rep 9</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">SIT TO STAND · SET 2</span></div>
+        <span class="chip k-mute">NO SCORE</span>
+      </div>
+      <div class="sunk c" style="gap:6px">
+        <span style="font-size:15px;font-weight:500">Not enough signal this rep</span>
+        <span class="b2">Your left hip and knee dropped out of frame for most of the movement, so there is nothing here we would stand behind.</span>
+      </div>
+      <span class="mono" style="font-size:10.5px;color:var(--ink3);line-height:1.6">CONFIDENCE 0.28 · FLOOR 0.55<br>MISSING · left_hip, left_knee<br>FRAMING · partially_out_of_frame</span>
+    </div>
+    <div class="card c" style="gap:7px;background:var(--warn-w)">
+      <span class="lb" style="color:var(--warn)">What happens to it</span>
+      <span class="b2" style="color:#7A4208">This rep is kept out of your form trend and marked in Ruth's report. It is not counted as a bad rep — it is counted as one we could not see.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>G7.</b> The contract says a score below the confidence floor is never shown as a number. Held out of the trend, marked in the report, and explicitly not scored as a failure.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">G6</span><h3>Offline</h3><span class="dim">390×330</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:330px;padding:16px;gap:12px">
+    <div class="card c" style="gap:8px;background:var(--sunk)">
+      <div class="r" style="gap:9px">
+        <div style="width:26px;height:26px;border-radius:7px;background:var(--line-2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" style="color:var(--ink2)"><use href="#i-lock"/></svg></div>
+        <span style="font-size:15px;font-weight:500;flex:1">No signal — carry on anyway</span>
+      </div>
+      <span class="b2">Everything that matters runs on this phone. Your session is being recorded locally and will reach Ruth when you are back online.</span>
+    </div>
+    <div class="card hair c" style="gap:9px">
+      <div class="r"><span class="lb g">Waiting to sync</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">3 SESSIONS · 412 EVENTS</span></div>
+      <div class="r"><span class="b2 g" style="font-size:13px">Tuesday · sit to stand</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">QUEUED</span></div>
+      <div class="r"><span class="b2 g" style="font-size:13px">Monday · full session</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">QUEUED</span></div>
+      <div class="r"><span class="b2 g" style="font-size:13px">Sunday · full session</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">QUEUED</span></div>
+      <div class="sep"></div>
+      <span class="b2" style="font-size:12.5px">Pose tracking, rep counting, cues and the safety gate all work offline. Only the report and Ruth's messages need a connection.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>G6.</b> Because pose already runs on-device, offline is the normal case rather than degraded mode — the copy says so instead of apologising.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H2</span><h3>Milestone</h3><span class="dim">390×430</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:430px;padding:16px;gap:12px;background:var(--teal-w)">
+    <div class="c" style="gap:5px;padding:4px 2px">
+      <span class="lb" style="color:var(--teal-d)">Milestone · week 3</span>
+      <span class="d1" style="color:var(--teal-d)">Your left knee<br>passed 120°</span>
+    </div>
+    <div class="card c" style="gap:11px">
+      <span class="b2">That is the range you need to get down stairs one foot at a time. Six weeks ago it was 104°.</span>
+      <div class="c" style="gap:5px">
+        <div class="r"><span class="mono" style="font-size:10.5px;color:var(--ink3)">WEEK 1</span><span class="mono g" style="font-size:10.5px;color:var(--ink3);text-align:right">TODAY</span></div>
+        <div class="track" style="height:8px;position:relative"><i style="width:82%;background:var(--teal)"></i><span style="position:absolute;left:52%;top:-3px;bottom:-3px;width:2px;background:var(--ink3)"></span></div>
+        <div class="r"><span class="mono" style="font-size:12px;font-weight:600">104°</span><span class="mono g" style="font-size:12px;font-weight:600;color:var(--teal);text-align:right">121°</span></div>
+      </div>
+      <div class="sep"></div>
+      <span class="b2" style="font-size:12.5px">Measured against your own baseline from session one — not against anybody else.</span>
+    </div>
+    <div class="g"></div>
+    <div class="c" style="gap:8px">
+      <div class="btn">Tell Ruth</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>A movement measurement. It does not mean your recovery is complete.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>H2.</b> Tied to a real measurement and a real-world consequence — stairs — rather than a generic badge. The last line stops a milestone from reading as medical clearance.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H3</span><h3>Re-engagement nudge</h3><span class="dim">390×300</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:300px;padding:16px;gap:12px;background:var(--sunk)">
+    <div class="card lift c" style="gap:10px">
+      <div class="r" style="gap:10px">
+        <div style="width:28px;height:28px;border-radius:7px;background:var(--teal);flex:none"></div>
+        <span class="mono" style="font-size:10.5px;color:var(--ink3);flex:1">REHAB COACH</span>
+        <span class="mono" style="font-size:10.5px;color:var(--ink3)">now</span>
+      </div>
+      <span style="font-size:15px;font-weight:500">Three days off — everything alright?</span>
+      <span class="b2">No pressure. If the knee is sore, say so and we will make today lighter. If you are just busy, there is a four-minute version of your session.</span>
+      <div class="r" style="gap:8px">
+        <span class="chip k-teal" style="padding:8px 12px;font-size:13px">Do the short one</span>
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">It is sore</span>
+        <span class="chip k-mute" style="padding:8px 12px;font-size:13px">Not today</span>
+      </div>
+    </div>
+    <div class="card c" style="gap:5px;background:transparent;padding:2px">
+      <span class="b2" style="font-size:12.5px">Sent because two of the last five sessions were missed — the pattern that predicts dropping out, caught before it becomes one.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>H3, H6.</b> Three replies, none of them guilt, and one of them lowers the bar. The nudge fires on the H6 risk pattern rather than on a fixed “you missed a day” timer.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H7</span><h3>Save your guest session</h3><span class="dim">390×420</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:420px;padding:16px;gap:12px">
+    <div class="c" style="gap:4px;padding:2px">
+      <span class="lb">Guest session complete</span>
+      <span class="d1" style="font-size:26px">That was 14 reps<br>and a form score</span>
+    </div>
+    <div class="card hair r" style="gap:10px">
+      <div class="c g" style="gap:2px"><span class="mono" style="font-size:22px;font-weight:600">14</span><span class="lb">Reps</span></div>
+      <div class="c g" style="gap:2px"><span class="mono" style="font-size:22px;font-weight:600">78</span><span class="lb">Form</span></div>
+      <div class="c g" style="gap:2px"><span class="mono" style="font-size:22px;font-weight:600">112°</span><span class="lb">Best range</span></div>
+    </div>
+    <div class="card c" style="gap:7px;background:var(--warn-w)">
+      <span class="lb" style="color:var(--warn)">On this device only</span>
+      <span class="b2" style="color:#7A4208">Nothing has left this phone and no account exists yet. Clear your browser and this session is gone.</span>
+    </div>
+    <div class="g"></div>
+    <div class="c" style="gap:8px">
+      <div class="btn">Keep it — create an account</div>
+      <div class="btn sec">Carry on without saving</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-lock"/></svg><span>Signing up moves your saved events, never any video — there is none.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>H7.</b> The signup ask comes after the demo has already paid off, and it asks to keep something that exists rather than to unlock something that does not.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H8</span><h3>Reach practice</h3><span class="dim">390×560</span></div>
+  <div class="plate"><div class="ab" style="width:390px;height:560px;background:var(--night)">
+    <div class="cam sq" style="height:560px">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:linear-gradient(180deg,rgba(12,20,20,.7) 0%,rgba(12,20,20,0) 22%,rgba(12,20,20,0) 62%,rgba(12,20,20,.85) 100%)"></div>
+      <div class="ovl r" style="top:16px;left:16px;right:16px;gap:10px">
+        <div class="c g" style="gap:1px"><span style="font-size:15px;font-weight:600;color:#fff">Reach practice</span><span class="mono" style="font-size:10.5px;color:rgba(255,255,255,.6)">SHOULDER ABDUCTION · 45s LEFT</span></div>
+        <div class="live" style="background:rgba(13,110,104,.9)"><i style="background:#6FE8DC"></i>7 / 10</div>
+      </div>
+      <div class="ovl" style="top:186px;left:56px;width:56px;height:56px;border-radius:50%;background:rgba(59,227,210,.22);border:2px solid #3BE3D2"></div>
+      <div class="ovl" style="top:150px;right:52px;width:56px;height:56px;border-radius:50%;background:rgba(255,194,77,.28);border:2px dashed #FFC24D;display:flex;align-items:center;justify-content:center"><span class="mono" style="font-size:12px;font-weight:600;color:#FFC24D">NEXT</span></div>
+      <div class="ovl" style="top:300px;left:150px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3)"></div>
+      <div class="ovl c" style="left:16px;right:16px;bottom:16px;gap:10px">
+        <div class="cuebar"><div class="ic" style="background:var(--teal-w)"><svg width="15" height="15" style="color:var(--teal)"><use href="#i-body"/></svg></div><div class="c" style="gap:1px"><span style="font-size:14px;font-weight:500">Reach the ring without leaning</span><span class="cap" style="font-size:11px">same scoring, same limits — only the target moved</span></div></div>
+        <div class="r" style="gap:8px">
+          <div class="live" style="background:rgba(255,255,255,.14);flex:1;justify-content:center"><span>TRUNK LEAN OK</span></div>
+          <div class="live" style="background:rgba(255,255,255,.14);flex:1;justify-content:center"><span>CAP 90° HELD</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>H8.</b> A game layer over the same pose engine, the same form criteria and the same safety gate — the two chips at the bottom exist to make that visible. Gamifying must not create a route around E1.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H10</span><h3>Wearable pairing</h3><span class="dim">390×420</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:420px;padding:16px;gap:12px">
+    <div class="c" style="gap:4px;padding:2px"><span class="lb">Optional</span><span class="h1">Connect a watch</span></div>
+    <div class="card hair c" style="gap:10px">
+      <div class="r" style="gap:11px">
+        <div style="width:38px;height:38px;border-radius:9px;background:var(--sunk);flex:none"></div>
+        <div class="c g" style="gap:1px"><span style="font-size:15px;font-weight:500">Maya's Watch</span><span class="mono" style="font-size:10.5px;color:var(--ok)">CONNECTED · HEART RATE, SLEEP</span></div>
+        <div style="width:44px;height:26px;border-radius:13px;background:var(--teal);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div>
+      </div>
+      <div class="sep"></div>
+      <div class="r"><span class="b2 g" style="font-size:13px">Resting heart rate today</span><span class="mono" style="font-size:13px;font-weight:600">62 bpm</span></div>
+      <div class="r"><span class="b2 g" style="font-size:13px">Sleep last night</span><span class="mono" style="font-size:13px;font-weight:600">5h 10m</span></div>
+      <div class="sunk c" style="gap:5px">
+        <span class="b2" style="font-size:12.5px">You slept badly, so today's readiness check starts at a lower default. You can override it — the watch does not get the final say.</span>
+      </div>
+    </div>
+    <div class="card c" style="gap:6px;background:var(--sunk)">
+      <span class="lb">What this is not</span>
+      <span class="b2">Context around your session, not a measurement of your recovery. No form score, pain report or safety limit uses this data.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>H10.</b> Wearable data adjusts a default and nothing else. Letting it into scoring or safety would put an unvalidated third-party signal inside a gate that must stay deterministic.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">C4</span><h3>Coach &amp; accessibility</h3><span class="dim">390×700</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:700px;padding:16px;gap:12px">
+    <div class="c" style="gap:4px;padding:2px"><span class="lb">Settings</span><span class="h1">Coach and access</span></div>
+    <div class="card hair c" style="gap:10px">
+      <span class="lb">Coaching voice</span>
+      <div class="c" style="gap:7px">
+        <div class="card r" style="gap:10px;padding:10px;background:var(--teal-w)">
+          <div class="c g" style="gap:2px"><span style="font-size:14px;font-weight:600;color:var(--teal-d)">Encouraging</span><span class="b2" style="font-size:12px;color:var(--teal-d)">“That is seven — you have got this.”</span></div>
+          <svg width="17" height="17" style="color:var(--teal)"><use href="#i-check"/></svg>
+        </div>
+        <div class="card r" style="gap:10px;padding:10px;background:var(--sunk)">
+          <div class="c g" style="gap:2px"><span style="font-size:14px;font-weight:500">Clinical</span><span class="b2" style="font-size:12px">“Rep 7. Knee 88°, within range.”</span></div>
+        </div>
+        <div class="card r" style="gap:10px;padding:10px;background:var(--sunk)">
+          <div class="c g" style="gap:2px"><span style="font-size:14px;font-weight:500">Concise</span><span class="b2" style="font-size:12px">“Seven. Slower down.”</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card hair c" style="gap:11px">
+      <span class="lb">Access</span>
+      <div class="r"><span class="b2 g" style="font-size:13.5px">Language</span><span class="mono" style="font-size:12px;font-weight:600">ENGLISH (UK)</span><svg width="15" height="15" style="color:var(--ink3)"><use href="#i-chev"/></svg></div>
+      <div class="sep"></div>
+      <div class="r"><span class="b2 g" style="font-size:13.5px">Larger text</span><div style="width:44px;height:26px;border-radius:13px;background:var(--teal);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div></div>
+      <div class="r"><span class="b2 g" style="font-size:13.5px">High contrast overlay</span><div style="width:44px;height:26px;border-radius:13px;background:var(--line-2);position:relative;flex:none"><span style="position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div></div>
+      <div class="r"><span class="b2 g" style="font-size:13.5px">Spoken cues</span><div style="width:44px;height:26px;border-radius:13px;background:var(--teal);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div></div>
+      <div class="r" style="opacity:.6"><span class="b2 g" style="font-size:13.5px">Captions on every cue</span><div class="r" style="gap:6px"><svg width="14" height="14" style="color:var(--ink3)"><use href="#i-lock"/></svg><span class="mono" style="font-size:10.5px">ALWAYS ON</span></div></div>
+      <span class="b2" style="font-size:12.5px">Captions cannot be switched off. A patient who cannot hear the coach still needs the coaching.</span>
+    </div>
+    <div class="card c" style="gap:7px;background:var(--sunk)">
+      <span class="lb">Preview</span>
+      <div class="cuebar" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)">
+        <div class="ic"><svg width="15" height="15" style="color:var(--warn)"><use href="#i-sound"/></svg></div>
+        <div class="c" style="gap:1px"><span style="font-size:16px;font-weight:500">Straighten a little more at the top</span><span class="cap" style="font-size:12px">spoken · captioned · larger text on</span></div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>C4, H9.</b> Three personas with a sample line each, so the choice is heard rather than guessed. The captions row is deliberately a locked state rather than a toggle.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">H5</span><h3>Caregiver view</h3><span class="dim">390×560</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:560px;padding:16px;gap:12px">
+    <div class="r" style="padding:2px">
+      <div class="c g" style="gap:3px"><span class="lb">Caregiver view · James</span><span class="h1">Maya this week</span></div>
+      <span class="chip k-mute">LIMITED</span>
+    </div>
+    <div class="card hair c" style="gap:11px">
+      <div class="r"><span class="h2 g" style="font-size:15px">Sessions done</span><span class="mono" style="font-size:15px;font-weight:600">5 of 6</span></div>
+      <div class="r" style="gap:6px">
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">M</span><div style="width:100%;height:28px;border-radius:6px;background:var(--teal)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:28px;border-radius:6px;background:var(--teal)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">W</span><div style="width:100%;height:28px;border-radius:6px;background:var(--teal)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:28px;border-radius:6px;background:var(--teal)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">F</span><div style="width:100%;height:28px;border-radius:6px;background:var(--teal)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:28px;border-radius:6px;background:var(--sunk)"></div></div>
+        <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:28px;border-radius:6px;background:var(--sunk)"></div></div>
+      </div>
+      <span class="b2">Today's session was finished this morning.</span>
+    </div>
+    <div class="card c" style="gap:9px;background:var(--sunk)">
+      <span class="lb">What you cannot see</span>
+      <div class="r" style="gap:9px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Form scores and range measurements</span></div>
+      <div class="r" style="gap:9px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Pain reports and body map</span></div>
+      <div class="r" style="gap:9px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Safety events and clinician messages</span></div>
+      <div class="sep"></div>
+      <span class="b2" style="font-size:12.5px">Maya chose what you can see and can change it at any time. She can also see that you looked.</span>
+    </div>
+    <div class="g"></div>
+    <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Adherence information only. Nothing here describes Maya's condition or recovery.</span></div>
+  </div></div>
+  <p class="unote"><b>H5, G5.</b> The locked list is the design: a caregiver view that shows what it withholds is far easier for a patient to consent to than one that quietly shows less.</p>
+</div>
+
+</div>
+<h2 class="grp">Clinician surfaces and internal tools</h2>
+<p>The reporting features, the audit trail, and the two internal tools that decide whether the catalogue can grow and whether scoring changes ship blind.</p>
+<div class="rail">
+
+<div class="unit wide">
+  <div class="ucap"><span class="id">F1</span><h3>Weekly report</h3><span class="dim">1440×900 · clinician</span></div>
+  <div class="plate"><div class="ab" style="width:1440px;height:900px;display:flex;flex-direction:column">
+    <div class="r" style="padding:20px 32px;gap:16px;background:var(--surf);box-shadow:inset 0 -1px 0 var(--line)">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--teal-w)"></div>
+      <div class="c" style="gap:2px"><span class="h2">Maya Okonjo · week 3</span><span class="mono" style="font-size:11px;color:var(--ink3)">POST-OP KNEE · 8–14 JUNE · GENERATED SUNDAY 23:00</span></div>
+      <span class="chip k-warn">PLATEAUED</span>
+      <div class="g"></div>
+      <div class="btn sec sm">Full audit trail</div>
+      <div class="btn sm" style="background:var(--teal);color:#fff">Export packet</div>
+    </div>
+    <div style="display:flex;flex:1;min-height:0">
+      <div class="c g" style="padding:22px 18px 22px 32px;gap:12px;min-width:0">
+        <div class="r" style="gap:12px">
+          <div class="card hair c g" style="gap:2px"><span class="lb">Adherence</span><span class="mono" style="font-size:26px;font-weight:600">5/6</span><span class="mono" style="font-size:10.5px;color:var(--ok)">83% · UP FROM 67%</span></div>
+          <div class="card hair c g" style="gap:2px"><span class="lb">Form trend</span><span class="mono" style="font-size:26px;font-weight:600">82</span><span class="mono" style="font-size:10.5px;color:var(--ok)">+6 OVER THE WEEK</span></div>
+          <div class="card hair c g" style="gap:2px"><span class="lb">Discomfort</span><span class="mono" style="font-size:26px;font-weight:600">2.1</span><span class="mono" style="font-size:10.5px;color:var(--ok)">−0.4 · SELF-REPORTED</span></div>
+          <div class="card hair c g" style="gap:2px"><span class="lb">Usable sessions</span><span class="mono" style="font-size:26px;font-weight:600">4/5</span><span class="mono" style="font-size:10.5px;color:var(--warn)">1 LOW CONFIDENCE</span></div>
+        </div>
+        <div class="card hair c" style="gap:11px">
+          <div class="r"><span class="h2 g" style="font-size:16px">Form score across the program</span><span class="chip k-mute">7 SESSIONS</span></div>
+          <svg viewBox="0 0 700 150" style="width:100%;height:150px">
+            <line x1="0" y1="30" x2="700" y2="30" stroke="#E2E8E9"/><line x1="0" y1="72" x2="700" y2="72" stroke="#E2E8E9"/><line x1="0" y1="114" x2="700" y2="114" stroke="#E2E8E9"/>
+            <path d="M20 118 L133 106 L246 112 L359 78 L472 66 L585 70 L680 34 L680 150 L20 150 Z" fill="#DCEBE8"/>
+            <polyline points="20,118 133,106 246,112 359,78 472,66 585,70 680,34" fill="none" stroke="#0D6E68" stroke-width="2.4"/>
+            <circle cx="20" cy="118" r="4" fill="#0D6E68"/><circle cx="133" cy="106" r="4" fill="#0D6E68"/>
+            <circle cx="246" cy="112" r="6" fill="#fff" stroke="#A75A0B" stroke-width="2.4"/>
+            <circle cx="359" cy="78" r="4" fill="#0D6E68"/><circle cx="472" cy="66" r="4" fill="#0D6E68"/><circle cx="585" cy="70" r="4" fill="#0D6E68"/><circle cx="680" cy="34" r="5" fill="#0D6E68"/>
+            <text x="238" y="134" font-family="IBM Plex Mono" font-size="10" fill="#A75A0B">low conf.</text>
+            <text x="655" y="24" font-family="IBM Plex Mono" font-size="11" fill="#0D6E68" font-weight="600">82</text>
+            <text x="4" y="134" font-family="IBM Plex Mono" font-size="10" fill="#7C8C8F">62</text>
+          </svg>
+          <span class="b2" style="font-size:12.5px">The hollow point is held out of the trend line — capture quality below the floor, so it is shown but not averaged in.</span>
+        </div>
+        <div class="card hair c" style="gap:11px">
+          <span class="h2" style="font-size:16px">Discomfort by region, by session</span>
+          <div class="c" style="gap:8px">
+            <div class="r" style="gap:10px"><span class="b2" style="width:96px;font-size:13px">Left knee</span>
+              <div class="r g" style="gap:5px">
+                <div class="tick" style="height:22px;border-radius:4px;background:#B5410A"></div><div class="tick" style="height:22px;border-radius:4px;background:#B5410A"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#D98A5A"></div><div class="tick" style="height:22px;border-radius:4px;background:#D98A5A"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div><div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#F6DDCB"></div>
+              </div>
+              <span class="chip k-ok">IMPROVING</span></div>
+            <div class="r" style="gap:10px"><span class="b2" style="width:96px;font-size:13px">Lower back</span>
+              <div class="r g" style="gap:5px">
+                <div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div><div class="tick" style="height:22px;border-radius:4px;background:#F6DDCB"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div><div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#F6DDCB"></div><div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div>
+                <div class="tick" style="height:22px;border-radius:4px;background:#EFC1A2"></div>
+              </div>
+              <span class="chip k-mute">STABLE</span></div>
+          </div>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">ALL VALUES SELF-REPORTED BY THE PATIENT · NO INFERRED SEVERITY APPEARS IN THIS REPORT</span>
+        </div>
+      </div>
+      <div class="c" style="width:392px;flex:none;padding:22px 32px 22px 10px;gap:12px">
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">In plain language</span>
+          <span class="b2" style="font-size:13.5px">Maya completed five of six prescribed sessions. Her left knee gained 9° of extension over three weeks and her own discomfort ratings for that knee fell from 3.2 to 2.1.</span>
+          <span class="b2" style="font-size:13.5px">Sit to stand was blocked twice on Tuesday when knee flexion passed the 90° cap. She reported 2/5 at the time and completed the rest of the session.</span>
+          <span class="b2" style="font-size:13.5px">Hamstring curl has not changed in three weeks — the rule table flagged it as a plateau and swapped it for bridging.</span>
+          <span class="mono" style="font-size:10px;color:var(--ink3)">GENERATED FROM THE EVENT LOG · NO CLINICAL INTERPRETATION</span>
+        </div>
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">Flagged this week</span>
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--dang);width:3px;height:26px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">2 safety blocks · sit to stand</span><span class="mono" style="font-size:10px;color:var(--ink3)">TUE 09:12 · KNEE 96° VS 90°</span></div></div>
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--pain);width:3px;height:26px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">1 rep flagged by patient</span><span class="mono" style="font-size:10px;color:var(--ink3)">TUE 09:11 · REP 6 · REPLAYABLE</span></div></div>
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--warn);width:3px;height:26px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">1 low-confidence session</span><span class="mono" style="font-size:10px;color:var(--ink3)">THU · DIM ROOM · HELD OUT</span></div></div>
+        </div>
+        <div class="card hair c" style="gap:8px">
+          <span class="lb">Program status</span>
+          <div class="r"><span class="b2 g" style="font-size:13px">Seated knee extension</span><span class="chip k-ok">PROGRESSING</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">Sit to stand</span><span class="chip k-warn">HELD</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">Hamstring curl</span><span class="chip k-pain">PLATEAUED</span></div>
+        </div>
+        <div class="g"></div>
+        <div class="disc"><svg width="14" height="14"><use href="#i-shield"/></svg><span>Coaching and monitoring data. Not a clinical assessment, and not a diagnosis. Movement measurements only.</span></div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>F1, F3, F4, G7.</b> One template renders the in-app view and the PDF. The hollow point on the chart is G7 made visible — a low-confidence session appears but does not move the line.</p>
+</div>
+
+<div class="unit" style="width:760px">
+  <div class="ucap"><span class="id">F2</span><h3>Export packet</h3><span class="dim">760×560</span></div>
+  <div class="plate"><div class="ab ph" style="width:760px;height:560px;padding:26px;gap:14px">
+    <div class="c" style="gap:4px"><span class="lb">Export · Maya Okonjo · weeks 1–3</span><span class="h1">What leaves the system</span></div>
+    <div class="r" style="gap:14px;align-items:stretch">
+      <div class="card hair c g" style="gap:9px">
+        <span class="lb" style="color:var(--ok)">Included</span>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ok);flex:none"><use href="#i-check"/></svg><span class="b2" style="font-size:13px">Adherence, form trend, ROM per joint</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ok);flex:none"><use href="#i-check"/></svg><span class="b2" style="font-size:13px">Self-reported pain by region and session</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ok);flex:none"><use href="#i-check"/></svg><span class="b2" style="font-size:13px">Safety verdicts with rule, threshold, observed</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ok);flex:none"><use href="#i-check"/></svg><span class="b2" style="font-size:13px">Program changes and the rules that caused them</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ok);flex:none"><use href="#i-check"/></svg><span class="b2" style="font-size:13px">Confidence marking on every session</span></div>
+      </div>
+      <div class="card hair c g" style="gap:9px">
+        <span class="lb" style="color:var(--ink3)">Never included</span>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Video or images — none exist</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Raw landmark frames</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Inferred pain severity — question generator only</span></div>
+        <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--ink3);flex:none"><use href="#i-lock"/></svg><span class="b2" style="font-size:13px">Any diagnostic language or clinical claim</span></div>
+      </div>
+    </div>
+    <div class="card c" style="gap:8px;background:var(--warn-w)">
+      <span class="lb" style="color:var(--warn)">Pending ADR-0006</span>
+      <span class="b2" style="color:#7A4208;font-size:13px">Retention and residency rules for exported files are not settled. Until the regulatory posture is decided, export is watermarked, expires in 7 days, and cannot be sent outside the clinic tenant.</span>
+    </div>
+    <div class="g"></div>
+    <div class="r" style="gap:12px">
+      <div class="c g" style="gap:3px"><span class="b2" style="font-size:13px">Exporting is written to Maya's access log — she will see that you did, and when.</span></div>
+      <div class="btn sec sm">Cancel</div>
+      <div class="btn sm" style="background:var(--teal);color:#fff">Generate PDF</div>
+    </div>
+  </div></div>
+  <p class="unote"><b>F2, G5.</b> The two-column include/exclude list is the honest version of an export dialog, and the blocked-decision note keeps ADR-0006 visible instead of quietly assuming an answer.</p>
+</div>
+
+<div class="unit" style="width:1180px">
+  <div class="ucap"><span class="id">F5</span><h3>Audit trail</h3><span class="dim">1180×620</span></div>
+  <div class="plate"><div class="ab ph" style="width:1180px;height:620px;padding:26px;gap:14px">
+    <div class="r">
+      <div class="c g" style="gap:3px"><span class="h1">Audit trail · Maya Okonjo</span><span class="mono" style="font-size:11px;color:var(--ink3)">TUESDAY 8 JUNE · SESSION 24 · 142 EVENTS · APPEND-ONLY</span></div>
+      <span class="chip k-mute">NORTHGATE PHYSIO</span>
+    </div>
+    <div class="card hair c" style="gap:0;padding:0;overflow:hidden">
+      <div class="r" style="gap:0;padding:10px 14px;background:var(--sunk)">
+        <span class="lb" style="width:70px">Time</span><span class="lb" style="width:150px">Event</span><span class="lb" style="width:120px">Actor</span><span class="lb g">Detail and reason</span>
+      </div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">09:04:12</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--teal)">setup_completed</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">device</span><span class="b2 g" style="font-size:13px">quality 0.86 · framing ok · lighting ok</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">09:11:38</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--pain)">pain_bookmarked</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">patient</span><span class="b2 g" style="font-size:13px">rep 6 · region not yet given · skeleton retained</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line);background:var(--dang-w)"><span class="mono" style="font-size:11.5px;width:70px;color:#8A1D14">09:12:02</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--dang);font-weight:600">safety_verdict</span><span class="mono" style="font-size:11.5px;width:120px;color:#8A1D14">realtime_gate</span><span class="b2 g" style="font-size:13px;color:#8A1D14">block · rule knee_flexion_cap · limit 90 · observed 96 · 3 consecutive reps</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">09:12:02</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--warn)">cue_delivered</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">safety</span><span class="b2 g" style="font-size:13px">urgency stop · escalation copy shown · captioned</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">09:14:50</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--pain)">pain_reported</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">patient</span><span class="b2 g" style="font-size:13px">left_knee · 2/5 · fusion self_report_only · inferred prior 0.31 discarded</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">23:00:04</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--teal)">adaptation_decided</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">rules_v1</span><span class="b2 g" style="font-size:13px">hold · sit_to_stand · 2 blocks + pain 4/5 this week · 2 alternatives blocked</span></div>
+      <div class="r" style="padding:9px 14px;box-shadow:inset 0 -1px 0 var(--line)"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">14:20:31</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--ink2)">report_viewed</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">r.alvarez</span><span class="b2 g" style="font-size:13px">session 24 · replay opened at rep 6 · visible in patient access log</span></div>
+      <div class="r" style="padding:9px 14px"><span class="mono" style="font-size:11.5px;width:70px;color:var(--ink3)">14:26:09</span><span class="mono" style="font-size:11.5px;width:150px;color:var(--ink2)">annotation_added</span><span class="mono" style="font-size:11.5px;width:120px;color:var(--ink2)">r.alvarez</span><span class="b2 g" style="font-size:13px">anchored rep 6 · delivered to patient · not generated</span></div>
+    </div>
+    <div class="r" style="gap:14px">
+      <div class="sunk c g" style="gap:5px"><span class="lb">No updates, no deletes</span><span class="b2" style="font-size:12.5px">A correction is a new event. Nothing in this table can be rewritten, including by us.</span></div>
+      <div class="sunk c g" style="gap:5px"><span class="lb">Every verdict carries a reason</span><span class="b2" style="font-size:12.5px">Blocks and recommendations are never stored as a bare value — the rule, threshold and observed value travel with them.</span></div>
+    </div>
+  </div></div>
+  <p class="unote"><b>F5, G1, B6.</b> The <code>pain_reported</code> row is the important one: it records that the inferred prior existed, that it was 0.31, and that it was discarded in favour of the patient's answer.</p>
+</div>
+
+<div class="unit wide">
+  <div class="ucap"><span class="id">I1</span><h3>Exercise authoring studio</h3><span class="dim">1440×900 · internal</span></div>
+  <div class="plate"><div class="ab" style="width:1440px;height:900px;display:flex;flex-direction:column">
+    <div class="r" style="padding:18px 30px;gap:14px;background:var(--surf);box-shadow:inset 0 -1px 0 var(--line)">
+      <div class="c g" style="gap:2px"><span class="h2">Bridging · draft 3</span><span class="mono" style="font-size:11px;color:var(--ink3)">EXERCISESPEC · UNPUBLISHED · AUTHORED BY R.ALVAREZ</span></div>
+      <div class="r" style="gap:8px">
+        <span class="chip k-ok">RECORD</span><span class="chip k-ok">DERIVE</span><span class="chip k-teal">TUNE</span><span class="chip k-mute">PUBLISH</span>
+      </div>
+      <div class="g"></div>
+      <div class="btn sec sm">Replay against fixtures</div>
+      <div class="btn sm" style="background:var(--teal);color:#fff">Publish to library</div>
+    </div>
+    <div style="display:flex;flex:1;min-height:0">
+      <div class="c" style="width:470px;flex:none;padding:20px 14px 20px 30px;gap:12px">
+        <div class="cam" style="height:300px">
+          <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+          <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+          <div class="ovl chip" style="top:12px;left:12px;background:rgba(12,20,20,.72);color:#fff">REFERENCE TAKE 4 · PHYSIO PERFORMED</div>
+          <div class="ovl readout mono" style="bottom:12px;left:12px;font-size:12px">hip 142° · knee 88° · trunk 6°</div>
+        </div>
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">Phases derived from the recording</span>
+          <div class="r"><span class="b2 g" style="font-size:13px">concentric · hip above 120°</span><span class="mono" style="font-size:11px;color:var(--ink3)">0.9s</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">hold · hip above 138°</span><span class="mono" style="font-size:11px;color:var(--ink3)">2.0s min</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">eccentric · hip below 120°</span><span class="mono" style="font-size:11px;color:var(--ink3)">2.8s min</span></div>
+          <span class="b2" style="font-size:12.5px">Boundaries proposed from four takes. Every one is editable — the tool suggests, the physiotherapist decides.</span>
+        </div>
+      </div>
+      <div class="c g" style="padding:20px 14px;gap:12px;min-width:0">
+        <div class="card hair c" style="gap:11px">
+          <span class="lb">Form criteria · tolerances</span>
+          <div class="c" style="gap:9px">
+            <div class="c" style="gap:4px">
+              <div class="r"><span class="b2 g" style="font-size:13px">Peak hip extension</span><span class="mono" style="font-size:11.5px">TARGET 135–150° · WARN 5 · FAIL 12</span></div>
+              <div class="track" style="height:8px;position:relative"><span style="position:absolute;left:44%;right:22%;top:0;bottom:0;background:rgba(31,122,77,.3)"></span><span style="position:absolute;left:36%;right:14%;top:0;bottom:0;background:rgba(167,90,11,.22)"></span><i style="width:0"></i></div>
+            </div>
+            <div class="c" style="gap:4px">
+              <div class="r"><span class="b2 g" style="font-size:13px">Hold duration</span><span class="mono" style="font-size:11.5px">TARGET 2.0–3.0s · WARN 0.4 · FAIL 1.0</span></div>
+              <div class="track" style="height:8px;position:relative"><span style="position:absolute;left:38%;right:30%;top:0;bottom:0;background:rgba(31,122,77,.3)"></span><i style="width:0"></i></div>
+            </div>
+            <div class="c" style="gap:4px">
+              <div class="r"><span class="b2 g" style="font-size:13px">Left–right symmetry</span><span class="mono" style="font-size:11.5px">TARGET 0–0.18 · WARN 0.05 · FAIL 0.12</span></div>
+              <div class="track" style="height:8px;position:relative"><span style="position:absolute;left:0;right:56%;top:0;bottom:0;background:rgba(31,122,77,.3)"></span><i style="width:0"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">Cue table · with cooldowns</span>
+          <div class="r"><span class="b2 g" style="font-size:13px">hip under target → “lift your hips a little higher”</span><span class="mono" style="font-size:11px;color:var(--ink3)">8000ms</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">hold too short → “hold it at the top, two seconds”</span><span class="mono" style="font-size:11px;color:var(--ink3)">6000ms</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">symmetry over → “even up — you are favouring the right”</span><span class="mono" style="font-size:11px;color:var(--ink3)">10000ms</span></div>
+          <span class="b2" style="font-size:12.5px">Cue text is data, not code. No model runs in the per-frame path, so what is written here is exactly what the patient hears.</span>
+        </div>
+        <div class="card hair c" style="gap:8px">
+          <span class="lb">Why this exercise · shown to the patient</span>
+          <div style="box-shadow:inset 0 0 0 1px var(--line-2);border-radius:8px;padding:10px 12px"><span class="b2" style="font-size:13.5px">Bridging builds the back of the hip without putting your knee through any range at all — which is why it is here while the knee settles.</span></div>
+        </div>
+      </div>
+      <div class="c" style="width:330px;flex:none;padding:20px 30px 20px 14px;gap:12px">
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">Safety thresholds</span>
+          <div class="r"><span class="b2 g" style="font-size:13px">Max knee flexion</span><span class="mono" style="font-size:12px;font-weight:600">70°</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">Max trunk lean</span><span class="mono" style="font-size:12px;font-weight:600">15°</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">Consecutive fails to block</span><span class="mono" style="font-size:12px;font-weight:600">3</span></div>
+          <div class="sep"></div>
+          <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--dang);flex:none"><use href="#i-shield"/></svg><span class="b2" style="font-size:12.5px">Each threshold needs a fixture proving it fires. No fixture, no publish.</span></div>
+        </div>
+        <div class="card c" style="gap:8px;background:var(--warn-w)">
+          <span class="lb" style="color:var(--warn)">Blocking publish · 1 item</span>
+          <div class="r" style="gap:8px"><svg width="15" height="15" style="color:var(--warn);flex:none"><use href="#i-x"/></svg><span class="b2" style="font-size:13px;color:#7A4208">No fixture yet for <code>max_trunk_lean</code>. Record a deliberately bad take to satisfy it.</span></div>
+        </div>
+        <div class="card hair c" style="gap:8px">
+          <span class="lb">Catalogue</span>
+          <div class="r"><span class="b2 g" style="font-size:13px">Published exercises</span><span class="mono" style="font-size:14px;font-weight:600">24</span></div>
+          <div class="r"><span class="b2 g" style="font-size:13px">Authored without an engineer</span><span class="mono" style="font-size:14px;font-weight:600">21</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>I1, A6, A3, E1.</b> The <code>ExerciseSpec</code> as an editing surface — phases, criteria, cues and safety thresholds. The blocking-publish card enforces the working agreement: a new safety rule without a fixture does not merge.</p>
+</div>
+
+<div class="unit" style="width:1180px">
+  <div class="ucap"><span class="id">I2</span><h3>Evaluation harness</h3><span class="dim">1180×700 · CI</span></div>
+  <div class="plate"><div class="ab ph" style="width:1180px;height:700px;padding:26px;gap:14px">
+    <div class="r">
+      <div class="c g" style="gap:3px"><span class="h1">Fixture replay · PR #218</span><span class="mono" style="font-size:11px;color:var(--ink3)">A2: WIDEN ECCENTRIC TOLERANCE ON SIT-TO-STAND · 142 FIXTURES · 38s</span></div>
+      <span class="chip k-warn">REVIEW REQUIRED</span>
+    </div>
+    <div class="r" style="gap:12px">
+      <div class="card hair c g" style="gap:2px"><span class="lb">Rep-count accuracy</span><span class="mono" style="font-size:24px;font-weight:600">96.4%</span><span class="mono" style="font-size:10.5px;color:var(--ok)">+0.3 · ABOVE THE 95% FLOOR</span></div>
+      <div class="card hair c g" style="gap:2px"><span class="lb">Mean form score</span><span class="mono" style="font-size:24px;font-weight:600">74.1</span><span class="mono" style="font-size:10.5px;color:var(--warn)">+5.8 · DISTRIBUTION SHIFTED</span></div>
+      <div class="card hair c g" style="gap:2px"><span class="lb">Safety rules fired</span><span class="mono" style="font-size:24px;font-weight:600">11/12</span><span class="mono" style="font-size:10.5px;color:var(--dang)">1 RULE NEVER FIRED</span></div>
+      <div class="card hair c g" style="gap:2px"><span class="lb">Frame budget</span><span class="mono" style="font-size:24px;font-weight:600">22ms</span><span class="mono" style="font-size:10.5px;color:var(--ok)">P95 · UNDER 33ms</span></div>
+    </div>
+    <div class="r" style="gap:14px;flex:1;min-height:0">
+      <div class="card hair c g" style="gap:10px">
+        <span class="lb">Score distribution · before and after</span>
+        <svg viewBox="0 0 560 190" style="width:100%;height:190px">
+          <line x1="30" y1="160" x2="550" y2="160" stroke="#D6DEDF"/>
+          <g fill="#C2CCCD">
+            <rect x="46" y="132" width="24" height="28" rx="3"/><rect x="106" y="112" width="24" height="48" rx="3"/><rect x="166" y="84" width="24" height="76" rx="3"/>
+            <rect x="226" y="62" width="24" height="98" rx="3"/><rect x="286" y="80" width="24" height="80" rx="3"/><rect x="346" y="106" width="24" height="54" rx="3"/>
+            <rect x="406" y="130" width="24" height="30" rx="3"/><rect x="466" y="146" width="24" height="14" rx="3"/>
+          </g>
+          <g fill="#0D6E68" opacity=".85">
+            <rect x="72" y="148" width="24" height="12" rx="3"/><rect x="132" y="126" width="24" height="34" rx="3"/><rect x="192" y="100" width="24" height="60" rx="3"/>
+            <rect x="252" y="70" width="24" height="90" rx="3"/><rect x="312" y="52" width="24" height="108" rx="3"/><rect x="372" y="86" width="24" height="74" rx="3"/>
+            <rect x="432" y="118" width="24" height="42" rx="3"/><rect x="492" y="140" width="24" height="20" rx="3"/>
+          </g>
+          <text x="30" y="180" font-family="IBM Plex Mono" font-size="10" fill="#7C8C8F">40</text>
+          <text x="270" y="180" font-family="IBM Plex Mono" font-size="10" fill="#7C8C8F">70</text>
+          <text x="520" y="180" font-family="IBM Plex Mono" font-size="10" fill="#7C8C8F">100</text>
+        </svg>
+        <span class="b2" style="font-size:12.5px">The whole distribution moved right by roughly six points. Reps that used to score 68 now score 74 — including ones a clinician marked as poor in KIMORE.</span>
+      </div>
+      <div class="card hair c" style="gap:10px;width:420px;flex:none">
+        <span class="lb">Regressions worth a human</span>
+        <div class="c" style="gap:8px">
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--dang);width:3px;height:34px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">kimore_lbp_07 · scored 71, clinician 34/50</span><span class="mono" style="font-size:10px;color:var(--ink3)">WAS 63 · NOW PASSES AS ACCEPTABLE FORM</span></div></div>
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--dang);width:3px;height:34px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">rule <code>eccentric_collapse</code> never fired</span><span class="mono" style="font-size:10px;color:var(--ink3)">FIRED ON 4 FIXTURES BEFORE THIS CHANGE</span></div></div>
+          <div class="r" style="gap:9px"><span class="stripe" style="background:var(--warn);width:3px;height:34px"></span><div class="c g" style="gap:1px"><span class="b2" style="font-size:13px;color:var(--ink)">uiprmd_m03_incorrect · rep count 9 vs 10</span><span class="mono" style="font-size:10px;color:var(--ink3)">UNCHANGED · PRE-EXISTING</span></div></div>
+        </div>
+        <div class="sunk c" style="gap:6px">
+          <span class="lb">Posted to the pull request</span>
+          <span class="b2" style="font-size:12.5px">“Rep accuracy +0.3, but mean score +5.8 and <code>eccentric_collapse</code> stopped firing. A widened tolerance that silences a safety rule is a conversation, not a merge.”</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote"><b>I2.</b> The least negotiable item in the catalogue, given an interface. The verdict is not a pass/fail badge — it names the specific fixture where a widened tolerance now accepts form a clinician scored 34/50.</p>
+</div>
+
+<div class="unit" style="width:1180px">
+  <div class="ucap"><span class="id">G3</span><h3>Roles, tenancy and drop-out risk</h3><span class="dim">1180×620</span></div>
+  <div class="plate"><div class="ab ph" style="width:1180px;height:620px;padding:26px;gap:14px">
+    <div class="r">
+      <div class="c g" style="gap:3px"><span class="h1">One record, three roles</span><span class="mono" style="font-size:11px;color:var(--ink3)">EVERY ROW TENANT-SCOPED · RLS ON · NO QUERY PATH BYPASSES IT</span></div>
+      <span class="chip k-teal">TENANT · NORTHGATE PHYSIO</span>
+    </div>
+    <div class="r" style="gap:14px;align-items:stretch">
+      <div class="card hair c g" style="gap:9px">
+        <div class="r" style="gap:9px"><div style="width:30px;height:30px;border-radius:8px;background:var(--teal-w);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" style="color:var(--teal)"><use href="#i-body"/></svg></div><span class="h2" style="font-size:16px">Patient</span></div>
+        <span class="b2" style="font-size:13px">Everything about themselves, including the raw event log and who opened it. Can revoke any share instantly.</span>
+        <div class="sep"></div>
+        <span class="mono" style="font-size:10.5px;color:var(--ink3);line-height:1.7">own sessions · own log<br>own access log · consent control</span>
+      </div>
+      <div class="card hair c g" style="gap:9px">
+        <div class="r" style="gap:9px"><div style="width:30px;height:30px;border-radius:8px;background:var(--teal-w);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" style="color:var(--teal)"><use href="#i-chart"/></svg></div><span class="h2" style="font-size:16px">Clinician</span></div>
+        <span class="b2" style="font-size:13px">Their caseload inside one clinic. Assign programs, set limits, annotate reps. Every read is logged to the patient.</span>
+        <div class="sep"></div>
+        <span class="mono" style="font-size:10.5px;color:var(--ink3);line-height:1.7">caseload within tenant<br>write · programs, thresholds, notes</span>
+      </div>
+      <div class="card hair c g" style="gap:9px">
+        <div class="r" style="gap:9px"><div style="width:30px;height:30px;border-radius:8px;background:var(--sunk);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" style="color:var(--ink2)"><use href="#i-home"/></svg></div><span class="h2" style="font-size:16px">Caregiver</span></div>
+        <span class="b2" style="font-size:13px">Whether a session happened. No scores, no pain, no safety events — and the patient can see each visit.</span>
+        <div class="sep"></div>
+        <span class="mono" style="font-size:10.5px;color:var(--ink3);line-height:1.7">adherence only<br>granted per-recipient · revocable</span>
+      </div>
+    </div>
+    <div class="card hair c" style="gap:11px">
+      <div class="r"><span class="lb g">Drop-out risk · this clinician's caseload</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">SCORED ON THE FIRST TWO WEEKS OF ADHERENCE</span></div>
+      <div class="r" style="gap:10px">
+        <span class="stripe" style="background:var(--dang);width:3px;height:38px"></span>
+        <div class="c g" style="gap:2px"><span class="b2" style="font-size:13.5px;color:var(--ink)">Tom Wheeler</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">3 MISSED IN A ROW AFTER 14 CONSECUTIVE DAYS · SESSIONS SHORTENING BEFORE THEY STOPPED</span></div>
+        <span class="chip k-dang">HIGH · 0.78</span>
+        <div class="btn sec sm">Send a shorter session</div>
+      </div>
+      <div class="r" style="gap:10px">
+        <span class="stripe" style="background:var(--warn);width:3px;height:38px"></span>
+        <div class="c g" style="gap:2px"><span class="b2" style="font-size:13.5px;color:var(--ink)">Priya Nair</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">ADHERENCE FINE, BUT THREE LOW-CONFIDENCE SESSIONS · FRUSTRATION WITH SETUP PREDICTS DROP-OUT</span></div>
+        <span class="chip k-warn">MEDIUM · 0.44</span>
+        <div class="btn sec sm">Send the camera guide</div>
+      </div>
+      <div class="sep"></div>
+      <span class="b2" style="font-size:12.5px">The nudge fires before the patient stops opening the app, not after. Risk is a pattern in adherence data — it is never presented to the patient, and never as a statement about their recovery.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>G3, G4, H6, H5.</b> Three roles as three different projections of one record. Risk scores stay clinician-side — telling a patient they look likely to quit is the fastest way to make it true.</p>
+</div>
+
+<div class="unit" style="width:1180px">
+  <div class="ucap"><span class="id">I3</span><h3>One core, three shells</h3><span class="dim">1180×360</span></div>
+  <div class="plate"><div class="ab ph" style="width:1180px;height:360px;padding:26px;gap:14px">
+    <div class="c" style="gap:3px"><span class="h1">The same numbers everywhere</span><span class="b2">The core engine is plain TypeScript with no DOM, no network and no framework — which is the entire reason a native shell is a packaging job rather than a rewrite.</span></div>
+    <div class="r" style="gap:14px;align-items:stretch">
+      <div class="card hair c g" style="gap:8px"><span class="lb">Web · today</span><span class="h2" style="font-size:16px">React + Vite</span><span class="b2" style="font-size:13px">A link a clinician sends. Guest sessions, no install, MediaPipe in a worker.</span><div class="sep"></div><span class="mono" style="font-size:10.5px;color:var(--ok)">SHIPPING · M1</span></div>
+      <div class="card hair c g" style="gap:8px"><span class="lb">Tablet · today</span><span class="h2" style="font-size:16px">Same build</span><span class="b2" style="font-size:13px">Landscape session layout at the same breakpoints. No separate codebase.</span><div class="sep"></div><span class="mono" style="font-size:10.5px;color:var(--ok)">SHIPPING · M1</span></div>
+      <div class="card hair c g" style="gap:8px"><span class="lb">Native · Q2</span><span class="h2" style="font-size:16px">React Native</span><span class="b2" style="font-size:13px">MediaPipe's mobile SDK, <code>packages/core</code> imported unchanged. Rep counts and form scores do not move across shells.</span><div class="sep"></div><span class="mono" style="font-size:10.5px;color:var(--warn)">I3 · PULLED FORWARD IF THE M0 SPIKE FAILS</span></div>
+    </div>
+    <div class="sunk c" style="gap:5px">
+      <span class="b2" style="font-size:12.5px"><b style="color:var(--ink)">Contingency, from the risk register — </b>if no MediaPipe tier clears 24fps on the device floor in the browser, the native shell moves from Q2 to now and the web app becomes the clinician surface plus a demo. That decision surfaces in week one, not at M1's end.</span>
+    </div>
+  </div></div>
+  <p class="unote"><b>I3.</b> Not a screen so much as a platform commitment, but it is a product-visible one: a patient who switches from laptop to phone must not see their form score change.</p>
+</div>
+
+</div>
+
+<footer style="margin-top:78px;padding-top:26px;border-top:1px solid var(--rule);color:var(--ink-3);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7">
+  61 of 61 features demonstrated · 27 screens and states on this page · 13 more in the mobile and tablet set · 4 in the clinician set.<br>
+  Sources: PRD v2.0 · FEATURES · ROADMAP · ARCHITECTURE · CONTRACTS · UPSTREAM · STATUS · ADR-0001 to ADR-0008.
+</footer>
+</div>
+
+<script>
+function fitPlates(){
+  document.querySelectorAll(".plate").forEach(function(p){
+    var ab = p.querySelector(".ab");
+    if(!ab){ return; }
+    var w = parseFloat(ab.style.width);
+    var h = parseFloat(ab.style.height);
+    var s = Math.min(1, p.clientWidth / w);
+    ab.style.transform = "scale(" + s + ")";
+    p.style.height = (h * s) + "px";
+  });
+}
+window.addEventListener("resize", fitPlates);
+window.addEventListener("load", fitPlates);
+if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitPlates); }
+fitPlates();
+</script>

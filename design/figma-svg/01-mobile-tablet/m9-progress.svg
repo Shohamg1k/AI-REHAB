@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="390" height="844" viewBox="0 0 390 844">
+<defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C8A90"></stop><stop offset="0.55" stop-color="#5D6A72"></stop><stop offset="1" stop-color="#47535B"></stop>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C5349"></stop><stop offset="1" stop-color="#3A342E"></stop>
+    </linearGradient>
+    <linearGradient id="daylight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9FB3BC"></stop><stop offset="1" stop-color="#778B96"></stop>
+    </linearGradient>
+    <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39454E"></stop><stop offset="1" stop-color="#28323A"></stop>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"></stop><stop offset="100%" stop-color="#000" stop-opacity=".45"></stop>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.1"></feGaussianBlur></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"></feTurbulence>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"></feColorMatrix>
+      <feComponentTransfer in="g"><feFuncA type="linear" slope=".085"></feFuncA></feComponentTransfer>
+    </filter>
+
+    <!-- the room + the patient, as the camera sees them -->
+    <symbol id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="url(#wall)"></rect>
+      <path d="M0 470 L400 440 L400 600 L0 600 Z" fill="url(#floor)"></path>
+      <path d="M0 470 L400 440" stroke="#6B6157" stroke-width="3" opacity=".7"></path>
+      <path d="M18 60 L150 40 L150 250 L18 262 Z" fill="url(#daylight)"></path>
+      <rect x="300" y="330" width="86" height="14" rx="4" fill="#3E4950" opacity=".85"></rect>
+      <!-- chair the patient stands up from -->
+      <g opacity=".92">
+        <rect x="150" y="386" width="116" height="15" rx="4" fill="#4E453C"></rect>
+        <rect x="243" y="288" width="16" height="102" rx="5" fill="#463E36"></rect>
+        <rect x="157" y="398" width="10" height="96" rx="4" fill="#3E372F"></rect>
+        <rect x="249" y="398" width="10" height="92" rx="4" fill="#443C34"></rect>
+      </g>
+      <!-- patient: mid sit-to-stand, facing camera -->
+      <g filter="url(#soft)">
+        <ellipse cx="200" cy="176" rx="80" ry="26" fill="#000" opacity=".0"></ellipse>
+        <path d="M186 178 h28 v26 h-28 z" fill="#C39A78"></path>
+        <ellipse cx="200" cy="152" rx="27" ry="30" fill="#C89E7B"></ellipse>
+        <path d="M173 146 q27 -30 54 0 q2 -34 -27 -34 q-29 0 -27 34 z" fill="#3A2E28"></path>
+        <path d="M168 200 q32 -14 64 0 l10 108 q-42 12 -84 0 z" fill="url(#shirt)"></path>
+        <path d="M170 206 q-16 34 -22 70 q-3 16 6 24 l14 -6 q-6 -8 -3 -18 q8 -30 18 -56 z" fill="url(#shirt)"></path>
+        <path d="M230 206 q16 34 22 70 q3 16 -6 24 l-14 -6 q6 -8 3 -18 q-8 -30 -18 -56 z" fill="url(#shirt)"></path>
+        <ellipse cx="160" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <ellipse cx="240" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <path d="M158 306 q42 -16 84 0 l-4 34 q-38 12 -76 0 z" fill="url(#pants)"></path>
+        <path d="M164 336 q16 8 32 2 l6 96 h-30 z" fill="url(#pants)"></path>
+        <path d="M236 336 q-16 8 -32 2 l-6 96 h30 z" fill="url(#pants)"></path>
+        <path d="M174 430 h28 l-4 62 h-22 z" fill="#2E3840"></path>
+        <path d="M198 430 h28 l-2 62 h-22 z" fill="#333D45"></path>
+        <path d="M168 490 h34 q6 0 6 8 v6 h-44 q0 -14 4 -14 z" fill="#EDEFF0"></path>
+        <path d="M200 490 h34 q4 0 4 14 h-44 v-6 q0 -8 6 -8 z" fill="#E4E7E8"></path>
+      </g>
+      <ellipse cx="200" cy="502" rx="72" ry="12" fill="#241F1A" opacity=".45"></ellipse>
+      <rect width="400" height="600" fill="url(#vig)"></rect>
+      <rect width="400" height="600" filter="url(#grain)" opacity=".55"></rect>
+    </symbol>
+
+    <!-- pose overlay, aligned to the figure above -->
+    <symbol id="pose" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round" opacity=".95">
+        <path d="M200 182 L200 236"></path>
+        <path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path>
+        <path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path>
+        <path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="152" r="5.4"></circle><circle cx="200" cy="236" r="5.4"></circle>
+        <circle cx="168" cy="202" r="5.4"></circle><circle cx="232" cy="202" r="5.4"></circle>
+        <circle cx="154" cy="268" r="5"></circle><circle cx="246" cy="268" r="5"></circle>
+        <circle cx="160" cy="306" r="5"></circle><circle cx="240" cy="306" r="5"></circle>
+        <circle cx="170" cy="318" r="5.4"></circle><circle cx="230" cy="318" r="5.4"></circle>
+        <circle cx="182" cy="428" r="5.4"></circle><circle cx="216" cy="428" r="5.4"></circle>
+        <circle cx="184" cy="492" r="5"></circle><circle cx="214" cy="492" r="5"></circle>
+      </g>
+    </symbol>
+
+    <!-- skeleton only, for replay: no video was ever stored -->
+    <symbol id="poseonly" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round">
+        <path d="M200 182 L200 236"></path><path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path><path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path><path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <circle cx="200" cy="152" r="17" fill="none" stroke="#3BE3D2" stroke-width="2.6"></circle>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="236" r="5"></circle><circle cx="168" cy="202" r="5"></circle><circle cx="232" cy="202" r="5"></circle>
+        <circle cx="154" cy="268" r="4.6"></circle><circle cx="246" cy="268" r="4.6"></circle><circle cx="160" cy="306" r="4.6"></circle><circle cx="240" cy="306" r="4.6"></circle>
+        <circle cx="170" cy="318" r="5"></circle><circle cx="230" cy="318" r="5"></circle><circle cx="216" cy="428" r="5"></circle><circle cx="184" cy="492" r="4.6"></circle><circle cx="214" cy="492" r="4.6"></circle>
+      </g>
+      <circle cx="182" cy="428" r="9" fill="#B5410A" stroke="#0C1414" stroke-width="2"></circle>
+    </symbol>
+
+    <!-- line icons -->
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.8h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"></circle></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M15.5 9.2a4 4 0 010 5.6M18 6.8a7.5 7.5 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 2.8v6c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 8.4v4.4M12 15.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5.2 4 5.2 8.6a5.2 5.2 0 01-10.4 0c0-1.8.9-3.1 1.8-4.2.5 1 1.3 1.7 2.1 1.9-.4-2.4.2-4.6 1.3-6.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2l11 6.8-11 6.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"></path></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5V10M12 16.5V5.5M17 16.5v-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 10V7.8a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.8"></path></symbol>
+    <symbol id="i-body" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 7.4v7m0 0l-3 6.2m3-6.2l3 6.2M6.5 10.2L12 8.6l5.5 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></symbol>
+  </defs>
+<rect id="div-0" x="0" y="0" width="390" height="844" rx="4" fill="#ecf0f1"/>
+<text id="span-1" x="22" y="23.02" font-family="IBM Plex Mono" font-size="12" font-weight="500" fill="#101617" xml:space="preserve">9:41</text>
+<text id="span-2" x="311" y="23.02" font-family="IBM Plex Mono" font-size="12" font-weight="500" fill="#101617" xml:space="preserve">5G ▮▮▮</text>
+<text id="d1-3" x="20" y="63.12" font-family="IBM Plex Sans" font-size="29" font-weight="600" fill="#101617" letter-spacing="-0.87" xml:space="preserve">Progress</text>
+<rect id="seg-4" x="20" y="86.08" width="350" height="41.16" rx="8" fill="#e2e8e9"/>
+<rect id="on-5" x="23" y="89.08" width="114.66" height="35.16" rx="6" fill="#ffffff"/>
+<text id="on-6" x="47.83" y="108.91" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#101617" xml:space="preserve">This week</text>
+<text id="div-7" x="174.98" y="108.91" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#47575a" xml:space="preserve">Month</text>
+<text id="div-8" x="285.16" y="108.91" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#47575a" xml:space="preserve">All time</text>
+<rect id="card-hair-9" x="20" y="139.23" width="350" height="112.31" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-10" x="34" y="168.8" font-family="IBM Plex Sans" font-size="17" font-weight="600" fill="#101617" letter-spacing="-0.255" xml:space="preserve">13-day streak</text>
+<text id="mono-11" x="279" y="166.79" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#7c8c8f" xml:space="preserve">6 OF 7 DAYS</text>
+<text id="mono-12" x="51.42" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">M</text>
+<rect id="div-13" x="34" y="207.55" width="40.84" height="30" rx="6" fill="#0d6e68"/>
+<text id="mono-14" x="98.27" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">T</text>
+<rect id="div-15" x="80.84" y="207.55" width="40.86" height="30" rx="6" fill="#0d6e68"/>
+<text id="mono-16" x="145.13" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">W</text>
+<rect id="div-17" x="127.7" y="207.55" width="40.86" height="30" rx="6" fill="#0d6e68"/>
+<text id="mono-18" x="191.98" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">T</text>
+<rect id="div-19" x="174.56" y="207.55" width="40.86" height="30" rx="6" fill="#0d6e68"/>
+<text id="mono-20" x="238.84" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">F</text>
+<rect id="div-21" x="221.42" y="207.55" width="40.86" height="30" rx="6" fill="#0d6e68"/>
+<text id="mono-22" x="285.7" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">S</text>
+<rect id="div-23" x="268.28" y="207.55" width="40.86" height="30" rx="6" fill="#e2e8e9"/>
+<text id="mono-24" x="332.56" y="196.96" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">S</text>
+<rect id="div-25" x="315.14" y="207.55" width="40.86" height="30" rx="6" fill="#dcebe8" stroke="#0d6e68" stroke-width="1.5"/>
+<rect id="card-hair-26" x="20" y="263.55" width="350" height="154.33" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-27" x="34" y="293.21" font-family="IBM Plex Sans" font-size="17" font-weight="600" fill="#101617" letter-spacing="-0.255" xml:space="preserve">Form score</text>
+<rect id="chip-k-ok-28" x="274.92" y="277.55" width="81.08" height="24.33" rx="4" fill="#e1f0e7"/>
+<text id="chip-k-ok-29" x="282.92" y="291.46" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#1f7a4d" letter-spacing="0.23" xml:space="preserve">IMPROVING</text>
+<svg id="svg-30" x="34" y="311.88" width="322" height="92" viewBox="0 0 318 92" preserveAspectRatio="xMidYMid meet">
+          <line x1="0" y1="20" x2="318" y2="20" stroke="#E2E8E9"></line><line x1="0" y1="52" x2="318" y2="52" stroke="#E2E8E9"></line>
+          <path d="M6 72 L58 64 L110 68 L162 48 L214 40 L266 44 L312 18 L312 92 L6 92 Z" fill="#DCEBE8"></path>
+          <polyline points="6,72 58,64 110,68 162,48 214,40 266,44 312,18" fill="none" stroke="#0D6E68" stroke-width="2.2"></polyline>
+          <circle cx="312" cy="18" r="4.5" fill="#0D6E68"></circle>
+          <text x="286" y="12" font-family="IBM Plex Mono" font-size="11" fill="#0D6E68" font-weight="600">82</text>
+          <text x="4" y="86" font-family="IBM Plex Mono" font-size="9.5" fill="#7C8C8F">62</text>
+        </svg>
+<rect id="card-hair-31" x="20" y="429.88" width="350" height="163.91" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-32" x="34" y="459.44" font-family="IBM Plex Sans" font-size="17" font-weight="600" fill="#101617" letter-spacing="-0.255" xml:space="preserve">Left vs right — knee extension</text>
+<text id="b2-33" x="34" y="490.99" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Left (operated)</text>
+<text id="mono-34" x="324" y="491.44" font-family="IBM Plex Mono" font-size="14" font-weight="600" fill="#b5410a" xml:space="preserve">118°</text>
+<rect id="track-35" x="34" y="503.88" width="322" height="6" rx="3" fill="#e2e8e9"/>
+<rect id="i-36" x="34" y="503.88" width="264.03" height="6" rx="3" fill="#b5410a"/>
+<text id="b2-37" x="34" y="532.87" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Right</text>
+<text id="mono-38" x="324" y="533.31" font-family="IBM Plex Mono" font-size="14" font-weight="600" fill="#1f7a4d" xml:space="preserve">134°</text>
+<rect id="track-39" x="34" y="545.75" width="322" height="6" rx="3" fill="#e2e8e9"/>
+<rect id="i-40" x="34" y="545.75" width="305.89" height="6" rx="3" fill="#1f7a4d"/>
+<text id="cap-41" x="34" y="573.77" font-family="IBM Plex Sans" font-size="12" font-weight="400" fill="#7c8c8f" xml:space="preserve">The gap has closed 9° in three weeks.</text>
+<rect id="card-hair-42" x="20" y="605.78" width="350" height="120.78" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-43" x="34" y="635.35" font-family="IBM Plex Sans" font-size="17" font-weight="600" fill="#101617" letter-spacing="-0.255" xml:space="preserve">Discomfort by region</text>
+<text id="b2-44" x="34" y="668.12" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Left knee</text>
+<text id="mono-45" x="240.92" y="668.57" font-family="IBM Plex Mono" font-size="13" font-weight="600" fill="#101617" xml:space="preserve">2.1</text>
+<rect id="chip-k-ok-46" x="274.92" y="653.91" width="81.08" height="24.33" rx="4" fill="#e1f0e7"/>
+<text id="chip-k-ok-47" x="282.92" y="667.82" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#1f7a4d" letter-spacing="0.23" xml:space="preserve">IMPROVING</text>
+<text id="b2-48" x="34" y="702.44" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Lower back</text>
+<text id="mono-49" x="262.61" y="702.9" font-family="IBM Plex Mono" font-size="13" font-weight="600" fill="#101617" xml:space="preserve">1.4</text>
+<rect id="chip-k-mute-50" x="296.61" y="688.23" width="59.39" height="24.33" rx="4" fill="#e2e8e9"/>
+<text id="chip-k-mute-51" x="304.61" y="702.15" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#47575a" letter-spacing="0.23" xml:space="preserve">STABLE</text>
+<svg id="svg-52" x="20" y="751" width="13" height="13" viewBox="0 0 13 13" preserveAspectRatio="xMidYMid meet"><use href="#i-shield"></use></svg>
+<text id="span-53" x="41" y="759.92" font-family="IBM Plex Sans" font-size="11.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">Coaching measurements, not a clinical assessment.</text>
+<rect id="navbar-54" x="0" y="776.09" width="390" height="67.91" fill="#ffffff"/>
+<svg id="svg-55" x="38.25" y="784.09" width="21" height="21" viewBox="0 0 21 21" preserveAspectRatio="xMidYMid meet"><use href="#i-home"></use></svg>
+<text id="it-56" x="34.75" y="818.3" font-family="IBM Plex Sans" font-size="10.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">Today</text>
+<svg id="svg-57" x="135.75" y="784.09" width="21" height="21" viewBox="0 0 21 21" preserveAspectRatio="xMidYMid meet"><use href="#i-chart"></use></svg>
+<text id="it-on-58" x="124.75" y="818.3" font-family="IBM Plex Sans" font-size="10.5" font-weight="400" fill="#0d6e68" xml:space="preserve">Progress</text>
+<svg id="svg-59" x="233.25" y="784.09" width="21" height="21" viewBox="0 0 21 21" preserveAspectRatio="xMidYMid meet"><use href="#i-list"></use></svg>
+<text id="it-60" x="222.25" y="818.3" font-family="IBM Plex Sans" font-size="10.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">Program</text>
+<svg id="svg-61" x="330.75" y="784.09" width="21" height="21" viewBox="0 0 21 21" preserveAspectRatio="xMidYMid meet"><use href="#i-lock"></use></svg>
+<text id="it-62" x="322.75" y="818.3" font-family="IBM Plex Sans" font-size="10.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">Sharing</text>
+</svg>

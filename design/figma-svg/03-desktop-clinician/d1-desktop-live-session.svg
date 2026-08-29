@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900">
+<defs></defs>
+<rect id="dk-0" x="0" y="0" width="1440" height="900" rx="6" fill="#f6f8fb"/>
+<rect id="div-1" x="32" y="22.09" width="26" height="26" rx="8" fill="#0f766e"/>
+<text id="t-t-2" x="74" y="37.76" font-family="Inter" font-size="17" font-weight="600" fill="#ffffff" xml:space="preserve">Sit to stand</text>
+<rect id="pill-num-3" x="181" y="20" width="128" height="30.19" rx="15.095" fill="#1e2c42"/>
+<text id="pill-num-4" x="193" y="37.73" font-family="Inter" font-size="13" font-weight="600" fill="#b6c2d2" xml:space="preserve">Set 2 of 2 · 01:14</text>
+<rect id="pill-p-ok-5" x="1030.19" y="20" width="159" height="30.19" rx="15.095" fill="#e6f5ec"/>
+<text id="pill-p-ok-6" x="1042.19" y="37.73" font-family="Inter" font-size="13" font-weight="600" fill="#15803d" xml:space="preserve">Capture quality: good</text>
+<rect id="pill-7" x="1205.19" y="20" width="166" height="30.19" rx="15.095" fill="#1e2c42"/>
+<text id="pill-8" x="1217.19" y="37.73" font-family="Inter" font-size="13" font-weight="600" fill="#b6c2d2" xml:space="preserve">Ruth's cap: knee ≤ 90°</text>
+<text id="t-h2-9" x="1387.19" y="39.29" font-family="Inter" font-size="20" font-weight="600" fill="#ffffff" letter-spacing="-0.2" xml:space="preserve">✕</text>
+<rect id="view-10" x="0" y="71.19" width="1080" height="828.81" fill="#111c2e"/>
+<svg id="svg-11" x="0" y="71.19" width="1080" height="828.81" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
+            <line x1="500" y1="150" x2="500" y2="285"></line><line x1="500" y1="285" x2="400" y2="238"></line><line x1="500" y1="285" x2="600" y2="238"></line>
+            <line x1="400" y1="238" x2="340" y2="348"></line><line x1="600" y1="238" x2="660" y2="348"></line>
+            <line x1="500" y1="285" x2="430" y2="462"></line><line x1="500" y1="285" x2="570" y2="462"></line>
+            <line x1="430" y1="462" x2="420" y2="620"></line><line x1="570" y1="462" x2="580" y2="620"></line><line x1="430" y1="462" x2="570" y2="462"></line>
+            <circle cx="500" cy="150" r="11"></circle><circle cx="500" cy="285" r="11"></circle><circle cx="400" cy="238" r="11"></circle><circle cx="600" cy="238" r="11"></circle>
+            <circle cx="340" cy="348" r="11"></circle><circle cx="660" cy="348" r="11"></circle><circle cx="430" cy="462" r="11"></circle><circle cx="570" cy="462" r="11"></circle>
+            <circle cx="420" cy="620" r="11"></circle><circle cx="580" cy="620" r="11"></circle>
+          </svg>
+<rect id="div-12" x="28" y="99.19" width="108" height="112.8" rx="20" fill="#ffffff"/>
+<text id="num-13" x="62.5" y="160.13" font-family="Inter" font-size="64" font-weight="700" fill="#0f172a" letter-spacing="-2" xml:space="preserve">7</text>
+<text id="t-c-14" x="54" y="189.21" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">of 10 reps</text>
+<rect id="div-15" x="937" y="99.19" width="115" height="92.8" rx="20" fill="#e6f5ec"/>
+<text id="num-16" x="966.5" y="146.43" font-family="Inter" font-size="44" font-weight="700" fill="#15803d" xml:space="preserve">86</text>
+<text id="t-c-17" x="963" y="169.21" font-family="Inter" font-size="12" font-weight="500" fill="#15803d" xml:space="preserve">form score</text>
+<rect id="chip-dk-num-18" x="648" y="543.61" width="146" height="31.59" rx="8" fill="#0b1220"/>
+<text id="chip-dk-num-19" x="658" y="562.05" font-family="Inter" font-size="14" font-weight="500" fill="#fcd34d" xml:space="preserve">knee 88° / cap 90°</text>
+<rect id="cue-20" x="28" y="802.02" width="1024" height="69.98" rx="14" fill="#fdf0dc"/>
+<rect id="i-21" x="44" y="823" width="28" height="28" rx="14" fill="#b45309"/>
+<text id="b-22" x="84" y="832.3" font-family="Inter" font-size="18" font-weight="500" fill="#7c3d06" xml:space="preserve">Straighten a little further at the top</text>
+<text id="span-23" x="84" y="851.22" font-family="Inter" font-size="12" font-weight="500" fill="#b45309" xml:space="preserve">Spoken cue · caption always shown</text>
+<text id="t-c-24" x="1109" y="109.21" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">THIS SET</text>
+<rect id="grow-25" x="1109" y="123.98" width="25.8" height="10" rx="5" fill="#15803d"/>
+<rect id="grow-26" x="1139.8" y="123.98" width="25.81" height="10" rx="5" fill="#15803d"/>
+<rect id="grow-27" x="1170.61" y="123.98" width="25.8" height="10" rx="5" fill="#15803d"/>
+<rect id="grow-28" x="1201.41" y="123.98" width="25.81" height="10" rx="5" fill="#15803d"/>
+<rect id="grow-29" x="1232.22" y="123.98" width="25.8" height="10" rx="5" fill="#b45309"/>
+<rect id="grow-30" x="1263.02" y="123.98" width="25.8" height="10" rx="5" fill="#c2410c"/>
+<rect id="grow-31" x="1293.81" y="123.98" width="25.8" height="10" rx="5" fill="#15803d"/>
+<rect id="grow-32" x="1324.61" y="123.98" width="25.8" height="10" rx="5" fill="#334155"/>
+<rect id="grow-33" x="1355.41" y="123.98" width="25.8" height="10" rx="5" fill="#334155"/>
+<rect id="grow-34" x="1386.2" y="123.98" width="25.8" height="10" rx="5" fill="#334155"/>
+<text id="t-c-35" x="1109" y="152" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Rep 6 flagged by you · rep 5 shallow</text>
+<text id="t-c-36" x="1109" y="186.8" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">COACHING SO FAR</text>
+<text id="t-s-37" x="1109" y="216.02" font-family="Inter" font-size="14" font-weight="400" fill="#b6c2d2" xml:space="preserve">Slow the way down — three seconds</text>
+<text id="t-s-38" x="1109" y="245.61" font-family="Inter" font-size="14" font-weight="400" fill="#b6c2d2" xml:space="preserve">Feet a little wider</text>
+<text id="t-s-39" x="1109" y="275.21" font-family="Inter" font-size="14" font-weight="400" fill="#b6c2d2" xml:space="preserve">Good — that one was full range</text>
+<rect id="div-40" x="1109" y="578.81" width="303" height="120" rx="18" fill="#fdede3"/>
+<text id="div-41" x="1189" y="631.64" font-family="Inter" font-size="22" font-weight="600" fill="#c2410c" xml:space="preserve">That one hurt</text>
+<text id="t-c-42" x="1197.5" y="658.83" font-family="Inter" font-size="12" font-weight="500" fill="#c2410c" xml:space="preserve">or press the space bar</text>
+<text id="t-c-43" x="1109" y="726.83" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Tags this exact rep and its skeleton. We ask about it</text>
+<text id="t-c-44" x="1109" y="743.63" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">in the break.</text>
+<rect id="btn-ghost-dk-grow-45" x="1109" y="768.41" width="145.5" height="52" rx="12" fill="#1e2c42" stroke="#334155" stroke-width="1"/>
+<text id="btn-ghost-dk-grow-46" x="1159.25" y="797.56" font-family="Inter" font-size="15" font-weight="500" fill="#ffffff" xml:space="preserve">Pause</text>
+<rect id="btn-ghost-dk-grow-47" x="1266.5" y="768.41" width="145.5" height="52" rx="12" fill="#1e2c42" stroke="#334155" stroke-width="1"/>
+<text id="btn-ghost-dk-grow-48" x="1323.75" y="797.56" font-family="Inter" font-size="15" font-weight="500" fill="#ffffff" xml:space="preserve">Skip</text>
+<text id="t-c-49" x="1109" y="848.43" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Coaching aid — not a medical device. Pose runs on</text>
+<text id="t-c-50" x="1109" y="865.22" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">this computer; video never leaves it.</text>
+</svg>

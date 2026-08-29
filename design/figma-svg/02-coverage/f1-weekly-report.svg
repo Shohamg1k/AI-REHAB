@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900">
+<defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C8A90"></stop><stop offset="0.55" stop-color="#5D6A72"></stop><stop offset="1" stop-color="#47535B"></stop>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C5349"></stop><stop offset="1" stop-color="#3A342E"></stop>
+    </linearGradient>
+    <linearGradient id="daylight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9FB3BC"></stop><stop offset="1" stop-color="#778B96"></stop>
+    </linearGradient>
+    <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39454E"></stop><stop offset="1" stop-color="#28323A"></stop>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"></stop><stop offset="100%" stop-color="#000" stop-opacity=".45"></stop>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.1"></feGaussianBlur></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"></feTurbulence>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"></feColorMatrix>
+      <feComponentTransfer in="g"><feFuncA type="linear" slope=".085"></feFuncA></feComponentTransfer>
+    </filter>
+
+    <!-- the room + the patient, as the camera sees them -->
+    <symbol id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="url(#wall)"></rect>
+      <path d="M0 470 L400 440 L400 600 L0 600 Z" fill="url(#floor)"></path>
+      <path d="M0 470 L400 440" stroke="#6B6157" stroke-width="3" opacity=".7"></path>
+      <path d="M18 60 L150 40 L150 250 L18 262 Z" fill="url(#daylight)"></path>
+      <rect x="300" y="330" width="86" height="14" rx="4" fill="#3E4950" opacity=".85"></rect>
+      <!-- chair the patient stands up from -->
+      <g opacity=".92">
+        <rect x="150" y="386" width="116" height="15" rx="4" fill="#4E453C"></rect>
+        <rect x="243" y="288" width="16" height="102" rx="5" fill="#463E36"></rect>
+        <rect x="157" y="398" width="10" height="96" rx="4" fill="#3E372F"></rect>
+        <rect x="249" y="398" width="10" height="92" rx="4" fill="#443C34"></rect>
+      </g>
+      <!-- patient: mid sit-to-stand, facing camera -->
+      <g filter="url(#soft)">
+        <ellipse cx="200" cy="176" rx="80" ry="26" fill="#000" opacity=".0"></ellipse>
+        <path d="M186 178 h28 v26 h-28 z" fill="#C39A78"></path>
+        <ellipse cx="200" cy="152" rx="27" ry="30" fill="#C89E7B"></ellipse>
+        <path d="M173 146 q27 -30 54 0 q2 -34 -27 -34 q-29 0 -27 34 z" fill="#3A2E28"></path>
+        <path d="M168 200 q32 -14 64 0 l10 108 q-42 12 -84 0 z" fill="url(#shirt)"></path>
+        <path d="M170 206 q-16 34 -22 70 q-3 16 6 24 l14 -6 q-6 -8 -3 -18 q8 -30 18 -56 z" fill="url(#shirt)"></path>
+        <path d="M230 206 q16 34 22 70 q3 16 -6 24 l-14 -6 q6 -8 3 -18 q-8 -30 -18 -56 z" fill="url(#shirt)"></path>
+        <ellipse cx="160" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <ellipse cx="240" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <path d="M158 306 q42 -16 84 0 l-4 34 q-38 12 -76 0 z" fill="url(#pants)"></path>
+        <path d="M164 336 q16 8 32 2 l6 96 h-30 z" fill="url(#pants)"></path>
+        <path d="M236 336 q-16 8 -32 2 l-6 96 h30 z" fill="url(#pants)"></path>
+        <path d="M174 430 h28 l-4 62 h-22 z" fill="#2E3840"></path>
+        <path d="M198 430 h28 l-2 62 h-22 z" fill="#333D45"></path>
+        <path d="M168 490 h34 q6 0 6 8 v6 h-44 q0 -14 4 -14 z" fill="#EDEFF0"></path>
+        <path d="M200 490 h34 q4 0 4 14 h-44 v-6 q0 -8 6 -8 z" fill="#E4E7E8"></path>
+      </g>
+      <ellipse cx="200" cy="502" rx="72" ry="12" fill="#241F1A" opacity=".45"></ellipse>
+      <rect width="400" height="600" fill="url(#vig)"></rect>
+      <rect width="400" height="600" filter="url(#grain)" opacity=".55"></rect>
+    </symbol>
+
+    <!-- pose overlay, aligned to the figure above -->
+    <symbol id="pose" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round" opacity=".95">
+        <path d="M200 182 L200 236"></path>
+        <path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path>
+        <path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path>
+        <path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="152" r="5.4"></circle><circle cx="200" cy="236" r="5.4"></circle>
+        <circle cx="168" cy="202" r="5.4"></circle><circle cx="232" cy="202" r="5.4"></circle>
+        <circle cx="154" cy="268" r="5"></circle><circle cx="246" cy="268" r="5"></circle>
+        <circle cx="160" cy="306" r="5"></circle><circle cx="240" cy="306" r="5"></circle>
+        <circle cx="170" cy="318" r="5.4"></circle><circle cx="230" cy="318" r="5.4"></circle>
+        <circle cx="182" cy="428" r="5.4"></circle><circle cx="216" cy="428" r="5.4"></circle>
+        <circle cx="184" cy="492" r="5"></circle><circle cx="214" cy="492" r="5"></circle>
+      </g>
+    </symbol>
+
+    <!-- skeleton only, for replay: no video was ever stored -->
+    <symbol id="poseonly" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round">
+        <path d="M200 182 L200 236"></path><path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path><path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path><path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <circle cx="200" cy="152" r="17" fill="none" stroke="#3BE3D2" stroke-width="2.6"></circle>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="236" r="5"></circle><circle cx="168" cy="202" r="5"></circle><circle cx="232" cy="202" r="5"></circle>
+        <circle cx="154" cy="268" r="4.6"></circle><circle cx="246" cy="268" r="4.6"></circle><circle cx="160" cy="306" r="4.6"></circle><circle cx="240" cy="306" r="4.6"></circle>
+        <circle cx="170" cy="318" r="5"></circle><circle cx="230" cy="318" r="5"></circle><circle cx="216" cy="428" r="5"></circle><circle cx="184" cy="492" r="4.6"></circle><circle cx="214" cy="492" r="4.6"></circle>
+      </g>
+      <circle cx="182" cy="428" r="9" fill="#B5410A" stroke="#0C1414" stroke-width="2"></circle>
+    </symbol>
+
+    <!-- line icons -->
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.8h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"></circle></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M15.5 9.2a4 4 0 010 5.6M18 6.8a7.5 7.5 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 2.8v6c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 8.4v4.4M12 15.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5.2 4 5.2 8.6a5.2 5.2 0 01-10.4 0c0-1.8.9-3.1 1.8-4.2.5 1 1.3 1.7 2.1 1.9-.4-2.4.2-4.6 1.3-6.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2l11 6.8-11 6.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"></path></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5V10M12 16.5V5.5M17 16.5v-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 10V7.8a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.8"></path></symbol>
+    <symbol id="i-body" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 7.4v7m0 0l-3 6.2m3-6.2l3 6.2M6.5 10.2L12 8.6l5.5 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></symbol>
+  </defs>
+<rect id="div-0" x="0" y="0" width="1440" height="900" rx="4" fill="#ecf0f1"/>
+<rect id="div-1" x="0" y="0" width="1440" height="81.73" fill="#ffffff"/>
+<rect id="div-2" x="32" y="21.86" width="38" height="38" rx="19" fill="#dcebe8"/>
+<text id="h2-3" x="86" y="35.57" font-family="IBM Plex Sans" font-size="17" font-weight="600" fill="#101617" letter-spacing="-0.255" xml:space="preserve">Maya Okonjo · week 3</text>
+<text id="mono-4" x="86" y="55.43" font-family="IBM Plex Mono" font-size="11" font-weight="400" fill="#7c8c8f" xml:space="preserve">POST-OP KNEE · 8–14 JUNE · GENERATED SUNDAY 23:00</text>
+<rect id="chip-k-warn-5" x="445" y="28.7" width="81.08" height="24.33" rx="4" fill="#f8ebd9"/>
+<text id="chip-k-warn-6" x="453" y="42.62" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#a75a0b" letter-spacing="0.23" xml:space="preserve">PLATEAUED</text>
+<rect id="btn-sec-sm-7" x="1159" y="21.86" width="117" height="38" rx="8" fill="#ffffff" stroke="#c2cccd" stroke-width="1"/>
+<text id="btn-sec-sm-8" x="1173" y="43.12" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#101617" xml:space="preserve">Full audit trail</text>
+<rect id="btn-sm-9" x="1292" y="21.86" width="116" height="38" rx="8" fill="#0d6e68"/>
+<text id="btn-sm-10" x="1306" y="43.12" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#ffffff" xml:space="preserve">Export packet</text>
+<rect id="card-hair-11" x="32" y="103.73" width="240.5" height="98.72" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-12" x="46" y="126.94" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">ADHERENCE</text>
+<text id="mono-13" x="46" y="158.1" font-family="IBM Plex Mono" font-size="26" font-weight="600" fill="#101617" xml:space="preserve">5/6</text>
+<text id="mono-14" x="46" y="182.75" font-family="IBM Plex Mono" font-size="10.5" font-weight="400" fill="#1f7a4d" xml:space="preserve">83% · UP FROM 67%</text>
+<rect id="card-hair-15" x="284.5" y="103.73" width="240.5" height="98.72" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-16" x="298.5" y="126.94" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">FORM TREND</text>
+<text id="mono-17" x="298.5" y="158.1" font-family="IBM Plex Mono" font-size="26" font-weight="600" fill="#101617" xml:space="preserve">82</text>
+<text id="mono-18" x="298.5" y="182.75" font-family="IBM Plex Mono" font-size="10.5" font-weight="400" fill="#1f7a4d" xml:space="preserve">+6 OVER THE WEEK</text>
+<rect id="card-hair-19" x="537" y="103.73" width="240.5" height="98.72" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-20" x="551" y="126.94" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">DISCOMFORT</text>
+<text id="mono-21" x="551" y="158.1" font-family="IBM Plex Mono" font-size="26" font-weight="600" fill="#101617" xml:space="preserve">2.1</text>
+<text id="mono-22" x="551" y="182.75" font-family="IBM Plex Mono" font-size="10.5" font-weight="400" fill="#1f7a4d" xml:space="preserve">−0.4 · SELF-REPORTED</text>
+<rect id="card-hair-23" x="789.5" y="103.73" width="240.5" height="98.72" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-24" x="803.5" y="126.94" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">USABLE SESSIONS</text>
+<text id="mono-25" x="803.5" y="158.1" font-family="IBM Plex Mono" font-size="26" font-weight="600" fill="#101617" xml:space="preserve">4/5</text>
+<text id="mono-26" x="803.5" y="182.75" font-family="IBM Plex Mono" font-size="10.5" font-weight="400" fill="#a75a0b" xml:space="preserve">1 LOW CONFIDENCE</text>
+<rect id="card-hair-27" x="32" y="214.45" width="998" height="242.45" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-28" x="46" y="243.61" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#101617" letter-spacing="-0.24" xml:space="preserve">Form score across the program</text>
+<rect id="chip-k-mute-29" x="927.69" y="228.45" width="88.31" height="24.33" rx="4" fill="#e2e8e9"/>
+<text id="chip-k-mute-30" x="935.69" y="242.37" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#47575a" letter-spacing="0.23" xml:space="preserve">7 SESSIONS</text>
+<svg id="svg-31" x="46" y="263.78" width="970" height="150" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet">
+            <line x1="0" y1="30" x2="700" y2="30" stroke="#E2E8E9"></line><line x1="0" y1="72" x2="700" y2="72" stroke="#E2E8E9"></line><line x1="0" y1="114" x2="700" y2="114" stroke="#E2E8E9"></line>
+            <path d="M20 118 L133 106 L246 112 L359 78 L472 66 L585 70 L680 34 L680 150 L20 150 Z" fill="#DCEBE8"></path>
+            <polyline points="20,118 133,106 246,112 359,78 472,66 585,70 680,34" fill="none" stroke="#0D6E68" stroke-width="2.4"></polyline>
+            <circle cx="20" cy="118" r="4" fill="#0D6E68"></circle><circle cx="133" cy="106" r="4" fill="#0D6E68"></circle>
+            <circle cx="246" cy="112" r="6" fill="#fff" stroke="#A75A0B" stroke-width="2.4"></circle>
+            <circle cx="359" cy="78" r="4" fill="#0D6E68"></circle><circle cx="472" cy="66" r="4" fill="#0D6E68"></circle><circle cx="585" cy="70" r="4" fill="#0D6E68"></circle><circle cx="680" cy="34" r="5" fill="#0D6E68"></circle>
+            <text x="238" y="134" font-family="IBM Plex Mono" font-size="10" fill="#A75A0B">low conf.</text>
+            <text x="655" y="24" font-family="IBM Plex Mono" font-size="11" fill="#0D6E68" font-weight="600">82</text>
+            <text x="4" y="134" font-family="IBM Plex Mono" font-size="10" fill="#7C8C8F">62</text>
+          </svg>
+<text id="b2-32" x="46" y="436.41" font-family="IBM Plex Sans" font-size="12.5" font-weight="400" fill="#47575a" xml:space="preserve">The hollow point is held out of the trend line — capture quality below the floor, so it is shown but not averaged in.</text>
+<rect id="card-hair-33" x="32" y="468.91" width="998" height="143.56" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="h2-34" x="46" y="497.27" font-family="IBM Plex Sans" font-size="16" font-weight="600" fill="#101617" letter-spacing="-0.24" xml:space="preserve">Discomfort by region, by session</text>
+<text id="b2-35" x="46" y="530.59" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Left knee</text>
+<rect id="tick-36" x="152" y="517.78" width="106.13" height="22" rx="4" fill="#b5410a"/>
+<rect id="tick-37" x="263.13" y="517.78" width="106.14" height="22" rx="4" fill="#b5410a"/>
+<rect id="tick-38" x="374.27" y="517.78" width="106.13" height="22" rx="4" fill="#d98a5a"/>
+<rect id="tick-39" x="485.39" y="517.78" width="106.14" height="22" rx="4" fill="#d98a5a"/>
+<rect id="tick-40" x="596.53" y="517.78" width="106.13" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-41" x="707.66" y="517.78" width="106.14" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-42" x="818.8" y="517.78" width="106.13" height="22" rx="4" fill="#f6ddcb"/>
+<rect id="chip-k-ok-43" x="934.92" y="516.63" width="81.08" height="24.33" rx="4" fill="#e1f0e7"/>
+<text id="chip-k-ok-44" x="942.92" y="530.54" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#1f7a4d" letter-spacing="0.23" xml:space="preserve">IMPROVING</text>
+<text id="b2-45" x="46" y="562.92" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Lower back</text>
+<rect id="tick-46" x="152" y="550.11" width="109.22" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-47" x="266.22" y="550.11" width="109.23" height="22" rx="4" fill="#f6ddcb"/>
+<rect id="tick-48" x="380.45" y="550.11" width="109.22" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-49" x="494.67" y="550.11" width="109.23" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-50" x="608.91" y="550.11" width="109.23" height="22" rx="4" fill="#f6ddcb"/>
+<rect id="tick-51" x="723.14" y="550.11" width="109.23" height="22" rx="4" fill="#efc1a2"/>
+<rect id="tick-52" x="837.38" y="550.11" width="109.23" height="22" rx="4" fill="#efc1a2"/>
+<rect id="chip-k-mute-53" x="956.61" y="548.95" width="59.39" height="24.33" rx="4" fill="#e2e8e9"/>
+<text id="chip-k-mute-54" x="964.61" y="562.87" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#47575a" letter-spacing="0.23" xml:space="preserve">STABLE</text>
+<text id="mono-55" x="46" y="592.88" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">ALL VALUES SELF-REPORTED BY THE PATIENT · NO INFERRED SEVERITY APPEARS IN THIS REPORT</text>
+<rect id="card-hair-56" x="1058" y="103.73" width="350" height="302.91" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-57" x="1072" y="126.94" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">IN PLAIN LANGUAGE</text>
+<text id="b2-58" x="1072" y="153.48" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Maya completed five of six prescribed sessions.</text>
+<text id="b2-59" x="1072" y="173.04" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Her left knee gained 9° of extension over three</text>
+<text id="b2-60" x="1072" y="192.6" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">weeks and her own discomfort ratings for that knee</text>
+<text id="b2-61" x="1072" y="212.16" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">fell from 3.2 to 2.1.</text>
+<text id="b2-62" x="1072" y="240.73" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Sit to stand was blocked twice on Tuesday when</text>
+<text id="b2-63" x="1072" y="260.29" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">knee flexion passed the 90° cap. She reported 2/5</text>
+<text id="b2-64" x="1072" y="279.85" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">at the time and completed the rest of the session.</text>
+<text id="b2-65" x="1072" y="308.41" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">Hamstring curl has not changed in three weeks —</text>
+<text id="b2-66" x="1072" y="327.98" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">the rule table flagged it as a plateau and swapped it</text>
+<text id="b2-67" x="1072" y="347.54" font-family="IBM Plex Sans" font-size="13.5" font-weight="400" fill="#47575a" xml:space="preserve">for bridging.</text>
+<text id="mono-68" x="1072" y="372.87" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">GENERATED FROM THE EVENT LOG · NO CLINICAL</text>
+<text id="mono-69" x="1072" y="387.05" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">INTERPRETATION</text>
+<rect id="card-hair-70" x="1058" y="418.64" width="350" height="172" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-71" x="1072" y="441.85" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">FLAGGED THIS WEEK</text>
+<rect id="stripe-72" x="1072" y="460.56" width="3" height="26" fill="#a32218"/>
+<text id="b2-73" x="1084" y="467.78" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#101617" xml:space="preserve">2 safety blocks · sit to stand</text>
+<text id="mono-74" x="1084" y="484.99" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">TUE 09:12 · KNEE 96° VS 90°</text>
+<rect id="stripe-75" x="1072" y="503.59" width="3" height="26" fill="#b5410a"/>
+<text id="b2-76" x="1084" y="510.81" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#101617" xml:space="preserve">1 rep flagged by patient</text>
+<text id="mono-77" x="1084" y="528.02" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">TUE 09:11 · REP 6 · REPLAYABLE</text>
+<rect id="stripe-78" x="1072" y="546.63" width="3" height="26" fill="#a75a0b"/>
+<text id="b2-79" x="1084" y="553.84" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#101617" xml:space="preserve">1 low-confidence session</text>
+<text id="mono-80" x="1084" y="571.05" font-family="IBM Plex Mono" font-size="10" font-weight="400" fill="#7c8c8f" xml:space="preserve">THU · DIM ROOM · HELD OUT</text>
+<rect id="card-hair-81" x="1058" y="602.64" width="350" height="139.89" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-82" x="1072" y="625.85" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">PROGRAM STATUS</text>
+<text id="b2-83" x="1072" y="653.51" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Seated knee extension</text>
+<rect id="chip-k-ok-84" x="1298.47" y="639.55" width="95.53" height="24.33" rx="4" fill="#e1f0e7"/>
+<text id="chip-k-ok-85" x="1306.47" y="653.46" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#1f7a4d" letter-spacing="0.23" xml:space="preserve">PROGRESSING</text>
+<text id="b2-86" x="1072" y="685.84" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Sit to stand</text>
+<rect id="chip-k-warn-87" x="1349.08" y="671.88" width="44.92" height="24.33" rx="4" fill="#f8ebd9"/>
+<text id="chip-k-warn-88" x="1357.08" y="685.79" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#a75a0b" letter-spacing="0.23" xml:space="preserve">HELD</text>
+<text id="b2-89" x="1072" y="718.17" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Hamstring curl</text>
+<rect id="chip-k-pain-90" x="1312.92" y="704.2" width="81.08" height="24.33" rx="4" fill="#f9e7dc"/>
+<text id="chip-k-pain-91" x="1320.92" y="718.12" font-family="IBM Plex Mono" font-size="11.5" font-weight="500" fill="#b5410a" letter-spacing="0.23" xml:space="preserve">PLATEAUED</text>
+<svg id="svg-92" x="1058" y="846.81" width="14" height="14" viewBox="0 0 14 14" preserveAspectRatio="xMidYMid meet"><use href="#i-shield"></use></svg>
+<text id="span-93" x="1080" y="855.73" font-family="IBM Plex Sans" font-size="11.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">Coaching and monitoring data. Not a clinical assessment, and</text>
+<text id="span-94" x="1080" y="871.82" font-family="IBM Plex Sans" font-size="11.5" font-weight="400" fill="#7c8c8f" xml:space="preserve">not a diagnosis. Movement measurements only.</text>
+</svg>

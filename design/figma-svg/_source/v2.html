@@ -1,0 +1,1032 @@
+<title>Rehab Coach Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* ---------------- page chrome ---------------- */
+:root{
+  --ink:#141B1C; --ink-2:#48585A; --ink-3:#7B8B8D;
+  --paper:#E8ECEC; --paper-2:#DFE5E4; --rule:#C7D0CF; --mark:#0D6E68;
+  --shadow:0 1px 2px rgba(20,27,28,.10),0 14px 36px rgba(20,27,28,.13);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ink:#E9EEED; --ink-2:#A2B1B0; --ink-3:#748381;
+  --paper:#0E1414; --paper-2:#151D1D; --rule:#283433; --mark:#57C6BC;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 18px 46px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --ink:#E9EEED; --ink-2:#A2B1B0; --ink-3:#748381;
+  --paper:#0E1414; --paper-2:#151D1D; --rule:#283433; --mark:#57C6BC;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 18px 46px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:56px 28px 96px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:"Newsreader",Georgia,serif;font-weight:400;font-size:clamp(34px,5vw,52px);line-height:1.06;margin:12px 0 0;letter-spacing:-.015em;text-wrap:balance}
+.lede{max-width:64ch;color:var(--ink-2);font-size:17px;margin:16px 0 0}
+.masthead{border-bottom:1px solid var(--rule);padding-bottom:30px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:22px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:500}
+.meta a{color:var(--mark);text-decoration:none;border-bottom:1px solid currentColor}
+.meta a:focus-visible{outline:2px solid var(--mark);outline-offset:3px}
+.changes{margin-top:30px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.chg{background:var(--paper-2);padding:16px 18px;border-top:2px solid var(--mark)}
+.chg h4{margin:0 0 6px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.chg p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+h2.grp{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:30px;margin:70px 0 0;letter-spacing:-.01em}
+h2.grp+p{color:var(--ink-2);max-width:66ch;margin:8px 0 0;font-size:15px}
+.rail{display:flex;gap:34px;align-items:flex-start;margin-top:34px;flex-wrap:wrap}
+.unit{width:390px;flex:none}
+.unit.wide{width:100%;max-width:1194px}
+.ucap{border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:14px;display:flex;gap:10px;align-items:baseline}
+.ucap .id{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--mark);letter-spacing:.06em}
+.ucap h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.ucap .dim{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.unote{color:var(--ink-2);font-size:13.5px;margin:12px 0 0;max-width:56ch}
+.plate{position:relative;overflow:hidden}
+.plate>.ab{position:absolute;top:0;left:0;transform-origin:0 0;box-shadow:var(--shadow);border-radius:4px}
+
+/* ---------------- app design system v2 ---------------- */
+.ab{
+  --page:#ECF0F1; --surf:#FFFFFF; --sunk:#E2E8E9; --line:#D6DEDF; --line-2:#C2CCCD;
+  --ink:#101617; --ink2:#47575A; --ink3:#7C8C8F;
+  --teal:#0D6E68; --teal-d:#084A46; --teal-w:#DCEBE8;
+  --ok:#1F7A4D; --ok-w:#E1F0E7; --warn:#A75A0B; --warn-w:#F8EBD9;
+  --dang:#A32218; --dang-w:#F8E5E2; --pain:#B5410A; --pain-w:#F9E7DC;
+  --night:#0C1414; --night-2:#16211F; --night-3:#233230;
+  --skl:#3BE3D2; --jnt:#FFC24D;
+  font-family:"IBM Plex Sans",system-ui,sans-serif; color:var(--ink); background:var(--page);
+  overflow:hidden; line-height:1.42;
+}
+.ab *{box-sizing:border-box}
+.ab .r{display:flex;align-items:center;gap:10px}
+.ab .c{display:flex;flex-direction:column}
+.ab .g{flex:1}
+.ab .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+/* type */
+.ab .d1{font-size:29px;font-weight:600;letter-spacing:-.03em;line-height:1.14}
+.ab .h1{font-size:22px;font-weight:600;letter-spacing:-.025em;line-height:1.2}
+.ab .h2{font-size:17px;font-weight:600;letter-spacing:-.015em}
+.ab .b1{font-size:15px;font-weight:400}
+.ab .b2{font-size:13.5px;color:var(--ink2);line-height:1.45}
+.ab .lb{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.ab .cap{font-size:12px;color:var(--ink3)}
+/* surfaces — hairline only where a boundary is real */
+.ab .card{background:var(--surf);border-radius:10px;padding:14px}
+.ab .card.hair{box-shadow:inset 0 0 0 1px var(--line)}
+.ab .card.lift{box-shadow:0 1px 1px rgba(16,22,23,.04),0 6px 16px rgba(16,22,23,.07)}
+.ab .sunk{background:var(--sunk);border-radius:10px;padding:14px}
+.ab .sep{height:1px;background:var(--line)}
+/* controls */
+.ab .btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:8px;font-size:15px;font-weight:500;background:var(--teal);color:#fff}
+.ab .btn.sec{background:var(--surf);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.ab .btn.dang{background:var(--dang-w);color:var(--dang);box-shadow:inset 0 0 0 1px #E7BBB4}
+.ab .btn.dk{background:var(--night-3);color:#fff}
+.ab .btn.sm{height:38px;font-size:13.5px;padding:0 14px}
+.ab .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:4px;font-size:11.5px;font-weight:500;font-family:"IBM Plex Mono",monospace;letter-spacing:.02em}
+.ab .k-ok{background:var(--ok-w);color:var(--ok)}
+.ab .k-warn{background:var(--warn-w);color:var(--warn)}
+.ab .k-dang{background:var(--dang-w);color:var(--dang)}
+.ab .k-pain{background:var(--pain-w);color:var(--pain)}
+.ab .k-mute{background:var(--sunk);color:var(--ink2)}
+.ab .k-teal{background:var(--teal-w);color:var(--teal-d)}
+.ab .k-dk{background:rgba(255,255,255,.12);color:#E5EEEC}
+/* camera viewport */
+.ab .cam{position:relative;overflow:hidden;border-radius:20px;background:#2A3439}
+.ab .cam.sq{border-radius:0}
+.ab .cam svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.ab .ovl{position:absolute}
+.ab .live{display:inline-flex;align-items:center;gap:6px;background:rgba(12,20,20,.62);backdrop-filter:blur(6px);color:#fff;padding:5px 9px;border-radius:4px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em}
+.ab .live i{width:7px;height:7px;border-radius:50%;background:#FF5C4D;display:block}
+.ab .readout{background:rgba(12,20,20,.68);backdrop-filter:blur(6px);color:#fff;border-radius:8px;padding:8px 11px}
+.ab .cuebar{display:flex;gap:11px;align-items:center;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-radius:12px;padding:11px 13px}
+.ab .cuebar .ic{width:26px;height:26px;border-radius:6px;background:var(--warn-w);display:flex;align-items:center;justify-content:center;flex:none}
+.ab .tick{height:4px;border-radius:2px;flex:1}
+.ab .track{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.ab .track i{display:block;height:100%;border-radius:3px}
+.ab .disc{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--ink3);line-height:1.4}
+.ab .disc svg{flex:none;margin-top:1px}
+.ab .navbar{display:flex;background:var(--surf);box-shadow:inset 0 1px 0 var(--line);padding:8px 0 20px}
+.ab .navbar .it{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--ink3)}
+.ab .navbar .it.on{color:var(--teal)}
+.ab .stat{display:flex;align-items:center;padding:12px 22px 4px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500}
+.ab .stat .g{text-align:right}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C8A90"/><stop offset="0.55" stop-color="#5D6A72"/><stop offset="1" stop-color="#47535B"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C5349"/><stop offset="1" stop-color="#3A342E"/>
+    </linearGradient>
+    <linearGradient id="daylight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9FB3BC"/><stop offset="1" stop-color="#778B96"/>
+    </linearGradient>
+    <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39454E"/><stop offset="1" stop-color="#28323A"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".45"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.1"/></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"/>
+      <feComponentTransfer in="g"><feFuncA type="linear" slope=".085"/></feComponentTransfer>
+    </filter>
+
+    <!-- the room + the patient, as the camera sees them -->
+    <symbol id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="url(#wall)"/>
+      <path d="M0 470 L400 440 L400 600 L0 600 Z" fill="url(#floor)"/>
+      <path d="M0 470 L400 440" stroke="#6B6157" stroke-width="3" opacity=".7"/>
+      <path d="M18 60 L150 40 L150 250 L18 262 Z" fill="url(#daylight)"/>
+      <rect x="300" y="330" width="86" height="14" rx="4" fill="#3E4950" opacity=".85"/>
+      <!-- chair the patient stands up from -->
+      <g opacity=".92">
+        <rect x="150" y="386" width="116" height="15" rx="4" fill="#4E453C"/>
+        <rect x="243" y="288" width="16" height="102" rx="5" fill="#463E36"/>
+        <rect x="157" y="398" width="10" height="96" rx="4" fill="#3E372F"/>
+        <rect x="249" y="398" width="10" height="92" rx="4" fill="#443C34"/>
+      </g>
+      <!-- patient: mid sit-to-stand, facing camera -->
+      <g filter="url(#soft)">
+        <ellipse cx="200" cy="176" rx="80" ry="26" fill="#000" opacity=".0"/>
+        <path d="M186 178 h28 v26 h-28 z" fill="#C39A78"/>
+        <ellipse cx="200" cy="152" rx="27" ry="30" fill="#C89E7B"/>
+        <path d="M173 146 q27 -30 54 0 q2 -34 -27 -34 q-29 0 -27 34 z" fill="#3A2E28"/>
+        <path d="M168 200 q32 -14 64 0 l10 108 q-42 12 -84 0 z" fill="url(#shirt)"/>
+        <path d="M170 206 q-16 34 -22 70 q-3 16 6 24 l14 -6 q-6 -8 -3 -18 q8 -30 18 -56 z" fill="url(#shirt)"/>
+        <path d="M230 206 q16 34 22 70 q3 16 -6 24 l-14 -6 q6 -8 3 -18 q-8 -30 -18 -56 z" fill="url(#shirt)"/>
+        <ellipse cx="160" cy="306" rx="9" ry="11" fill="#C39A78"/>
+        <ellipse cx="240" cy="306" rx="9" ry="11" fill="#C39A78"/>
+        <path d="M158 306 q42 -16 84 0 l-4 34 q-38 12 -76 0 z" fill="url(#pants)"/>
+        <path d="M164 336 q16 8 32 2 l6 96 h-30 z" fill="url(#pants)"/>
+        <path d="M236 336 q-16 8 -32 2 l-6 96 h30 z" fill="url(#pants)"/>
+        <path d="M174 430 h28 l-4 62 h-22 z" fill="#2E3840"/>
+        <path d="M198 430 h28 l-2 62 h-22 z" fill="#333D45"/>
+        <path d="M168 490 h34 q6 0 6 8 v6 h-44 q0 -14 4 -14 z" fill="#EDEFF0"/>
+        <path d="M200 490 h34 q4 0 4 14 h-44 v-6 q0 -8 6 -8 z" fill="#E4E7E8"/>
+      </g>
+      <ellipse cx="200" cy="502" rx="72" ry="12" fill="#241F1A" opacity=".45"/>
+      <rect width="400" height="600" fill="url(#vig)"/>
+      <rect width="400" height="600" filter="url(#grain)" opacity=".55"/>
+    </symbol>
+
+    <!-- pose overlay, aligned to the figure above -->
+    <symbol id="pose" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round" opacity=".95">
+        <path d="M200 182 L200 236"/>
+        <path d="M168 202 L232 202"/><path d="M168 202 L200 236"/><path d="M232 202 L200 236"/>
+        <path d="M168 202 L154 268"/><path d="M154 268 L160 306"/>
+        <path d="M232 202 L246 268"/><path d="M246 268 L240 306"/>
+        <path d="M200 236 L170 318"/><path d="M200 236 L230 318"/><path d="M170 318 L230 318"/>
+        <path d="M170 318 L182 428"/><path d="M182 428 L184 492"/>
+        <path d="M230 318 L216 428"/><path d="M216 428 L214 492"/>
+      </g>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="152" r="5.4"/><circle cx="200" cy="236" r="5.4"/>
+        <circle cx="168" cy="202" r="5.4"/><circle cx="232" cy="202" r="5.4"/>
+        <circle cx="154" cy="268" r="5"/><circle cx="246" cy="268" r="5"/>
+        <circle cx="160" cy="306" r="5"/><circle cx="240" cy="306" r="5"/>
+        <circle cx="170" cy="318" r="5.4"/><circle cx="230" cy="318" r="5.4"/>
+        <circle cx="182" cy="428" r="5.4"/><circle cx="216" cy="428" r="5.4"/>
+        <circle cx="184" cy="492" r="5"/><circle cx="214" cy="492" r="5"/>
+      </g>
+    </symbol>
+
+    <!-- skeleton only, for replay: no video was ever stored -->
+    <symbol id="poseonly" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round">
+        <path d="M200 182 L200 236"/><path d="M168 202 L232 202"/><path d="M168 202 L200 236"/><path d="M232 202 L200 236"/>
+        <path d="M168 202 L154 268"/><path d="M154 268 L160 306"/><path d="M232 202 L246 268"/><path d="M246 268 L240 306"/>
+        <path d="M200 236 L170 318"/><path d="M200 236 L230 318"/><path d="M170 318 L230 318"/>
+        <path d="M170 318 L182 428"/><path d="M182 428 L184 492"/><path d="M230 318 L216 428"/><path d="M216 428 L214 492"/>
+      </g>
+      <circle cx="200" cy="152" r="17" fill="none" stroke="#3BE3D2" stroke-width="2.6"/>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="236" r="5"/><circle cx="168" cy="202" r="5"/><circle cx="232" cy="202" r="5"/>
+        <circle cx="154" cy="268" r="4.6"/><circle cx="246" cy="268" r="4.6"/><circle cx="160" cy="306" r="4.6"/><circle cx="240" cy="306" r="4.6"/>
+        <circle cx="170" cy="318" r="5"/><circle cx="230" cy="318" r="5"/><circle cx="216" cy="428" r="5"/><circle cx="184" cy="492" r="4.6"/><circle cx="214" cy="492" r="4.6"/>
+      </g>
+      <circle cx="182" cy="428" r="9" fill="#B5410A" stroke="#0C1414" stroke-width="2"/>
+    </symbol>
+
+    <!-- line icons -->
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.8h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15.5 9.2a4 4 0 010 5.6M18 6.8a7.5 7.5 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 2.8v6c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8.4v4.4M12 15.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5.2 4 5.2 8.6a5.2 5.2 0 01-10.4 0c0-1.8.9-3.1 1.8-4.2.5 1 1.3 1.7 2.1 1.9-.4-2.4.2-4.6 1.3-6.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2l11 6.8-11 6.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5V10M12 16.5V5.5M17 16.5v-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7.8a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-body" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.4v7m0 0l-3 6.2m3-6.2l3 6.2M6.5 10.2L12 8.6l5.5 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">AI Rehab Coach · second pass · mobile + tablet</div>
+    <h1>The screens, with the camera in them</h1>
+    <p class="lede">The camera view is the product, so it is now rendered as one — the patient sees themselves, framed, with the pose overlay tracking their body. Everything else was rebuilt around that: a working type system, real icons, and surfaces that stop shouting at each other.</p>
+    <div class="meta">
+      <span><b>Figma</b> <a href="https://www.figma.com/design/6VCYsaHDeKKKSskFqegIMY">6VCYsaHDeKKKSskFqegIMY</a> · v1 mobile set</span>
+      <span><b>This pass</b> 10 × mobile 390×844 · 3 × tablet</span>
+      <span><b>Blocked</b> Figma connector quota — port pending</span>
+    </div>
+    <div class="changes">
+      <div class="chg"><h4>You can see yourself</h4><p>A real self-view: the room, the chair you are standing up from, your body, with the skeleton drawn over it. The flat placeholder box is gone.</p></div>
+      <div class="chg"><h4>Live and replay look different</h4><p>Live shows video. Replay shows skeleton on black — because no video was ever stored. The difference is now visible, not just claimed in a footnote.</p></div>
+      <div class="chg"><h4>Measurements got their own face</h4><p>IBM Plex Mono carries every angle, rep count, timer and score. Instrument readings read as readings, not as body copy.</p></div>
+      <div class="chg"><h4>Fewer boxes, drawn icons</h4><p>One radius system instead of 16px on everything, hairlines only where a boundary is real, and stroked icons in place of coloured circles standing in for icons.</p></div>
+    </div>
+  </header>
+<style>
+.ab.ph{display:flex;flex-direction:column}
+.ab .cam svg.lay{position:absolute;inset:0;width:100%;height:100%}
+.ab .pad{padding:0 20px}
+.ab .exrow{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surf);border-radius:10px}
+.ab .thumb{width:46px;height:46px;border-radius:8px;background:var(--sunk);flex:none;display:flex;align-items:center;justify-content:center;color:var(--ink3)}
+.ab .seg{display:flex;background:var(--sunk);border-radius:8px;padding:3px}
+.ab .seg>div{flex:1;text-align:center;padding:8px 0;border-radius:6px;font-size:13.5px;font-weight:500;color:var(--ink2)}
+.ab .seg>div.on{background:var(--surf);color:var(--ink);box-shadow:0 1px 2px rgba(16,22,23,.12)}
+.ab .corner{position:absolute;width:26px;height:26px;border:2px solid rgba(255,255,255,.85)}
+</style>
+
+<h2 class="grp">Mobile — 390 × 844</h2>
+<p>The full patient loop. Screens four through seven are where the camera lives; the rest are the frame around it.</p>
+<div class="rail">
+
+<div class="unit">
+  <div class="ucap"><span class="id">M1</span><h3>Welcome</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="gap:16px;padding-top:8px">
+      <div class="r" style="gap:9px">
+        <div style="width:26px;height:26px;border-radius:7px;background:var(--teal)"></div>
+        <div class="h2">Rehab Coach</div>
+      </div>
+      <div class="cam" style="height:280px">
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+        <div class="ovl live" style="top:12px;left:12px"><i></i>LIVE · ON THIS PHONE</div>
+        <div class="ovl readout mono" style="top:12px;right:12px;font-size:12px">86 <span style="opacity:.65">form</span></div>
+        <div class="ovl" style="left:12px;right:12px;bottom:12px">
+          <div class="cuebar">
+            <div class="ic"><svg width="15" height="15" style="color:var(--warn)"><use href="#i-sound"/></svg></div>
+            <div class="c" style="gap:1px"><span style="font-size:13.5px;font-weight:500">Straighten a little more at the top</span><span class="cap" style="font-size:11px">spoken · always captioned</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="d1">See yourself the way<br>your physio does.</div>
+      <div class="b2" style="font-size:14.5px">Prop the phone up, step back, and do your exercises. We count the reps, correct the form as you go, and remember exactly where it hurt.</div>
+      <div class="c" style="gap:13px;padding-top:2px">
+        <div class="r" style="gap:11px;align-items:flex-start">
+          <svg width="19" height="19" style="color:var(--teal);flex:none;margin-top:1px"><use href="#i-lock"/></svg>
+          <div class="c"><span style="font-size:14px;font-weight:500">The video stays on your phone</span><span class="b2">Nothing is recorded or uploaded — we keep the joint positions, never the picture.</span></div>
+        </div>
+        <div class="r" style="gap:11px;align-items:flex-start">
+          <svg width="19" height="19" style="color:var(--teal);flex:none;margin-top:1px"><use href="#i-cam"/></svg>
+          <div class="c"><span style="font-size:14px;font-weight:500">No wearables, no signal needed</span><span class="b2">One ordinary camera, working offline.</span></div>
+        </div>
+        <div class="r" style="gap:11px;align-items:flex-start">
+          <svg width="19" height="19" style="color:var(--teal);flex:none;margin-top:1px"><use href="#i-shield"/></svg>
+          <div class="c"><span style="font-size:14px;font-weight:500">It will never tell you to push through</span><span class="b2">If something looks unsafe, the set stops.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:18px">
+      <div class="btn">Try a session — no account</div>
+      <div class="btn sec">I have a code from my physio</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device. It does not diagnose or replace your clinician.</span></div>
+    </div>
+  </div></div>
+  <p class="unote">The hero is the product doing its job, not an illustration of it. H7 keeps the signup form out of the way until after the session.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M2</span><h3>Today</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:8px;padding-bottom:14px;align-items:flex-start">
+      <div class="c g" style="gap:3px">
+        <span class="lb">Tuesday · week 3</span>
+        <span class="d1">Good morning,<br>Maya</span>
+      </div>
+      <div class="chip k-warn" style="padding:6px 9px"><svg width="13" height="13"><use href="#i-flame"/></svg>12</div>
+    </div>
+    <div class="pad c" style="gap:14px">
+      <div class="card hair c" style="gap:11px">
+        <span class="h2">How is the knee today?</span>
+        <div class="seg"><div>Good</div><div class="on">So-so</div><div>Sore</div></div>
+        <span class="b2">We will hold today's intensity where it was and watch the left side.</span>
+      </div>
+      <div class="r">
+        <span class="lb g">Today's program</span>
+        <span class="mono" style="font-size:11.5px;color:var(--ink3)">1/3 · ~9 MIN LEFT</span>
+      </div>
+      <div class="c" style="gap:8px">
+        <div class="exrow" style="opacity:.72">
+          <div class="thumb" style="background:var(--ok-w);color:var(--ok)"><svg width="20" height="20"><use href="#i-check"/></svg></div>
+          <div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Seated knee extension</span><span class="mono" style="font-size:11.5px;color:var(--ok)">3 × 10 · FORM 84</span></div>
+        </div>
+        <div class="card lift c" style="gap:11px;padding:14px">
+          <div class="r">
+            <div class="thumb" style="background:var(--teal-w);color:var(--teal)"><svg width="22" height="22"><use href="#i-body"/></svg></div>
+            <div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:600">Sit to stand</span><span class="mono" style="font-size:11.5px;color:var(--ink3)">2 SETS × 8 · UP NEXT</span></div>
+            <svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg>
+          </div>
+          <div class="sep"></div>
+          <div class="b2"><b style="color:var(--ink);font-weight:600">Why this one — </b>standing up without your hands is the movement your knee has to relearn first.</div>
+        </div>
+        <div class="exrow">
+          <div class="thumb"><svg width="22" height="22"><use href="#i-body"/></svg></div>
+          <div class="c g" style="gap:2px"><span style="font-size:15px;font-weight:500">Standing hamstring curl</span><span class="mono" style="font-size:11.5px;color:var(--ink3)">3 × 10</span></div>
+          <svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:12px">
+      <div class="btn"><svg width="18" height="18"><use href="#i-cam"/></svg>Start sit to stand</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device.</span></div>
+    </div>
+    <div class="navbar">
+      <div class="it on"><svg width="21" height="21"><use href="#i-home"/></svg>Today</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-chart"/></svg>Progress</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-list"/></svg>Program</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-lock"/></svg>Sharing</div>
+    </div>
+  </div></div>
+  <p class="unote">One card is lifted — the next thing to do. Everything else sits flat, so the eye lands in the right place without a colour fight.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M3</span><h3>Why this exercise</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:6px;padding-bottom:12px;gap:12px">
+      <svg width="20" height="20" style="color:var(--ink)"><use href="#i-back"/></svg>
+      <span class="mono" style="font-size:11.5px;color:var(--ink3)">EXERCISE 2 OF 3</span>
+    </div>
+    <div class="pad c" style="gap:13px">
+      <div class="cam" style="height:186px;background:var(--night)">
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#poseonly" width="400" height="600"/></svg>
+        <div class="ovl chip k-dk" style="top:10px;left:10px">REFERENCE FORM · LOOPING</div>
+      </div>
+      <div class="c" style="gap:6px">
+        <span class="h1">Sit to stand</span>
+        <div class="r" style="gap:6px">
+          <span class="chip k-teal">KNEE · QUADS</span>
+          <span class="chip k-mute">2 × 8</span>
+          <span class="chip k-mute">~3 MIN</span>
+        </div>
+      </div>
+      <div class="card c" style="gap:7px;background:var(--teal-w)">
+        <span class="lb" style="color:var(--teal-d)">Why this one</span>
+        <span style="font-size:15px;color:var(--teal-d);line-height:1.42">Standing up without using your hands is the movement your knee has to relearn first — most of home life depends on it.</span>
+      </div>
+      <div class="c" style="gap:9px">
+        <span class="lb">What good looks like</span>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:11.5px;color:var(--teal);margin-top:2px">01</span><span class="b2">Feet flat, hip width apart</span></div>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:11.5px;color:var(--teal);margin-top:2px">02</span><span class="b2">Lead with your chest, not your chin</span></div>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:11.5px;color:var(--teal);margin-top:2px">03</span><span class="b2">Stand fully upright before you sit back down</span></div>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:11.5px;color:var(--teal);margin-top:2px">04</span><span class="b2">Take three seconds to lower</span></div>
+      </div>
+      <div class="card c" style="gap:6px;background:var(--warn-w)">
+        <div class="r" style="gap:7px"><svg width="14" height="14" style="color:var(--warn)"><use href="#i-shield"/></svg><span class="lb" style="color:var(--warn)">Ruth's limit for you</span></div>
+        <span class="b2" style="color:#7A4208">Knee bend capped at <span class="mono" style="font-weight:600">90°</span>. We pause the set if you go past it.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:18px">
+      <div class="btn"><svg width="18" height="18"><use href="#i-cam"/></svg>Set up camera</div>
+      <div style="text-align:center;font-size:14.5px;font-weight:500;color:var(--teal);padding:6px">Swap or skip this exercise</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device.</span></div>
+    </div>
+  </div></div>
+  <p class="unote">The reference loop is skeleton-only and says so — a model of the movement, not footage of a person. Numbered steps because the movement genuinely is a sequence.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M4</span><h3>Camera setup</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px;background:var(--night)">
+    <div class="cam sq" style="height:560px;border-radius:0">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:linear-gradient(180deg,rgba(12,20,20,.72) 0%,rgba(12,20,20,0) 26%,rgba(12,20,20,0) 55%,rgba(12,20,20,.82) 100%)"></div>
+      <div class="corner" style="top:96px;left:70px;border-right:0;border-bottom:0"></div>
+      <div class="corner" style="top:96px;right:70px;border-left:0;border-bottom:0"></div>
+      <div class="corner" style="bottom:104px;left:70px;border-right:0;border-top:0"></div>
+      <div class="corner" style="bottom:104px;right:70px;border-left:0;border-top:0"></div>
+      <div class="ovl stat" style="top:0;left:0;right:0;color:#fff"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+      <div class="ovl c" style="top:46px;left:20px;right:20px;gap:4px">
+        <span class="h1" style="color:#fff">Set up your camera</span>
+        <span style="font-size:13.5px;color:rgba(255,255,255,.72);line-height:1.45">Fifteen seconds. Every score today inherits this setup.</span>
+      </div>
+      <div class="ovl" style="bottom:24px;left:20px;right:20px;display:flex;justify-content:center">
+        <div class="live" style="background:rgba(255,255,255,.95);color:var(--warn)"><i style="background:var(--warn)"></i>STEP BACK ABOUT HALF A METRE</div>
+      </div>
+    </div>
+    <div class="c g" style="padding:16px 20px 0;gap:12px">
+      <div class="r" style="gap:10px"><svg width="17" height="17" style="color:#4ED6A8"><use href="#i-check"/></svg><span style="font-size:14px;color:#fff;flex:1">Whole body in frame</span><span class="mono" style="font-size:11px;color:#4ED6A8">GOOD</span></div>
+      <div class="r" style="gap:10px"><svg width="17" height="17" style="color:#4ED6A8"><use href="#i-check"/></svg><span style="font-size:14px;color:#fff;flex:1">Enough light</span><span class="mono" style="font-size:11px;color:#4ED6A8">GOOD</span></div>
+      <div class="r" style="gap:10px"><svg width="17" height="17" style="color:#F0B44C"><use href="#i-cam"/></svg><span style="font-size:14px;color:#fff;flex:1">Distance from camera</span><span class="mono" style="font-size:11px;color:#F0B44C">ADJUSTING</span></div>
+      <div class="r" style="gap:10px"><svg width="17" height="17" style="color:#4ED6A8"><use href="#i-check"/></svg><span style="font-size:14px;color:#fff;flex:1">Phone steady and level</span><span class="mono" style="font-size:11px;color:#4ED6A8">GOOD</span></div>
+    </div>
+    <div class="c" style="padding:0 20px 18px;gap:10px">
+      <div class="c" style="gap:6px">
+        <div class="r"><span class="mono g" style="font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.55)">CAPTURE QUALITY</span><span class="mono" style="font-size:11px;color:#F0B44C">FAIR — ONE THING TO FIX</span></div>
+        <div class="r" style="gap:4px">
+          <div class="tick" style="background:#F0B44C"></div><div class="tick" style="background:#F0B44C"></div>
+          <div class="tick" style="background:#F0B44C"></div><div class="tick" style="background:rgba(255,255,255,.18)"></div><div class="tick" style="background:rgba(255,255,255,.18)"></div>
+        </div>
+      </div>
+      <div class="btn" style="background:var(--night-3);color:rgba(255,255,255,.45)">Start when this turns green</div>
+      <div class="disc" style="color:rgba(255,255,255,.5)"><svg width="13" height="13"><use href="#i-shield"/></svg><span>You can start anyway — the session is then marked low-confidence in Ruth's report.</span></div>
+    </div>
+  </div></div>
+  <p class="unote">A7 is a framing ritual, so the frame is drawn on the picture. The quality meter is five ticks rather than a word, because it is a measurement the patient is actively moving.</p>
+</div>
+
+</div>
+<div class="rail">
+
+<div class="unit">
+  <div class="ucap"><span class="id">M5</span><h3>Live session</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab" style="width:390px;height:844px;background:var(--night)">
+    <div class="cam sq" style="height:844px">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:linear-gradient(180deg,rgba(12,20,20,.78) 0%,rgba(12,20,20,0) 22%,rgba(12,20,20,0) 46%,rgba(12,20,20,.88) 78%)"></div>
+      <div class="ovl stat" style="top:0;left:0;right:0;color:#fff"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+      <div class="ovl r" style="top:44px;left:18px;right:18px;gap:12px">
+        <svg width="20" height="20" style="color:#fff"><use href="#i-x"/></svg>
+        <div class="c g" style="gap:1px">
+          <span style="font-size:16px;font-weight:600;color:#fff">Sit to stand</span>
+          <span class="mono" style="font-size:11px;color:rgba(255,255,255,.62)">SET 2 OF 2 · 01:14</span>
+        </div>
+        <div class="live" style="background:rgba(31,122,77,.9)"><i style="background:#8DF0BE"></i>CAPTURE GOOD</div>
+      </div>
+      <div class="ovl readout c" style="top:108px;left:18px;padding:10px 14px">
+        <span class="mono" style="font-size:38px;font-weight:600;line-height:1;letter-spacing:-.03em">07</span>
+        <span class="mono" style="font-size:10.5px;letter-spacing:.09em;opacity:.66">OF 10 REPS</span>
+      </div>
+      <div class="ovl readout c" style="top:108px;right:18px;padding:10px 14px;align-items:flex-end">
+        <span class="mono" style="font-size:26px;font-weight:600;line-height:1;color:#8DF0BE">86</span>
+        <span class="mono" style="font-size:10.5px;letter-spacing:.09em;opacity:.66">FORM</span>
+      </div>
+      <div class="ovl live mono" style="top:492px;left:214px;background:rgba(12,20,20,.72);color:#FFC24D;letter-spacing:.03em">KNEE 88° / CAP 90°</div>
+      <div class="ovl r" style="top:214px;left:18px;right:18px;gap:3px">
+        <div class="tick" style="background:#4ED6A8"></div><div class="tick" style="background:#4ED6A8"></div>
+        <div class="tick" style="background:#4ED6A8"></div><div class="tick" style="background:#4ED6A8"></div>
+        <div class="tick" style="background:#F0B44C"></div><div class="tick" style="background:#E8845A"></div>
+        <div class="tick" style="background:#4ED6A8"></div><div class="tick" style="background:rgba(255,255,255,.2)"></div>
+        <div class="tick" style="background:rgba(255,255,255,.2)"></div><div class="tick" style="background:rgba(255,255,255,.2)"></div>
+      </div>
+      <div class="ovl" style="left:18px;right:18px;bottom:196px">
+        <div class="cuebar">
+          <div class="ic"><svg width="15" height="15" style="color:var(--warn)"><use href="#i-sound"/></svg></div>
+          <div class="c" style="gap:1px"><span style="font-size:14px;font-weight:500">Straighten a little further at the top</span><span class="cap" style="font-size:11px">spoken cue · always captioned</span></div>
+        </div>
+      </div>
+      <div class="ovl c" style="left:18px;right:18px;bottom:26px;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;height:74px;border-radius:12px;background:rgba(249,231,220,.96)">
+          <span style="width:13px;height:13px;border-radius:50%;background:var(--pain);display:block"></span>
+          <span style="font-size:19px;font-weight:600;color:var(--pain)">That one hurt</span>
+        </div>
+        <div class="mono" style="font-size:10.5px;color:rgba(255,255,255,.55);text-align:center;letter-spacing:.04em">TAGS THIS REP · WE ASK ABOUT IT IN THE BREAK</div>
+        <div class="r" style="gap:10px">
+          <div class="btn dk g" style="height:46px;background:rgba(255,255,255,.14)"><svg width="17" height="17"><use href="#i-pause"/></svg>Pause</div>
+          <div class="btn dk g" style="height:46px;background:rgba(255,255,255,.14)"><svg width="17" height="17"><use href="#i-skip"/></svg>Skip</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote">Full-bleed, because the camera is the screen. Chrome floats on blurred plates so nothing competes with the body; the ten ticks are the set, with the flagged rep already marked.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M6</span><h3>Safety block</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab" style="width:390px;height:844px;background:var(--night)">
+    <div class="cam sq" style="height:844px">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:rgba(12,20,20,.72)"></div>
+      <div class="ovl stat" style="top:0;left:0;right:0;color:#fff"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+      <div class="ovl r" style="top:44px;left:18px;right:18px;gap:12px">
+        <svg width="20" height="20" style="color:#fff"><use href="#i-x"/></svg>
+        <div class="c g" style="gap:1px">
+          <span style="font-size:16px;font-weight:600;color:#fff">Sit to stand</span>
+          <span class="mono" style="font-size:11px;color:#F2A79C">SET 2 · PAUSED BY SAFETY</span>
+        </div>
+      </div>
+      <div class="ovl c" style="left:0;right:0;bottom:0;background:var(--surf);border-radius:20px 20px 0 0;padding:20px 20px 20px;gap:14px">
+        <div class="r" style="gap:11px;align-items:flex-start">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--dang-w);display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" style="color:var(--dang)"><use href="#i-shield"/></svg></div>
+          <div class="c" style="gap:3px">
+            <span class="h1" style="color:var(--dang)">We stopped the set</span>
+            <span class="b2">Your knee bent to <span class="mono" style="font-weight:600;color:var(--ink)">96°</span> against the <span class="mono" style="font-weight:600;color:var(--ink)">90°</span> cap Ruth set, on three reps in a row.</span>
+          </div>
+        </div>
+        <div class="sunk c" style="gap:7px">
+          <span class="lb">If it hurts</span>
+          <span class="b2">Stop and contact Ruth. If the pain is severe or you cannot bear weight, call your local emergency number. We will not ask you to carry on.</span>
+        </div>
+        <div class="c" style="gap:6px">
+          <span class="lb">Written to your log</span>
+          <span class="mono" style="font-size:11.5px;color:var(--ink2);line-height:1.6">09:12 · BLOCKED · KNEE 96° &gt; CAP 90°<br>09:12 · REPS 6, 7, 8 · REASON ATTACHED<br>09:12 · VISIBLE TO RUTH ALVAREZ</span>
+        </div>
+        <div class="c" style="gap:9px">
+          <div class="btn dang">Stop and contact Ruth</div>
+          <div class="btn sec">Switch to the seated version</div>
+          <div style="text-align:center;font-size:14.5px;font-weight:500;color:var(--ink2);padding:4px">End session</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="unote">The block arrives as a sheet over a dimmed feed — the camera keeps running, the coaching does not. No option on this screen continues the exercise, because nothing downstream may soften a veto.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M7</span><h3>Rest check-in</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad r" style="padding-top:6px;padding-bottom:12px">
+      <div class="c g" style="gap:2px"><span class="h1">Set 2 done</span><span class="mono" style="font-size:11.5px;color:var(--ink3)">48S REST · 2 QUESTIONS</span></div>
+      <div class="chip k-pain">REP 6 FLAGGED</div>
+    </div>
+    <div class="pad c" style="gap:12px">
+      <div class="cam" style="height:172px;background:#08100F">
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#poseonly" width="400" height="600"/></svg>
+        <div class="ovl chip k-dk" style="top:10px;left:10px">REP 6 · 00:47 INTO SET 2</div>
+        <div class="ovl r" style="left:10px;right:10px;bottom:10px;gap:9px">
+          <svg width="16" height="16" style="color:#fff"><use href="#i-play"/></svg>
+          <div class="track g" style="background:rgba(255,255,255,.2);position:relative;overflow:visible">
+            <i style="width:46%;background:#3BE3D2"></i>
+            <span style="position:absolute;left:78%;top:-2px;width:9px;height:9px;border-radius:50%;background:var(--pain)"></span>
+          </div>
+          <span class="mono" style="font-size:10.5px;color:rgba(255,255,255,.7)">0:03/0:06</span>
+        </div>
+      </div>
+      <div class="disc" style="margin-top:-4px"><svg width="13" height="13"><use href="#i-lock"/></svg><span>Skeleton only — there is no video of this rep, because none was ever kept.</span></div>
+      <div class="card hair c" style="gap:10px">
+        <span class="h2">Where was it?</span>
+        <div style="background:var(--sunk);border-radius:8px;height:126px;position:relative">
+          <svg viewBox="0 0 320 126" style="width:100%;height:100%">
+            <ellipse cx="186" cy="18" rx="11" ry="12" fill="#B9C4C6"/>
+            <rect x="169" y="32" width="34" height="40" rx="8" fill="#B9C4C6"/>
+            <rect x="154" y="35" width="11" height="32" rx="5" fill="#B9C4C6"/>
+            <rect x="207" y="35" width="11" height="32" rx="5" fill="#B9C4C6"/>
+            <rect x="171" y="74" width="13" height="44" rx="6" fill="#B9C4C6"/>
+            <rect x="188" y="74" width="13" height="44" rx="6" fill="#B9C4C6"/>
+            <circle cx="177" cy="92" r="13" fill="#B5410A"/>
+            <circle cx="177" cy="92" r="18.5" fill="none" stroke="#B5410A" stroke-width="1.3" opacity=".42"/>
+            <path d="M108 92 h48" stroke="#B5410A" stroke-width="1.2"/>
+          </svg>
+          <span class="mono" style="position:absolute;left:14px;top:84px;font-size:11px;font-weight:600;color:var(--pain)">LEFT KNEE</span>
+        </div>
+        <span class="cap">Tap the spot. We log the region, not a diagnosis.</span>
+      </div>
+      <div class="card hair c" style="gap:10px">
+        <span class="h2">How did that left knee feel?</span>
+        <div class="r" style="gap:7px">
+          <div class="c g" style="align-items:center;gap:2px;padding:9px 0;border-radius:8px;background:var(--ok-w)"><span class="mono" style="font-size:17px;font-weight:600;color:var(--ok)">1</span><span style="font-size:10.5px;color:var(--ok)">None</span></div>
+          <div class="c g" style="align-items:center;gap:2px;padding:9px 0;border-radius:8px;background:#EAF2E2;box-shadow:inset 0 0 0 2px #4F7A1F"><span class="mono" style="font-size:17px;font-weight:600;color:#4F7A1F">2</span><span style="font-size:10.5px;color:#4F7A1F">Mild</span></div>
+          <div class="c g" style="align-items:center;gap:2px;padding:9px 0;border-radius:8px;background:var(--warn-w)"><span class="mono" style="font-size:17px;font-weight:600;color:var(--warn)">3</span><span style="font-size:10.5px;color:var(--warn)">Moderate</span></div>
+          <div class="c g" style="align-items:center;gap:2px;padding:9px 0;border-radius:8px;background:var(--pain-w)"><span class="mono" style="font-size:17px;font-weight:600;color:var(--pain)">4</span><span style="font-size:10.5px;color:var(--pain)">Strong</span></div>
+          <div class="c g" style="align-items:center;gap:2px;padding:9px 0;border-radius:8px;background:var(--dang-w)"><span class="mono" style="font-size:17px;font-weight:600;color:var(--dang)">5</span><span style="font-size:10.5px;color:var(--dang)">Severe</span></div>
+        </div>
+        <span class="cap">Your answer is what gets recorded. What we saw only decided which question to ask.</span>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:16px">
+      <div class="btn">Continue — 1 exercise left</div>
+      <div style="text-align:center;font-size:14.5px;font-weight:500;color:var(--ink2);padding:4px">I need to stop here</div>
+    </div>
+  </div></div>
+  <p class="unote">This is the clearest place to show the privacy model rather than assert it: live was video, the replay is a skeleton on black, and the caption says why they differ.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M8</span><h3>Session summary</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:10px;gap:14px">
+      <div class="c" style="gap:4px">
+        <span class="lb">Tuesday · 11 min 24 s</span>
+        <span class="d1">Session done</span>
+      </div>
+      <div class="card c" style="gap:9px;background:var(--teal-w);padding:14px">
+        <div class="r" style="gap:8px"><svg width="16" height="16" style="color:var(--teal-d)"><use href="#i-flame"/></svg><span class="lb" style="color:var(--teal-d)">13 days in a row — your longest yet</span></div>
+        <div class="r" style="gap:4px">
+          <div class="tick" style="background:var(--teal);height:6px"></div><div class="tick" style="background:var(--teal);height:6px"></div>
+          <div class="tick" style="background:var(--teal);height:6px"></div><div class="tick" style="background:var(--teal);height:6px"></div>
+          <div class="tick" style="background:var(--teal);height:6px"></div><div class="tick" style="background:var(--teal);height:6px"></div>
+          <div class="tick" style="background:var(--teal);height:6px"></div>
+        </div>
+      </div>
+      <div class="r" style="gap:10px;align-items:stretch">
+        <div class="card hair c g" style="gap:2px;padding:13px"><span class="lb">Reps</span><span class="mono" style="font-size:25px;font-weight:600;letter-spacing:-.02em">28/28</span><span class="mono" style="font-size:10.5px;color:var(--ok)">ALL SETS FINISHED</span></div>
+        <div class="card hair c g" style="gap:2px;padding:13px"><span class="lb">Form</span><span class="mono" style="font-size:25px;font-weight:600;letter-spacing:-.02em">82</span><span class="mono" style="font-size:10.5px;color:var(--ok)">+6 VS LAST TIME</span></div>
+      </div>
+      <div class="r" style="gap:10px;align-items:stretch">
+        <div class="card hair c g" style="gap:2px;padding:13px"><span class="lb">Discomfort</span><span class="mono" style="font-size:25px;font-weight:600;letter-spacing:-.02em">2/5</span><span class="mono" style="font-size:10.5px;color:var(--pain)">LEFT KNEE · REP 6</span></div>
+        <div class="card hair c g" style="gap:2px;padding:13px"><span class="lb">Capture</span><span class="mono" style="font-size:25px;font-weight:600;letter-spacing:-.02em">Good</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">SCORES TRUSTWORTHY</span></div>
+      </div>
+      <div class="c" style="gap:10px">
+        <span class="lb">What we noticed</span>
+        <div class="r" style="gap:10px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:var(--ok);margin-top:8px;flex:none"></span><span class="b2">Your left side reached <span class="mono" style="font-weight:600;color:var(--ink)">4°</span> further than last Tuesday.</span></div>
+        <div class="r" style="gap:10px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:var(--ok);margin-top:8px;flex:none"></span><span class="b2">You slowed the lowering phase — that is what we asked for.</span></div>
+        <div class="r" style="gap:10px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:var(--pain);margin-top:8px;flex:none"></span><span class="b2">Rep 6 is saved for Ruth with its skeleton.</span></div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad c" style="gap:9px;padding-bottom:12px">
+      <div class="btn">Done for today</div>
+      <div class="btn sec">Send a note to Ruth</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device.</span></div>
+    </div>
+    <div class="navbar">
+      <div class="it on"><svg width="21" height="21"><use href="#i-home"/></svg>Today</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-chart"/></svg>Progress</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-list"/></svg>Program</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-lock"/></svg>Sharing</div>
+    </div>
+  </div></div>
+  <p class="unote">Four readings in mono, each with its reason underneath. No score appears as a bare number anywhere in the product.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M9</span><h3>Progress</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:12px">
+      <span class="d1">Progress</span>
+      <div class="seg"><div class="on">This week</div><div>Month</div><div>All time</div></div>
+    </div>
+    <div class="pad c" style="gap:12px;padding-top:12px">
+      <div class="card hair c" style="gap:11px">
+        <div class="r"><span class="h2 g">13-day streak</span><span class="mono" style="font-size:11px;color:var(--ink3)">6 OF 7 DAYS</span></div>
+        <div class="r" style="gap:6px">
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">M</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">W</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">F</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:30px;border-radius:6px;background:var(--sunk)"></div></div>
+          <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:30px;border-radius:6px;background:var(--teal-w);box-shadow:inset 0 0 0 1.5px var(--teal)"></div></div>
+        </div>
+      </div>
+      <div class="card hair c" style="gap:10px">
+        <div class="r"><span class="h2 g">Form score</span><span class="chip k-ok">IMPROVING</span></div>
+        <svg viewBox="0 0 318 92" style="width:100%;height:92px">
+          <line x1="0" y1="20" x2="318" y2="20" stroke="#E2E8E9"/><line x1="0" y1="52" x2="318" y2="52" stroke="#E2E8E9"/>
+          <path d="M6 72 L58 64 L110 68 L162 48 L214 40 L266 44 L312 18 L312 92 L6 92 Z" fill="#DCEBE8"/>
+          <polyline points="6,72 58,64 110,68 162,48 214,40 266,44 312,18" fill="none" stroke="#0D6E68" stroke-width="2.2"/>
+          <circle cx="312" cy="18" r="4.5" fill="#0D6E68"/>
+          <text x="286" y="12" font-family="IBM Plex Mono" font-size="11" fill="#0D6E68" font-weight="600">82</text>
+          <text x="4" y="86" font-family="IBM Plex Mono" font-size="9.5" fill="#7C8C8F">62</text>
+        </svg>
+      </div>
+      <div class="card hair c" style="gap:11px">
+        <span class="h2">Left vs right — knee extension</span>
+        <div class="c" style="gap:5px">
+          <div class="r"><span class="b2 g">Left (operated)</span><span class="mono" style="font-size:14px;font-weight:600;color:var(--pain)">118°</span></div>
+          <div class="track"><i style="width:82%;background:var(--pain)"></i></div>
+        </div>
+        <div class="c" style="gap:5px">
+          <div class="r"><span class="b2 g">Right</span><span class="mono" style="font-size:14px;font-weight:600;color:var(--ok)">134°</span></div>
+          <div class="track"><i style="width:95%;background:var(--ok)"></i></div>
+        </div>
+        <span class="cap">The gap has closed 9° in three weeks.</span>
+      </div>
+      <div class="card hair c" style="gap:10px">
+        <span class="h2">Discomfort by region</span>
+        <div class="r"><span class="b2 g">Left knee</span><span class="mono" style="font-size:13px;font-weight:600">2.1</span><span class="chip k-ok">IMPROVING</span></div>
+        <div class="r"><span class="b2 g">Lower back</span><span class="mono" style="font-size:13px;font-weight:600">1.4</span><span class="chip k-mute">STABLE</span></div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad" style="padding-bottom:10px"><div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching measurements, not a clinical assessment.</span></div></div>
+    <div class="navbar">
+      <div class="it"><svg width="21" height="21"><use href="#i-home"/></svg>Today</div>
+      <div class="it on"><svg width="21" height="21"><use href="#i-chart"/></svg>Progress</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-list"/></svg>Program</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-lock"/></svg>Sharing</div>
+    </div>
+  </div></div>
+  <p class="unote">Charts get an endpoint label and a baseline rather than a legend. Degrees stay in mono so a reading never reads as prose.</p>
+</div>
+
+<div class="unit">
+  <div class="ucap"><span class="id">M10</span><h3>Sharing &amp; privacy</h3><span class="dim">390×844</span></div>
+  <div class="plate"><div class="ab ph" style="width:390px;height:844px">
+    <div class="stat"><span>9:41</span><span class="g">5G ▮▮▮</span></div>
+    <div class="pad c" style="padding-top:8px;gap:5px">
+      <span class="d1">Who can see<br>your data</span>
+      <span class="b2">Switch any of this off at any time. It takes effect immediately.</span>
+    </div>
+    <div class="pad c" style="gap:10px;padding-top:14px">
+      <div class="card c" style="gap:7px;background:var(--teal-w)">
+        <div class="r" style="gap:7px"><svg width="15" height="15" style="color:var(--teal-d)"><use href="#i-lock"/></svg><span class="lb" style="color:var(--teal-d)">Never shared, by design</span></div>
+        <span class="b2" style="color:var(--teal-d)">Camera video. Pose runs on this phone and each frame is dropped as it is read — there is nothing to share, not even with us.</span>
+      </div>
+      <div class="card hair c" style="gap:9px">
+        <div class="r" style="gap:11px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--teal-w);flex:none"></div>
+          <div class="c g" style="gap:1px"><span style="font-size:15px;font-weight:500">Ruth Alvarez</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">PHYSIOTHERAPIST · SINCE 4 JUN</span></div>
+          <div style="width:44px;height:26px;border-radius:13px;background:var(--teal);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div>
+        </div>
+        <span class="b2">Full sessions, form scores, pain reports, safety events.</span>
+      </div>
+      <div class="card hair c" style="gap:9px">
+        <div class="r" style="gap:11px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--sunk);flex:none"></div>
+          <div class="c g" style="gap:1px"><span style="font-size:15px;font-weight:500">Dad (James)</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">CAREGIVER · SINCE 12 JUN</span></div>
+          <div style="width:44px;height:26px;border-radius:13px;background:var(--teal);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div>
+        </div>
+        <span class="b2">Whether you did today's session. Nothing else.</span>
+      </div>
+      <div class="card hair c" style="gap:9px">
+        <div class="r" style="gap:11px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--sunk);flex:none"></div>
+          <div class="c g" style="gap:1px"><span style="font-size:15px;font-weight:500">Northgate study</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">INVITATION · PENDING</span></div>
+          <div style="width:44px;height:26px;border-radius:13px;background:var(--line-2);position:relative;flex:none"><span style="position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></span></div>
+        </div>
+        <span class="b2">Anonymised movement data only.</span>
+      </div>
+      <div class="sunk c" style="gap:8px">
+        <span class="lb">Who opened your data</span>
+        <div class="r"><span class="b2 g">Ruth viewed Tuesday's session</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">2H AGO</span></div>
+        <div class="r"><span class="b2 g">Ruth exported a report</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">MON 09:12</span></div>
+        <div class="r"><span class="b2 g">Dad checked today's status</span><span class="mono" style="font-size:10.5px;color:var(--ink3)">MON 20:04</span></div>
+      </div>
+    </div>
+    <div class="g"></div>
+    <div class="pad" style="padding-bottom:10px"><div class="btn dang">Download or delete everything</div></div>
+    <div class="navbar">
+      <div class="it"><svg width="21" height="21"><use href="#i-home"/></svg>Today</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-chart"/></svg>Progress</div>
+      <div class="it"><svg width="21" height="21"><use href="#i-list"/></svg>Program</div>
+      <div class="it on"><svg width="21" height="21"><use href="#i-lock"/></svg>Sharing</div>
+    </div>
+  </div></div>
+  <p class="unote">G5 leads with what is never shared, because that is the fact that makes the rest of the list believable.</p>
+</div>
+
+</div>
+<h2 class="grp">Tablet — 834 × 1194 and 1194 × 834</h2>
+<p>The session goes landscape on a tablet. The device is propped on a chair at knee height; in portrait the coaching sits behind the patient's own body in frame.</p>
+<div class="rail">
+
+<div class="unit wide">
+  <div class="ucap"><span class="id">T2</span><h3>Tablet · Live session</h3><span class="dim">1194×834 · landscape</span></div>
+  <div class="plate"><div class="ab" style="width:1194px;height:834px;display:flex;background:var(--night)">
+    <div class="cam sq" style="width:762px;height:834px;flex:none">
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#scene" width="400" height="600"/></svg>
+      <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#pose" width="400" height="600"/></svg>
+      <div class="ovl" style="inset:0;background:linear-gradient(180deg,rgba(12,20,20,.6) 0%,rgba(12,20,20,0) 20%,rgba(12,20,20,0) 70%,rgba(12,20,20,.7) 100%)"></div>
+      <div class="ovl live" style="top:22px;left:22px"><i></i>LIVE · ON THIS TABLET</div>
+      <div class="ovl readout c" style="top:66px;left:22px;padding:12px 18px">
+        <span class="mono" style="font-size:46px;font-weight:600;line-height:1;letter-spacing:-.03em">07</span>
+        <span class="mono" style="font-size:11px;letter-spacing:.09em;opacity:.66">OF 10 REPS</span>
+      </div>
+      <div class="ovl readout c" style="top:22px;right:22px;padding:12px 18px;align-items:flex-end">
+        <span class="mono" style="font-size:32px;font-weight:600;line-height:1;color:#8DF0BE">86</span>
+        <span class="mono" style="font-size:11px;letter-spacing:.09em;opacity:.66">FORM</span>
+      </div>
+      <div class="ovl live mono" style="top:590px;left:452px;background:rgba(12,20,20,.72);color:#FFC24D">KNEE 88° / CAP 90°</div>
+      <div class="ovl" style="left:22px;right:22px;bottom:22px">
+        <div class="cuebar" style="padding:14px 16px">
+          <div class="ic" style="width:32px;height:32px"><svg width="18" height="18" style="color:var(--warn)"><use href="#i-sound"/></svg></div>
+          <div class="c" style="gap:2px"><span style="font-size:16px;font-weight:500">Straighten a little further at the top</span><span class="cap">spoken cue · always captioned</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="c" style="width:432px;padding:26px;gap:18px">
+      <div class="r">
+        <svg width="21" height="21" style="color:#fff"><use href="#i-x"/></svg>
+        <div class="c g" style="gap:2px">
+          <span style="font-size:18px;font-weight:600;color:#fff">Sit to stand</span>
+          <span class="mono" style="font-size:11px;color:rgba(255,255,255,.6)">SET 2 OF 2 · 01:14</span>
+        </div>
+        <div class="live" style="background:rgba(31,122,77,.9)"><i style="background:#8DF0BE"></i>CAPTURE GOOD</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.12)"></div>
+      <div class="c" style="gap:8px">
+        <span class="mono" style="font-size:10.5px;letter-spacing:.1em;color:rgba(255,255,255,.5)">THIS SET</span>
+        <div class="r" style="gap:4px">
+          <div class="tick" style="height:6px;background:#4ED6A8"></div><div class="tick" style="height:6px;background:#4ED6A8"></div>
+          <div class="tick" style="height:6px;background:#4ED6A8"></div><div class="tick" style="height:6px;background:#4ED6A8"></div>
+          <div class="tick" style="height:6px;background:#F0B44C"></div><div class="tick" style="height:6px;background:#E8845A"></div>
+          <div class="tick" style="height:6px;background:#4ED6A8"></div><div class="tick" style="height:6px;background:rgba(255,255,255,.2)"></div>
+          <div class="tick" style="height:6px;background:rgba(255,255,255,.2)"></div><div class="tick" style="height:6px;background:rgba(255,255,255,.2)"></div>
+        </div>
+        <span class="mono" style="font-size:10.5px;color:rgba(255,255,255,.5)">REP 6 FLAGGED BY YOU · REP 5 SHALLOW</span>
+      </div>
+      <div class="c" style="gap:10px">
+        <span class="mono" style="font-size:10.5px;letter-spacing:.1em;color:rgba(255,255,255,.5)">COACHING SO FAR</span>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:10.5px;color:#F0B44C;margin-top:3px">01</span><span style="font-size:14px;color:rgba(255,255,255,.82)">Slow the way down — three seconds</span></div>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:10.5px;color:#F0B44C;margin-top:3px">02</span><span style="font-size:14px;color:rgba(255,255,255,.82)">Feet a little wider</span></div>
+        <div class="r" style="gap:9px;align-items:flex-start"><span class="mono" style="font-size:10.5px;color:#4ED6A8;margin-top:3px">03</span><span style="font-size:14px;color:rgba(255,255,255,.82)">Good — that one was full range</span></div>
+      </div>
+      <div class="g"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;height:92px;border-radius:14px;background:rgba(249,231,220,.96)">
+        <span style="width:15px;height:15px;border-radius:50%;background:var(--pain);display:block"></span>
+        <span style="font-size:21px;font-weight:600;color:var(--pain)">That one hurt</span>
+      </div>
+      <span class="mono" style="font-size:10.5px;color:rgba(255,255,255,.5);text-align:center;letter-spacing:.04em">TAGS THIS REP AND ITS SKELETON</span>
+      <div class="r" style="gap:12px">
+        <div class="btn g" style="background:rgba(255,255,255,.14);color:#fff"><svg width="18" height="18"><use href="#i-pause"/></svg>Pause</div>
+        <div class="btn g" style="background:rgba(255,255,255,.14);color:#fff"><svg width="18" height="18"><use href="#i-skip"/></svg>Skip</div>
+      </div>
+      <div class="disc" style="color:rgba(255,255,255,.45)"><svg width="13" height="13"><use href="#i-lock"/></svg><span>Coaching aid — not a medical device. Video never leaves this tablet.</span></div>
+    </div>
+  </div></div>
+  <p class="unote">The self-view gets 64% of the width and the patient is framed head to foot — at tablet distance that is what makes the overlay legible enough to trust.</p>
+</div>
+
+<div class="unit wide">
+  <div class="ucap"><span class="id">T3</span><h3>Tablet · Rest check-in</h3><span class="dim">1194×834 · landscape</span></div>
+  <div class="plate"><div class="ab" style="width:1194px;height:834px;display:flex">
+    <div class="c" style="width:596px;flex:none;background:var(--surf);padding:36px;gap:18px;box-shadow:inset -1px 0 0 var(--line)">
+      <div class="r">
+        <div class="c g" style="gap:3px"><span class="h1" style="font-size:26px">Set 2 done — 48s rest</span><span class="b2">You marked rep 6. Here it is again.</span></div>
+        <span class="chip k-pain">REP 6 FLAGGED</span>
+      </div>
+      <div class="cam" style="height:430px;background:#08100F">
+        <svg class="lay" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#poseonly" width="400" height="600"/></svg>
+        <div class="ovl chip k-dk" style="top:14px;left:14px">REP 6 · 00:47 INTO SET 2</div>
+        <div class="ovl r" style="left:14px;right:14px;bottom:14px;gap:11px">
+          <svg width="18" height="18" style="color:#fff"><use href="#i-play"/></svg>
+          <div class="track g" style="background:rgba(255,255,255,.2);position:relative;overflow:visible">
+            <i style="width:46%;background:#3BE3D2"></i>
+            <span style="position:absolute;left:46%;top:-4px;width:14px;height:14px;border-radius:50%;background:#3BE3D2;border:3px solid #08100F"></span>
+            <span style="position:absolute;left:78%;top:-1px;width:8px;height:8px;border-radius:50%;background:var(--pain)"></span>
+          </div>
+          <span class="mono" style="font-size:11px;color:rgba(255,255,255,.7)">0:03 / 0:06</span>
+        </div>
+      </div>
+      <div class="disc"><svg width="14" height="14"><use href="#i-lock"/></svg><span>Rendered from stored joint positions. There is no video of this rep — there never was, on the tablet or anywhere else.</span></div>
+    </div>
+    <div class="c g" style="padding:36px;gap:16px">
+      <div class="card hair c" style="gap:12px">
+        <span class="h2" style="font-size:18px">Where was it?</span>
+        <div style="background:var(--sunk);border-radius:8px;height:214px;position:relative">
+          <svg viewBox="0 0 480 214" style="width:100%;height:100%">
+            <ellipse cx="272" cy="32" rx="19" ry="21" fill="#B9C4C6"/>
+            <rect x="246" y="56" width="52" height="68" rx="12" fill="#B9C4C6"/>
+            <rect x="222" y="60" width="17" height="54" rx="8" fill="#B9C4C6"/>
+            <rect x="305" y="60" width="17" height="54" rx="8" fill="#B9C4C6"/>
+            <rect x="249" y="126" width="20" height="72" rx="9" fill="#B9C4C6"/>
+            <rect x="275" y="126" width="20" height="72" rx="9" fill="#B9C4C6"/>
+            <circle cx="259" cy="158" r="19" fill="#B5410A"/>
+            <circle cx="259" cy="158" r="27" fill="none" stroke="#B5410A" stroke-width="1.5" opacity=".4"/>
+            <path d="M164 158 h68" stroke="#B5410A" stroke-width="1.2"/>
+          </svg>
+          <span class="mono" style="position:absolute;left:24px;top:148px;font-size:12px;font-weight:600;color:var(--pain)">LEFT KNEE</span>
+        </div>
+        <span class="cap">Tap the spot. We log the region, not a diagnosis.</span>
+      </div>
+      <div class="card hair c" style="gap:12px">
+        <span class="h2" style="font-size:18px">How did that left knee feel?</span>
+        <div class="r" style="gap:9px">
+          <div class="c g" style="align-items:center;gap:3px;padding:13px 0;border-radius:8px;background:var(--ok-w)"><span class="mono" style="font-size:20px;font-weight:600;color:var(--ok)">1</span><span style="font-size:11.5px;color:var(--ok)">None</span></div>
+          <div class="c g" style="align-items:center;gap:3px;padding:13px 0;border-radius:8px;background:#EAF2E2;box-shadow:inset 0 0 0 2px #4F7A1F"><span class="mono" style="font-size:20px;font-weight:600;color:#4F7A1F">2</span><span style="font-size:11.5px;color:#4F7A1F">Mild</span></div>
+          <div class="c g" style="align-items:center;gap:3px;padding:13px 0;border-radius:8px;background:var(--warn-w)"><span class="mono" style="font-size:20px;font-weight:600;color:var(--warn)">3</span><span style="font-size:11.5px;color:var(--warn)">Moderate</span></div>
+          <div class="c g" style="align-items:center;gap:3px;padding:13px 0;border-radius:8px;background:var(--pain-w)"><span class="mono" style="font-size:20px;font-weight:600;color:var(--pain)">4</span><span style="font-size:11.5px;color:var(--pain)">Strong</span></div>
+          <div class="c g" style="align-items:center;gap:3px;padding:13px 0;border-radius:8px;background:var(--dang-w)"><span class="mono" style="font-size:20px;font-weight:600;color:var(--dang)">5</span><span style="font-size:11.5px;color:var(--dang)">Severe</span></div>
+        </div>
+        <span class="cap">Your answer is what gets recorded. What we saw only decided which question to ask.</span>
+      </div>
+      <div class="g"></div>
+      <div class="btn">Continue — 1 exercise left</div>
+      <div style="text-align:center;font-size:15px;font-weight:500;color:var(--ink2);padding:4px">I need to stop here</div>
+      <div class="disc"><svg width="13" height="13"><use href="#i-shield"/></svg><span>Coaching aid — not a medical device. It does not diagnose or replace your clinician.</span></div>
+    </div>
+  </div></div>
+  <p class="unote">Replay left, question right — the patient answers about a movement they can see rather than one they are trying to remember.</p>
+</div>
+
+<div class="unit" style="width:834px">
+  <div class="ucap"><span class="id">T1</span><h3>Tablet · Today</h3><span class="dim">834×1194 · portrait</span></div>
+  <div class="plate"><div class="ab" style="width:834px;height:1194px;display:flex;flex-direction:column">
+    <div class="r" style="background:var(--surf);padding:20px 36px;gap:16px;box-shadow:inset 0 -1px 0 var(--line)">
+      <div style="width:28px;height:28px;border-radius:7px;background:var(--teal)"></div>
+      <span class="h2">Rehab Coach</span>
+      <div class="r" style="gap:24px;margin-left:22px">
+        <span style="font-size:15px;font-weight:500;color:var(--teal)">Today</span>
+        <span style="font-size:15px;color:var(--ink2)">Progress</span>
+        <span style="font-size:15px;color:var(--ink2)">Program</span>
+        <span style="font-size:15px;color:var(--ink2)">Sharing</span>
+      </div>
+      <div class="g"></div>
+      <span class="chip k-warn" style="padding:6px 9px"><svg width="13" height="13"><use href="#i-flame"/></svg>12 DAYS</span>
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--teal-w)"></div>
+    </div>
+    <div style="display:flex;gap:22px;padding:26px 36px 20px;flex:1;align-items:flex-start">
+      <div class="c g" style="gap:16px">
+        <div class="c" style="gap:4px">
+          <span class="lb">Tuesday · week 3 · 1 of 3 done</span>
+          <span class="d1" style="font-size:34px">Good morning, Maya</span>
+        </div>
+        <div class="card hair c" style="gap:12px;padding:18px">
+          <span class="h2">How is the knee today?</span>
+          <div class="seg"><div>Good</div><div class="on">So-so</div><div>Sore</div></div>
+          <span class="b2">We will hold today's intensity where it was and watch the left side.</span>
+        </div>
+        <span class="lb">Today's program</span>
+        <div class="exrow" style="opacity:.72;padding:16px">
+          <div class="thumb" style="background:var(--ok-w);color:var(--ok);width:52px;height:52px"><svg width="22" height="22"><use href="#i-check"/></svg></div>
+          <div class="c g" style="gap:3px"><span style="font-size:16px;font-weight:500">Seated knee extension</span><span class="mono" style="font-size:11.5px;color:var(--ok)">3 × 10 · FINISHED · FORM 84</span></div>
+        </div>
+        <div class="card lift c" style="gap:12px;padding:18px">
+          <div class="r">
+            <div class="thumb" style="background:var(--teal-w);color:var(--teal);width:52px;height:52px"><svg width="24" height="24"><use href="#i-body"/></svg></div>
+            <div class="c g" style="gap:3px"><span style="font-size:17px;font-weight:600">Sit to stand</span><span class="mono" style="font-size:11.5px;color:var(--ink3)">2 SETS × 8 · UP NEXT</span></div>
+            <div class="btn sm" style="background:var(--teal);color:#fff;height:44px;padding:0 20px"><svg width="17" height="17"><use href="#i-cam"/></svg>Start</div>
+          </div>
+          <div class="sep"></div>
+          <div class="b2"><b style="color:var(--ink);font-weight:600">Why this one — </b>standing up without your hands is the movement your knee has to relearn first.</div>
+        </div>
+        <div class="exrow" style="padding:16px">
+          <div class="thumb" style="width:52px;height:52px"><svg width="24" height="24"><use href="#i-body"/></svg></div>
+          <div class="c g" style="gap:3px"><span style="font-size:16px;font-weight:500">Standing hamstring curl</span><span class="mono" style="font-size:11.5px;color:var(--ink3)">3 × 10</span></div>
+          <svg width="18" height="18" style="color:var(--ink3)"><use href="#i-chev"/></svg>
+        </div>
+      </div>
+      <div class="c" style="width:280px;flex:none;gap:14px">
+        <div class="card hair c" style="gap:12px">
+          <span class="lb">This week</span>
+          <div class="r" style="gap:5px">
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">M</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">W</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">T</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">F</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:26px;border-radius:5px;background:var(--sunk)"></div></div>
+            <div class="c g" style="align-items:center;gap:5px"><span class="mono" style="font-size:10px;color:var(--ink3)">S</span><div style="width:100%;height:26px;border-radius:5px;background:var(--teal-w);box-shadow:inset 0 0 0 1.5px var(--teal)"></div></div>
+          </div>
+          <div class="sep"></div>
+          <div class="r" style="align-items:flex-start;gap:14px">
+            <div class="c g" style="gap:2px"><span class="lb">Form</span><span class="mono" style="font-size:24px;font-weight:600">82</span><span class="mono" style="font-size:10.5px;color:var(--ok)">+6</span></div>
+            <div class="c g" style="gap:2px"><span class="lb">Discomfort</span><span class="mono" style="font-size:24px;font-weight:600">2.1</span><span class="mono" style="font-size:10.5px;color:var(--ok)">−0.4</span></div>
+          </div>
+        </div>
+        <div class="card hair c" style="gap:9px">
+          <span class="lb">From Ruth</span>
+          <span class="b2" style="font-size:14px">“The left knee is catching up nicely. Keep the lowering slow — three full seconds.”</span>
+          <span class="cap">Monday, after reviewing your session</span>
+        </div>
+        <div class="sunk c" style="gap:8px">
+          <div class="r" style="gap:7px"><svg width="15" height="15" style="color:var(--ink2)"><use href="#i-shield"/></svg><span class="lb">Something not right?</span></div>
+          <span class="b2">If pain is severe or new, stop and contact Ruth. In an emergency call your local emergency number.</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 36px 22px"><div class="disc"><svg width="14" height="14"><use href="#i-shield"/></svg><span>Coaching and monitoring aid — not a medical device. It does not diagnose or replace your clinician.</span></div></div>
+  </div></div>
+  <p class="unote">Same hierarchy as the phone, given room: one lifted card for the next action, a rail for what is checked but not acted on.</p>
+</div>
+
+</div>
+
+<footer style="margin-top:78px;padding-top:26px;border-top:1px solid var(--rule);color:var(--ink-3);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7">
+  Thirteen screens · IBM Plex Sans + Plex Mono · light mode only.<br>
+  The Figma file still holds the first pass. Porting this one needs connector quota the Starter plan has spent.
+</footer>
+</div>
+
+<script>
+function fitPlates(){
+  document.querySelectorAll(".plate").forEach(function(p){
+    var ab = p.querySelector(".ab");
+    if(!ab){ return; }
+    var w = parseFloat(ab.style.width);
+    var h = parseFloat(ab.style.height);
+    var s = Math.min(1, p.clientWidth / w);
+    ab.style.transform = "scale(" + s + ")";
+    p.style.height = (h * s) + "px";
+  });
+}
+window.addEventListener("resize", fitPlates);
+window.addEventListener("load", fitPlates);
+if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitPlates); }
+fitPlates();
+</script>

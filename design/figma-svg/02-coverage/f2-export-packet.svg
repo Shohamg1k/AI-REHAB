@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="760" height="560" viewBox="0 0 760 560">
+<defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C8A90"></stop><stop offset="0.55" stop-color="#5D6A72"></stop><stop offset="1" stop-color="#47535B"></stop>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C5349"></stop><stop offset="1" stop-color="#3A342E"></stop>
+    </linearGradient>
+    <linearGradient id="daylight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9FB3BC"></stop><stop offset="1" stop-color="#778B96"></stop>
+    </linearGradient>
+    <linearGradient id="pants" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39454E"></stop><stop offset="1" stop-color="#28323A"></stop>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"></stop><stop offset="100%" stop-color="#000" stop-opacity=".45"></stop>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.1"></feGaussianBlur></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"></feTurbulence>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"></feColorMatrix>
+      <feComponentTransfer in="g"><feFuncA type="linear" slope=".085"></feFuncA></feComponentTransfer>
+    </filter>
+
+    <!-- the room + the patient, as the camera sees them -->
+    <symbol id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="url(#wall)"></rect>
+      <path d="M0 470 L400 440 L400 600 L0 600 Z" fill="url(#floor)"></path>
+      <path d="M0 470 L400 440" stroke="#6B6157" stroke-width="3" opacity=".7"></path>
+      <path d="M18 60 L150 40 L150 250 L18 262 Z" fill="url(#daylight)"></path>
+      <rect x="300" y="330" width="86" height="14" rx="4" fill="#3E4950" opacity=".85"></rect>
+      <!-- chair the patient stands up from -->
+      <g opacity=".92">
+        <rect x="150" y="386" width="116" height="15" rx="4" fill="#4E453C"></rect>
+        <rect x="243" y="288" width="16" height="102" rx="5" fill="#463E36"></rect>
+        <rect x="157" y="398" width="10" height="96" rx="4" fill="#3E372F"></rect>
+        <rect x="249" y="398" width="10" height="92" rx="4" fill="#443C34"></rect>
+      </g>
+      <!-- patient: mid sit-to-stand, facing camera -->
+      <g filter="url(#soft)">
+        <ellipse cx="200" cy="176" rx="80" ry="26" fill="#000" opacity=".0"></ellipse>
+        <path d="M186 178 h28 v26 h-28 z" fill="#C39A78"></path>
+        <ellipse cx="200" cy="152" rx="27" ry="30" fill="#C89E7B"></ellipse>
+        <path d="M173 146 q27 -30 54 0 q2 -34 -27 -34 q-29 0 -27 34 z" fill="#3A2E28"></path>
+        <path d="M168 200 q32 -14 64 0 l10 108 q-42 12 -84 0 z" fill="url(#shirt)"></path>
+        <path d="M170 206 q-16 34 -22 70 q-3 16 6 24 l14 -6 q-6 -8 -3 -18 q8 -30 18 -56 z" fill="url(#shirt)"></path>
+        <path d="M230 206 q16 34 22 70 q3 16 -6 24 l-14 -6 q6 -8 3 -18 q-8 -30 -18 -56 z" fill="url(#shirt)"></path>
+        <ellipse cx="160" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <ellipse cx="240" cy="306" rx="9" ry="11" fill="#C39A78"></ellipse>
+        <path d="M158 306 q42 -16 84 0 l-4 34 q-38 12 -76 0 z" fill="url(#pants)"></path>
+        <path d="M164 336 q16 8 32 2 l6 96 h-30 z" fill="url(#pants)"></path>
+        <path d="M236 336 q-16 8 -32 2 l-6 96 h30 z" fill="url(#pants)"></path>
+        <path d="M174 430 h28 l-4 62 h-22 z" fill="#2E3840"></path>
+        <path d="M198 430 h28 l-2 62 h-22 z" fill="#333D45"></path>
+        <path d="M168 490 h34 q6 0 6 8 v6 h-44 q0 -14 4 -14 z" fill="#EDEFF0"></path>
+        <path d="M200 490 h34 q4 0 4 14 h-44 v-6 q0 -8 6 -8 z" fill="#E4E7E8"></path>
+      </g>
+      <ellipse cx="200" cy="502" rx="72" ry="12" fill="#241F1A" opacity=".45"></ellipse>
+      <rect width="400" height="600" fill="url(#vig)"></rect>
+      <rect width="400" height="600" filter="url(#grain)" opacity=".55"></rect>
+    </symbol>
+
+    <!-- pose overlay, aligned to the figure above -->
+    <symbol id="pose" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round" opacity=".95">
+        <path d="M200 182 L200 236"></path>
+        <path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path>
+        <path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path>
+        <path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="152" r="5.4"></circle><circle cx="200" cy="236" r="5.4"></circle>
+        <circle cx="168" cy="202" r="5.4"></circle><circle cx="232" cy="202" r="5.4"></circle>
+        <circle cx="154" cy="268" r="5"></circle><circle cx="246" cy="268" r="5"></circle>
+        <circle cx="160" cy="306" r="5"></circle><circle cx="240" cy="306" r="5"></circle>
+        <circle cx="170" cy="318" r="5.4"></circle><circle cx="230" cy="318" r="5.4"></circle>
+        <circle cx="182" cy="428" r="5.4"></circle><circle cx="216" cy="428" r="5.4"></circle>
+        <circle cx="184" cy="492" r="5"></circle><circle cx="214" cy="492" r="5"></circle>
+      </g>
+    </symbol>
+
+    <!-- skeleton only, for replay: no video was ever stored -->
+    <symbol id="poseonly" viewBox="0 0 400 600">
+      <g stroke="#3BE3D2" stroke-width="2.6" stroke-linecap="round">
+        <path d="M200 182 L200 236"></path><path d="M168 202 L232 202"></path><path d="M168 202 L200 236"></path><path d="M232 202 L200 236"></path>
+        <path d="M168 202 L154 268"></path><path d="M154 268 L160 306"></path><path d="M232 202 L246 268"></path><path d="M246 268 L240 306"></path>
+        <path d="M200 236 L170 318"></path><path d="M200 236 L230 318"></path><path d="M170 318 L230 318"></path>
+        <path d="M170 318 L182 428"></path><path d="M182 428 L184 492"></path><path d="M230 318 L216 428"></path><path d="M216 428 L214 492"></path>
+      </g>
+      <circle cx="200" cy="152" r="17" fill="none" stroke="#3BE3D2" stroke-width="2.6"></circle>
+      <g fill="#FFC24D">
+        <circle cx="200" cy="236" r="5"></circle><circle cx="168" cy="202" r="5"></circle><circle cx="232" cy="202" r="5"></circle>
+        <circle cx="154" cy="268" r="4.6"></circle><circle cx="246" cy="268" r="4.6"></circle><circle cx="160" cy="306" r="4.6"></circle><circle cx="240" cy="306" r="4.6"></circle>
+        <circle cx="170" cy="318" r="5"></circle><circle cx="230" cy="318" r="5"></circle><circle cx="216" cy="428" r="5"></circle><circle cx="184" cy="492" r="4.6"></circle><circle cx="214" cy="492" r="4.6"></circle>
+      </g>
+      <circle cx="182" cy="428" r="9" fill="#B5410A" stroke="#0C1414" stroke-width="2"></circle>
+    </symbol>
+
+    <!-- line icons -->
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5.2 5.2L20 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.8h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"></circle></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M15.5 9.2a4 4 0 010 5.6M18 6.8a7.5 7.5 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 2.8v6c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 8.4v4.4M12 15.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.5s5.2 4 5.2 8.6a5.2 5.2 0 01-10.4 0c0-1.8.9-3.1 1.8-4.2.5 1 1.3 1.7 2.1 1.9-.4-2.4.2-4.6 1.3-6.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2l11 6.8-11 6.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"></path></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5V10M12 16.5V5.5M17 16.5v-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 10V7.8a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.8"></path></symbol>
+    <symbol id="i-body" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M12 7.4v7m0 0l-3 6.2m3-6.2l3 6.2M6.5 10.2L12 8.6l5.5 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></symbol>
+  </defs>
+<rect id="div-0" x="0" y="0" width="760" height="560" rx="4" fill="#ecf0f1"/>
+<text id="lb-1" x="26" y="35.2" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">EXPORT · MAYA OKONJO · WEEKS 1–3</text>
+<text id="h1-2" x="26" y="62.03" font-family="IBM Plex Sans" font-size="22" font-weight="600" fill="#101617" letter-spacing="-0.55" xml:space="preserve">What leaves the system</text>
+<rect id="card-hair-3" x="26" y="85.3" width="347" height="182.13" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-4" x="40" y="108.5" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#1f7a4d" letter-spacing="1.05" xml:space="preserve">INCLUDED</text>
+<svg id="svg-5" x="40" y="125.13" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-check"></use></svg>
+<text id="b2-6" x="63" y="134.43" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Adherence, form trend, ROM per joint</text>
+<svg id="svg-7" x="40" y="152.97" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-check"></use></svg>
+<text id="b2-8" x="63" y="162.28" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Self-reported pain by region and session</text>
+<svg id="svg-9" x="40" y="180.81" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-check"></use></svg>
+<text id="b2-10" x="63" y="190.12" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Safety verdicts with rule, threshold, observed</text>
+<svg id="svg-11" x="40" y="208.66" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-check"></use></svg>
+<text id="b2-12" x="63" y="217.96" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Program changes and the rules that caused them</text>
+<svg id="svg-13" x="40" y="236.5" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-check"></use></svg>
+<text id="b2-14" x="63" y="245.81" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Confidence marking on every session</text>
+<rect id="card-hair-15" x="387" y="85.3" width="347" height="182.13" rx="10" fill="#ffffff" stroke="#d6dedf" stroke-width="1"/>
+<text id="lb-16" x="401" y="108.5" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#7c8c8f" letter-spacing="1.05" xml:space="preserve">NEVER INCLUDED</text>
+<svg id="svg-17" x="401" y="125.13" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-lock"></use></svg>
+<text id="b2-18" x="424" y="134.43" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Video or images — none exist</text>
+<svg id="svg-19" x="401" y="152.97" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-lock"></use></svg>
+<text id="b2-20" x="424" y="162.28" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Raw landmark frames</text>
+<svg id="svg-21" x="401" y="180.81" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-lock"></use></svg>
+<text id="b2-22" x="424" y="190.12" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Inferred pain severity — question generator only</text>
+<svg id="svg-23" x="401" y="208.66" width="15" height="15" viewBox="0 0 15 15" preserveAspectRatio="xMidYMid meet"><use href="#i-lock"></use></svg>
+<text id="b2-24" x="424" y="217.96" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Any diagnostic language or clinical claim</text>
+<rect id="card-25" x="26" y="281.42" width="708" height="88.59" rx="10" fill="#f8ebd9"/>
+<text id="lb-26" x="40" y="304.63" font-family="IBM Plex Mono" font-size="10.5" font-weight="500" fill="#a75a0b" letter-spacing="1.05" xml:space="preserve">PENDING ADR-0006</text>
+<text id="b2-27" x="40" y="329.56" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#7a4208" xml:space="preserve">Retention and residency rules for exported files are not settled. Until the regulatory posture is decided, export is</text>
+<text id="b2-28" x="40" y="348.4" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#7a4208" xml:space="preserve">watermarked, expires in 7 days, and cannot be sent outside the clinic tenant.</text>
+<text id="b2-29" x="26" y="516.81" font-family="IBM Plex Sans" font-size="13" font-weight="400" fill="#47575a" xml:space="preserve">Exporting is written to Maya's access log — she will see that you did, and when.</text>
+<rect id="btn-sec-sm-30" x="532" y="496" width="72" height="38" rx="8" fill="#ffffff" stroke="#c2cccd" stroke-width="1"/>
+<text id="btn-sec-sm-31" x="546" y="517.26" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#101617" xml:space="preserve">Cancel</text>
+<rect id="btn-sm-32" x="616" y="496" width="118" height="38" rx="8" fill="#0d6e68"/>
+<text id="btn-sm-33" x="630" y="517.26" font-family="IBM Plex Sans" font-size="13.5" font-weight="500" fill="#ffffff" xml:space="preserve">Generate PDF</text>
+</svg>

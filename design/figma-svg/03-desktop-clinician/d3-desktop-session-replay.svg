@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900">
+<defs></defs>
+<rect id="div-0" x="0" y="0" width="1440" height="900" rx="6" fill="#f6f8fb"/>
+<rect id="row-1" x="0" y="0" width="1440" height="83.59" fill="#ffffff"/>
+<rect id="div-2" x="32" y="21.3" width="40" height="40" rx="20" fill="#e3f2ef"/>
+<text id="t-t-3" x="88" y="34.57" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Maya Okonjo</text>
+<text id="t-c-4" x="88" y="55.82" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Post-op knee · week 3 · program assigned 4 June</text>
+<rect id="pill-p-dang-5" x="386" y="26.2" width="141" height="30.19" rx="15.095" fill="#fdecea"/>
+<text id="pill-p-dang-6" x="398" y="43.93" font-family="Inter" font-size="13" font-weight="600" fill="#b42318" xml:space="preserve">Safety block today</text>
+<rect id="pill-p-ok-7" x="991" y="26.2" width="114" height="30.19" rx="15.095" fill="#e6f5ec"/>
+<text id="pill-p-ok-8" x="1003" y="43.93" font-family="Inter" font-size="13" font-weight="600" fill="#15803d" xml:space="preserve">Capture: good</text>
+<rect id="btn-sec-9" x="1121" y="21.3" width="131" height="40" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<text id="btn-sec-10" x="1140" y="43.94" font-family="Inter" font-size="14" font-weight="500" fill="#0f172a" xml:space="preserve">Export packet</text>
+<rect id="btn-11" x="1268" y="21.3" width="140" height="40" rx="12" fill="#0f766e"/>
+<text id="btn-12" x="1286" y="43.94" font-family="Inter" font-size="14" font-weight="500" fill="#ffffff" xml:space="preserve">Adjust program</text>
+<rect id="view-13" x="32" y="107.59" width="988" height="663.61" rx="18" fill="#111c2e"/>
+<svg id="svg-14" x="32" y="107.59" width="988" height="663.61" viewBox="0 0 820 420" preserveAspectRatio="xMidYMid meet">
+              <line x1="410" y1="80" x2="410" y2="170"></line><line x1="410" y1="170" x2="342" y2="140"></line><line x1="410" y1="170" x2="478" y2="140"></line>
+              <line x1="342" y1="140" x2="300" y2="212"></line><line x1="478" y1="140" x2="520" y2="212"></line>
+              <line x1="410" y1="170" x2="362" y2="272"></line><line x1="410" y1="170" x2="458" y2="272"></line>
+              <line x1="362" y1="272" x2="356" y2="356"></line><line x1="458" y1="272" x2="464" y2="356"></line><line x1="362" y1="272" x2="458" y2="272"></line>
+              <circle cx="410" cy="80" r="8"></circle><circle cx="410" cy="170" r="8"></circle><circle cx="342" cy="140" r="8"></circle><circle cx="478" cy="140" r="8"></circle>
+              <circle cx="300" cy="212" r="8"></circle><circle cx="520" cy="212" r="8"></circle><circle cx="458" cy="272" r="8"></circle>
+              <circle cx="356" cy="356" r="8"></circle><circle cx="464" cy="356" r="8"></circle>
+              <circle cx="362" cy="272" r="13" fill="#B42318"></circle>
+            </svg>
+<rect id="chip-dk-15" x="48" y="123.59" width="160" height="28.8" rx="8" fill="#0f172a" fill-opacity="0.750"/>
+<text id="chip-dk-16" x="58" y="139.61" font-family="Inter" font-size="12" font-weight="500" fill="#ffffff" xml:space="preserve">Sit to stand · set 2 · rep 6</text>
+<rect id="pill-p-dang-17" x="784" y="123.59" width="220" height="30.19" rx="15.095" fill="#fdecea"/>
+<text id="pill-p-dang-18" x="796" y="141.32" font-family="Inter" font-size="13" font-weight="600" fill="#b42318" xml:space="preserve">Blocked — knee 96° vs 90° cap</text>
+<rect id="div-19" x="48" y="694.81" width="956" height="60.39" rx="12" fill="#0f172a" fill-opacity="0.820"/>
+<text id="t-c-20" x="62" y="716.83" font-family="Inter" font-size="12" font-weight="500" fill="#b6c2d2" xml:space="preserve">REASON RECORDED WITH THE BLOCK</text>
+<text id="t-s-21" x="62" y="736.05" font-family="Inter" font-size="14" font-weight="400" fill="#ffffff" xml:space="preserve">Knee flexion exceeded the per-patient cap on three consecutive reps. Safety verdict: block. No downstream component may soften it.</text>
+<rect id="card-tight-22" x="32" y="785.2" width="988" height="90.8" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<rect id="div-23" x="47" y="800.2" width="34" height="34" rx="17" fill="#eef2f7"/>
+<text id="div-24" x="53.5" y="820.35" font-family="Inter" font-size="15" font-weight="400" fill="#475569" xml:space="preserve">▶</text>
+<rect id="track-grow-25" x="93" y="813.2" width="820" height="8" rx="4" fill="#eef2f7"/>
+<rect id="i-26" x="93" y="813.2" width="475.59" height="8" rx="4" fill="#0f766e"/>
+<rect id="div-27" x="568.59" y="808.2" width="16" height="16" rx="8" fill="#0f766e" stroke="#ffffff" stroke-width="3"/>
+<rect id="div-28" x="363.59" y="812.2" width="9" height="9" rx="4.5" fill="#c2410c"/>
+<rect id="div-29" x="568.59" y="812.2" width="9" height="9" rx="4.5" fill="#b42318"/>
+<rect id="div-30" x="675.19" y="812.2" width="9" height="9" rx="4.5" fill="#b42318"/>
+<text id="t-c-num-31" x="925" y="818.82" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">03:41 / 06:12</text>
+<rect id="span-32" x="47" y="848.2" width="8" height="8" rx="4" fill="#c2410c"/>
+<text id="t-c-33" x="61" y="854.22" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Patient flagged</text>
+<rect id="span-34" x="163" y="848.2" width="8" height="8" rx="4" fill="#b42318"/>
+<text id="t-c-35" x="177" y="854.22" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Safety block</text>
+<text id="t-c-36" x="723" y="854.22" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Rendered from stored landmarks · no video exists</text>
+<rect id="card-tight-37" x="1052" y="107.59" width="356" height="174.59" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<text id="t-t-38" x="1067" y="137.16" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Left vs right — knee extension</text>
+<text id="t-s-grow-39" x="1067" y="169.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Left (operated)</text>
+<text id="t-b-num-40" x="1356" y="170.04" font-family="Inter" font-size="15" font-weight="500" fill="#c2410c" xml:space="preserve">118°</text>
+<rect id="track-41" x="1067" y="183.39" width="326" height="10" rx="5" fill="#eef2f7"/>
+<rect id="i-42" x="1067" y="183.39" width="267.31" height="10" rx="5" fill="#c2410c"/>
+<text id="t-s-grow-43" x="1067" y="216.53" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">Right</text>
+<text id="t-b-num-44" x="1356" y="217.04" font-family="Inter" font-size="15" font-weight="500" fill="#15803d" xml:space="preserve">134°</text>
+<rect id="track-45" x="1067" y="230.39" width="326" height="10" rx="5" fill="#eef2f7"/>
+<rect id="i-46" x="1067" y="230.39" width="309.69" height="10" rx="5" fill="#15803d"/>
+<text id="t-c-47" x="1067" y="260.41" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Gap closed 9° in three weeks.</text>
+<rect id="card-tight-48" x="1052" y="296.19" width="356" height="192.98" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<text id="t-t-grow-49" x="1067" y="328.94" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Form score</text>
+<rect id="pill-p-ok-50" x="1305" y="311.19" width="88" height="30.19" rx="15.095" fill="#e6f5ec"/>
+<text id="pill-p-ok-51" x="1317" y="328.92" font-family="Inter" font-size="13" font-weight="600" fill="#15803d" xml:space="preserve">Improving</text>
+<svg id="svg-52" x="1067" y="351.38" width="326" height="96" viewBox="0 0 330 96" preserveAspectRatio="xMidYMid meet">
+              <line x1="0" y1="24" x2="330" y2="24" stroke="#E2E8F0"></line><line x1="0" y1="58" x2="330" y2="58" stroke="#E2E8F0"></line>
+              <path d="M0 74 L55 66 L110 70 L165 50 L220 42 L275 46 L330 22 L330 96 L0 96 Z" fill="#E3F2EF"></path>
+              <polyline points="0,74 55,66 110,70 165,50 220,42 275,46 330,22" fill="none" stroke="#0F766E" stroke-width="2.5"></polyline>
+              <circle cx="330" cy="22" r="5" fill="#0F766E"></circle>
+            </svg>
+<text id="t-c-53" x="1067" y="467.4" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Seven sessions · 62 → 82</text>
+<rect id="card-tight-54" x="1052" y="503.17" width="356" height="192.58" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+<text id="t-t-55" x="1067" y="532.74" font-family="Inter" font-size="17" font-weight="600" fill="#0f172a" xml:space="preserve">Note on rep 6</text>
+<rect id="div-56" x="1067" y="551.97" width="326" height="80.78" rx="10" fill="none" stroke="#cbd5e1" stroke-width="1"/>
+<text id="div-57" x="1080" y="575.41" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">This is the rep I want you to slow down — let</text>
+<text id="div-58" x="1080" y="595" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">yourself sit back rather than dropping. Keep</text>
+<text id="div-59" x="1080" y="614.6" font-family="Inter" font-size="14" font-weight="400" fill="#475569" xml:space="preserve">the cap where it is for another week.</text>
+<text id="t-c-grow-60" x="1067" y="654.97" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">Attaches to this rep · Maya sees it on her</text>
+<text id="t-c-grow-61" x="1067" y="671.77" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">summary</text>
+<rect id="btn-62" x="1327" y="642.75" width="66" height="38" rx="12" fill="#0f766e"/>
+<text id="btn-63" x="1343" y="664.39" font-family="Inter" font-size="14" font-weight="500" fill="#ffffff" xml:space="preserve">Send</text>
+<rect id="card-tight-64" x="1052" y="709.75" width="356" height="120.58" rx="16" fill="#eef2f7"/>
+<text id="t-l-65" x="1066" y="735.48" font-family="Inter" font-size="13" font-weight="600" fill="#0f172a" xml:space="preserve">Audit trail</text>
+<text id="t-c-num-66" x="1066" y="759.96" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">09:12 · safety block written with reason</text>
+<text id="t-c-num-67" x="1066" y="784.75" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">09:12 · patient shown escalation guidance</text>
+<text id="t-c-num-68" x="1066" y="809.55" font-family="Inter" font-size="12" font-weight="500" fill="#8a97a8" xml:space="preserve">14:20 · Ruth Alvarez opened this replay</text>
+</svg>
