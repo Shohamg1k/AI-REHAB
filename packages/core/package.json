@@ -1,0 +1,24 @@
+{
+  "name": "@ai-rehab/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The fast loop, pure TypeScript. Pose smoothing, joint angles, rep segmentation, form scoring, safety gate. Zero deps, zero DOM, zero network — see docs/ARCHITECTURE.md §3.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-rehab/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}
