@@ -1,0 +1,28 @@
+{
+  "name": "@ai-rehab/eval",
+  "version": "0.0.0",
+  "private": true,
+  "description": "I2 — fixture replay harness. Replays recorded/synthetic landmark streams through packages/core and reports rep-count accuracy, form-score distribution, and safety rule coverage. See docs/ARCHITECTURE.md §6.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "replay": "tsc -p tsconfig.json && node dist/bin/replay.js"
+  },
+  "dependencies": {
+    "@ai-rehab/contracts": "workspace:*",
+    "@ai-rehab/core": "workspace:*",
+    "@ai-rehab/exercises": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}

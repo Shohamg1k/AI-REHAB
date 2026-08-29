@@ -29,11 +29,17 @@ export const seatedKneeExtension: ExerciseSpec = {
     requiredJoints: ["right_knee", "right_hip"]
   },
 
+  // The concentric phase's enter angle (120°) is deliberately well below the
+  // peak-extension criterion's target (165-180°): rep *counting* should stay
+  // permissive so a poorly-performed rep still gets segmented and scored
+  // (and then flagged by the criterion below), rather than silently not
+  // counted at all. See packages/eval/src/synth/fixtures.ts
+  // "knee-extension-insufficient-rom" for the fixture that exercises this.
   phases: [
     {
       name: "concentric",
       joint: "right_knee",
-      enter: { angle: 160, direction: "above" },
+      enter: { angle: 120, direction: "above" },
       minDurationMs: 200
     },
     {
@@ -111,8 +117,14 @@ export const seatedKneeExtension: ExerciseSpec = {
     }
   ],
 
+  // No maxAngle guard on right_knee: the joint-angle convention in
+  // packages/core/src/pose/landmarkAdapter.ts measures the *interior* angle
+  // between two rays, which is mathematically bounded to 0-180° (full
+  // extension saturates at 180 and cannot go higher) — a maxAngle threshold
+  // above 180 is unreachable, dead configuration. True hyperextension
+  // (bending backward past straight) needs a signed-angle or velocity-based
+  // detector this MVP doesn't build; see docs/STATUS.md.
   safety: {
-    maxAngle: { right_knee: 188 },
     maxTrunkLean: 30,
     consecutiveFailedRepsToBlock: 5
   }

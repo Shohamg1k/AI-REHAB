@@ -44,5 +44,12 @@ export default [
       "no-console": ["warn", { allow: ["warn", "error"] }]
     }
   },
+  {
+    // CLI entry points — printing to stdout is the whole point.
+    files: ["**/bin/**/*.ts"],
+    rules: {
+      "no-console": "off"
+    }
+  },
   prettierConfig
 ];

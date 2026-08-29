@@ -33,3 +33,6 @@ coverage/
 # vite
 apps/*/dist/
 apps/*/.vite/
+
+# eval harness output — regenerated every run (pnpm eval / CI)
+packages/eval/report.md

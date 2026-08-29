@@ -33,11 +33,13 @@ export const standingShoulderAbduction: ExerciseSpec = {
     requiredJoints: ["right_shoulder", "right_elbow", "right_hip"]
   },
 
+  // See the comment on seated-knee-extension's phases: the enter angle
+  // (35°) sits well below the peak-abduction target (80-110°) on purpose.
   phases: [
     {
       name: "concentric",
       joint: "right_shoulder",
-      enter: { angle: 70, direction: "above" },
+      enter: { angle: 35, direction: "above" },
       minDurationMs: 200
     },
     {

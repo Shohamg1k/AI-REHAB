@@ -34,11 +34,13 @@ export const sitToStand: ExerciseSpec = {
     requiredJoints: ["right_hip", "right_knee", "right_shoulder"]
   },
 
+  // See the comment on seated-knee-extension's phases: the enter angle
+  // (115°) sits well below the stand-tall target (160-185°) on purpose.
   phases: [
     {
       name: "concentric",
       joint: "right_hip",
-      enter: { angle: 150, direction: "above" },
+      enter: { angle: 115, direction: "above" },
       minDurationMs: 200
     },
     {
@@ -133,8 +135,12 @@ export const sitToStand: ExerciseSpec = {
     }
   ],
 
+  // No maxAngle guard on right_knee/right_hip — see the comment on
+  // seated-knee-extension's safety block. The interior-angle convention
+  // saturates at 180° (full standing extension), so a ceiling above that is
+  // unreachable dead configuration; trunk lean and consecutive-fail
+  // tracking are the safety signals that actually fire for this exercise.
   safety: {
-    maxAngle: { right_knee: 190, right_hip: 190 },
     maxTrunkLean: 55,
     consecutiveFailedRepsToBlock: 4
   }
