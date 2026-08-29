@@ -9,7 +9,7 @@
   },
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "build": "pnpm -r --filter=./packages/* run build",
+    "build": "pnpm -r run build",
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
@@ -17,13 +17,16 @@
     "lint:boundaries": "node scripts/lint-boundaries.mjs",
     "eval": "pnpm --filter @ai-rehab/eval run replay",
     "dev:patient": "pnpm --filter @ai-rehab/patient run dev",
-    "ci": "pnpm run lint:boundaries && pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build"
+    "ci": "pnpm run lint:boundaries && pnpm run build && pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run eval"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
+    "jsdom": "^25.0.1",
     "prettier": "^3.3.3",
     "typescript": "^5.6.2",
     "vitest": "^2.1.1"

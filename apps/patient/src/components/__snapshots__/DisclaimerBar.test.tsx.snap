@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DisclaimerBar (E4) > renders the non-diagnostic disclaimer 1`] = `
+<div>
+  <div
+    class="bg-subtle border-b border-border px-16 py-8 text-caption text-text-secondary text-center"
+  >
+    A coaching and monitoring aid, not a medical device. It does not diagnose or replace your clinician.
+  </div>
+</div>
+`;

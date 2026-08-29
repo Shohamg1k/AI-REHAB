@@ -26,7 +26,14 @@ jobs:
       - name: Package boundaries (ARCHITECTURE.md §3)
         run: pnpm run lint:boundaries
 
+      - name: Build
+        run: pnpm run build
+
       - name: Typecheck
+        # Runs after Build: packages have no project-reference wiring, so
+        # cross-package type resolution (e.g. packages/core importing
+        # @ai-rehab/contracts) reads the *built* dist/index.d.ts. Typecheck
+        # before Build would fail on a clean checkout with no dist/ yet.
         run: pnpm run typecheck
 
       - name: Lint
@@ -34,9 +41,6 @@ jobs:
 
       - name: Test
         run: pnpm run test
-
-      - name: Build
-        run: pnpm run build
 
       - name: Eval harness — fixture replay (I2)
         run: pnpm run eval
