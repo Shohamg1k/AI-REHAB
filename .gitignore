@@ -36,3 +36,7 @@ apps/*/.vite/
 
 # eval harness output — regenerated every run (pnpm eval / CI)
 packages/eval/report.md
+
+# MediaPipe pose assets — staged by scripts/fetch-pose-assets.mjs on install,
+# not committed (wasm is reproducible from node_modules; the model is ~5.8MB).
+apps/patient/public/mediapipe/

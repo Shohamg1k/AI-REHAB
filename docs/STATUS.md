@@ -37,6 +37,15 @@ Three real defects found and fixed:
    MediaPipe fell back to `importScripts()` — unsupported in the ES module
    workers Vite always emits. Surfaced as an opaque "ModuleFactory not set".
    See [mediapipe#5257](https://github.com/google-ai-edge/mediapipe/issues/5257).
+   Once that was fixed the failure moved to `Failed to fetch`: the wasm and
+   model were being pulled from jsDelivr and storage.googleapis.com at
+   runtime, which a proxy or VPN can block outright. Both are now staged
+   into `apps/patient/public` by `scripts/fetch-pose-assets.mjs` and served
+   from the app's own origin — which also removes two third-party requests
+   per session, in a product whose whole claim is that nothing leaves the
+   device. **Verified**: in a real module worker, the model now initialises
+   from local assets (`detectForVideo` present); with `useModule: false` it
+   still reproduces the original error, confirming the diagnosis.
 2. **The patient could not see themselves.** The `<video>` element was
    deliberately kept offscreen and only a skeleton was drawn, so there was no
    way to tell whether you were in frame. The camera is now visible with the

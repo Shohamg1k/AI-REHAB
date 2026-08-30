@@ -34,17 +34,21 @@ const ctx = globalThis as unknown as {
   onmessage: ((ev: MessageEvent<MainToWorkerMessage>) => void) | null;
 };
 
-// Pinned to the exact installed @mediapipe/tasks-vision version (see
-// apps/patient/package.json — pinned there too, no `^` range) so the wasm
-// runtime and the JS bindings never drift apart. A mismatch here fails at
-// runtime with an opaque "ModuleFactory not set" error, not a type error,
-// so nothing catches it until the app actually runs.
-const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
-// `lite` per docs/adr/0007-pose-model-tier.md — chosen as the safest default
-// pending the real M0 device spike (fps/jitter on the actual device floor),
-// which this environment cannot run without physical hardware.
-const MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+// Served from this app's own origin, staged by scripts/fetch-pose-assets.mjs.
+//
+// Not a CDN, deliberately. Fetching these from jsDelivr and
+// storage.googleapis.com fails outright on networks that block or
+// TLS-intercept those hosts (corporate proxies and VPNs routinely do), with
+// nothing but "Failed to fetch" to diagnose it from. Serving locally also
+// keeps the promise the product makes: a session start no longer announces
+// itself to two third parties, and the app works offline.
+//
+// The wasm is copied from the exact installed @mediapipe/tasks-vision, so
+// the runtime and the JS bindings cannot drift apart — the version mismatch
+// that produced "ModuleFactory not set".
+const WASM_URL = new URL("/mediapipe/wasm", self.location.origin).href;
+const MODEL_URL = new URL("/mediapipe/models/pose_landmarker_lite.task", self.location.origin)
+  .href;
 
 let landmarker: PoseLandmarker | null = null;
 let smoother = new LandmarkSmoother();
