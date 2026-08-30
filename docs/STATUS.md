@@ -54,6 +54,24 @@ listed `right_hip` only because the shoulder *angle* is computed from the hip
 *landmark*, which then dragged the knee into the framing requirement. The two
 concerns are now separate fields.
 
+Also added on the same branch (informed by a review of four reference
+projects — see [`REFERENCE-ANALYSIS.md`](REFERENCE-ANALYSIS.md)):
+
+4. **Reps are scored as trajectories, not poses.** `packages/core/reps/temporal.ts`
+   computes range, velocity dispersion (smoothness), phase balance and trunk
+   stability per rep, exposed as new `FormCriterion.measure` values so
+   exercises opt in as data. Closed-form arithmetic, no model in the
+   per-frame path — ADR-0001 holds.
+5. **A scoring-dilution bug the new criteria exposed.** Adding secondary
+   criteria let a rep that missed its primary target by 25 deg still score 68.
+   Liao/Vakanski published the same compression (incorrect reps at 0.7-0.9).
+   Fixed by weighting the criterion that *is* the exercise above the rest,
+   and by replacing the `score <= 50` cutoff feeding the safety gate with
+   `isFailedRep()` — "did any criterion fail outright", which is both truer
+   and explainable.
+6. **Session summary shows the set as a shape** — consistency, range trend
+   sparkline, best rep, and the criterion that fell short most often.
+
 Still unverified: **live pose tracking with a real camera.** This environment
 has no camera, so the fixed MediaPipe load path, the video preview, and
 framing against a real body have not been observed working. That remains the

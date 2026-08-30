@@ -1,4 +1,10 @@
 import type { ExerciseSpec, JointAngles, JointName, RepEvent, RepPhase } from "@ai-rehab/contracts";
+import {
+  computeTemporalMetrics,
+  EMPTY_TEMPORAL_METRICS,
+  type AngleSample,
+  type TemporalMetrics
+} from "./temporal.js";
 
 /**
  * Rep segmentation FSM (A4). A rep is one traversal of `ExerciseSpec.phases`
@@ -19,6 +25,8 @@ import type { ExerciseSpec, JointAngles, JointName, RepEvent, RepPhase } from "@
 export type RepAuxMetrics = {
   peakTrunkLean: number;
   peakSymmetry: Partial<Record<"shoulder" | "elbow" | "hip" | "knee", number>>;
+  /** Trajectory-shape metrics for the rep just closed. See ./temporal.ts. */
+  temporal: TemporalMetrics;
 };
 
 export type RepSegmenterState = {
@@ -26,7 +34,11 @@ export type RepSegmenterState = {
   phaseEnteredAt: number | null;
   repStartT: number | null;
   peakAngles: Partial<Record<JointName, number>>;
+  minAngles: Partial<Record<JointName, number>>;
   confidenceSamples: number[];
+  /** Driving-joint angle series for the in-progress rep, for temporal metrics. */
+  angleSamples: AngleSample[];
+  trunkLeanSamples: number[];
   auxMetrics: RepAuxMetrics;
   repIndex: number;
 };
@@ -37,8 +49,11 @@ export function createRepSegmenterState(): RepSegmenterState {
     phaseEnteredAt: null,
     repStartT: null,
     peakAngles: {},
+    minAngles: {},
     confidenceSamples: [],
-    auxMetrics: { peakTrunkLean: 0, peakSymmetry: {} },
+    angleSamples: [],
+    trunkLeanSamples: [],
+    auxMetrics: { peakTrunkLean: 0, peakSymmetry: {}, temporal: EMPTY_TEMPORAL_METRICS },
     repIndex: 0
   };
 }
@@ -47,11 +62,23 @@ function crosses(phase: RepPhase, angle: number): boolean {
   return phase.enter.direction === "above" ? angle >= phase.enter.angle : angle <= phase.enter.angle;
 }
 
-function accumulate(state: RepSegmenterState, angles: JointAngles): RepSegmenterState {
+function accumulate(
+  state: RepSegmenterState,
+  angles: JointAngles,
+  drivingJoint: JointName
+): RepSegmenterState {
   const peakAngles = { ...state.peakAngles };
+  const minAngles = { ...state.minAngles };
   for (const [joint, value] of Object.entries(angles.angles) as Array<[JointName, number]>) {
     peakAngles[joint] = Math.max(peakAngles[joint] ?? -Infinity, value);
+    minAngles[joint] = Math.min(minAngles[joint] ?? Infinity, value);
   }
+
+  const drivingAngle = angles.angles[drivingJoint];
+  const angleSamples =
+    drivingAngle === undefined
+      ? state.angleSamples
+      : [...state.angleSamples, { t: angles.t, angle: drivingAngle }];
 
   const confidenceValues = Object.values(angles.confidence) as number[];
   const confidenceSamples =
@@ -69,8 +96,12 @@ function accumulate(state: RepSegmenterState, angles: JointAngles): RepSegmenter
   return {
     ...state,
     peakAngles,
+    minAngles,
     confidenceSamples,
+    angleSamples,
+    trunkLeanSamples: [...state.trunkLeanSamples, angles.trunkLean],
     auxMetrics: {
+      ...state.auxMetrics,
       peakTrunkLean: Math.max(state.auxMetrics.peakTrunkLean, angles.trunkLean),
       peakSymmetry
     }
@@ -106,7 +137,8 @@ export function stepRepSegmenter(
 
   const started = accumulate(
     state.repStartT === null ? { ...state, repStartT: angles.t } : state,
-    angles
+    angles,
+    phase.joint
   );
 
   if (!crosses(phase, angle)) {
@@ -158,15 +190,21 @@ export function stepRepSegmenter(
     meanConfidence
   };
 
-  const aux = started.auxMetrics;
+  const aux: RepAuxMetrics = {
+    ...started.auxMetrics,
+    temporal: computeTemporalMetrics(started.angleSamples, started.trunkLeanSamples)
+  };
 
   const nextState: RepSegmenterState = {
     cursor: 0,
     phaseEnteredAt: null,
     repStartT: null,
     peakAngles: {},
+    minAngles: {},
     confidenceSamples: [],
-    auxMetrics: { peakTrunkLean: 0, peakSymmetry: {} },
+    angleSamples: [],
+    trunkLeanSamples: [],
+    auxMetrics: { peakTrunkLean: 0, peakSymmetry: {}, temporal: EMPTY_TEMPORAL_METRICS },
     repIndex: started.repIndex + 1
   };
 

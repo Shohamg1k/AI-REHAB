@@ -80,13 +80,31 @@ export const sitToStand: ExerciseSpec = {
 
   criteria: [
     {
+      id: "smoothness",
+      label: "Controlled, steady movement",
+      joint: "right_hip",
+      measure: "smoothness",
+      target: { min: 0.5, max: 1 },
+      tolerance: { warn: 0.15, fail: 0.3 },
+      weight: 1
+    },
+    {
+      id: "phase-balance",
+      label: "Lowering as slowly as lifting",
+      joint: "right_hip",
+      measure: "phase_balance",
+      target: { min: 0.6, max: 1 },
+      tolerance: { warn: 0.2, fail: 0.35 },
+      weight: 1
+    },
+    {
       id: "stand-tall",
       label: "Full hip extension when standing",
       joint: "right_hip",
       measure: "peak_angle",
       target: { min: 160, max: 185 },
       tolerance: { warn: 10, fail: 20 },
-      weight: 2
+      weight: 3
     },
     {
       id: "knee-extension",
@@ -95,7 +113,7 @@ export const sitToStand: ExerciseSpec = {
       measure: "peak_angle",
       target: { min: 160, max: 185 },
       tolerance: { warn: 10, fail: 20 },
-      weight: 2
+      weight: 3
     },
     {
       id: "tempo",
@@ -120,6 +138,22 @@ export const sitToStand: ExerciseSpec = {
   compensations: [],
 
   cues: [
+    {
+      id: "smoother",
+      triggerCriterion: "smoothness",
+      direction: "under",
+      text: "Try to move at one steady speed rather than in bursts.",
+      cooldownMs: 10000,
+      priority: 2
+    },
+    {
+      id: "control-the-return",
+      triggerCriterion: "phase-balance",
+      direction: "under",
+      text: "Lower back down as slowly as you lifted — don't let it drop.",
+      cooldownMs: 10000,
+      priority: 2
+    },
     {
       id: "stand-tall-cue",
       triggerCriterion: "stand-tall",

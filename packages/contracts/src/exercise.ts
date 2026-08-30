@@ -31,7 +31,23 @@ export const FormCriterionSchema = z.object({
   id: z.string(),
   label: z.string(),
   joint: JointNameSchema,
-  measure: z.enum(["peak_angle", "end_angle", "tempo_ms", "symmetry", "trunk_lean"]),
+  /**
+   * What this criterion reads off the rep. The first five are single-value
+   * readings; the last four summarise the movement's shape over time (see
+   * packages/core/src/reps/temporal.ts) so a rep is scored as a trajectory
+   * rather than a pose snapshot.
+   */
+  measure: z.enum([
+    "peak_angle",
+    "end_angle",
+    "tempo_ms",
+    "symmetry",
+    "trunk_lean",
+    "range_of_motion",
+    "smoothness",
+    "phase_balance",
+    "stability"
+  ]),
   target: z.object({ min: z.number(), max: z.number() }),
   tolerance: z.object({ warn: z.number().nonnegative(), fail: z.number().nonnegative() }),
   weight: z.number().positive()

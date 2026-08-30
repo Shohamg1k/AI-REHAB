@@ -7,6 +7,7 @@ import {
   createRepSegmenterState,
   stepRepSegmenter,
   scoreRep,
+  isFailedRep,
   selectCue,
   evaluateSafety,
   type CueCooldownState,
@@ -44,8 +45,6 @@ const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/w
 // which this environment cannot run without physical hardware.
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
-
-const PASS_SCORE_THRESHOLD = 50; // mirrors packages/eval/src/replay.ts
 
 let landmarker: PoseLandmarker | null = null;
 let smoother = new LandmarkSmoother();
@@ -202,7 +201,7 @@ function handleFrame(bitmap: ImageBitmap, t: number): void {
     if (step.closedRep) {
       const score = scoreRep(step.closedRep.rep, step.closedRep.aux, spec.criteria, captureQuality.score);
       closedRep = { rep: step.closedRep.rep, score };
-      consecutiveFailedReps = score.score <= PASS_SCORE_THRESHOLD ? consecutiveFailedReps + 1 : 0;
+      consecutiveFailedReps = isFailedRep(score) ? consecutiveFailedReps + 1 : 0;
 
       const cueResult = selectCue(score.breakdown, spec.criteria, spec.cues, cooldownState, t);
       cooldownState = cueResult.cooldownState;

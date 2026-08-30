@@ -82,13 +82,31 @@ export const standingShoulderAbduction: ExerciseSpec = {
 
   criteria: [
     {
+      id: "smoothness",
+      label: "Controlled, steady movement",
+      joint: "right_shoulder",
+      measure: "smoothness",
+      target: { min: 0.5, max: 1 },
+      tolerance: { warn: 0.15, fail: 0.3 },
+      weight: 1
+    },
+    {
+      id: "phase-balance",
+      label: "Lowering as slowly as lifting",
+      joint: "right_shoulder",
+      measure: "phase_balance",
+      target: { min: 0.6, max: 1 },
+      tolerance: { warn: 0.2, fail: 0.35 },
+      weight: 1
+    },
+    {
       id: "peak-abduction",
       label: "Arm raised to shoulder height",
       joint: "right_shoulder",
       measure: "peak_angle",
       target: { min: 80, max: 110 },
       tolerance: { warn: 10, fail: 25 },
-      weight: 2
+      weight: 4
     },
     {
       id: "tempo",
@@ -113,6 +131,22 @@ export const standingShoulderAbduction: ExerciseSpec = {
   compensations: [],
 
   cues: [
+    {
+      id: "smoother",
+      triggerCriterion: "smoothness",
+      direction: "under",
+      text: "Try to move at one steady speed rather than in bursts.",
+      cooldownMs: 10000,
+      priority: 2
+    },
+    {
+      id: "control-the-return",
+      triggerCriterion: "phase-balance",
+      direction: "under",
+      text: "Lower back down as slowly as you lifted — don't let it drop.",
+      cooldownMs: 10000,
+      priority: 2
+    },
     {
       id: "raise-higher",
       triggerCriterion: "peak-abduction",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FormCriterion, RepEvent } from "@ai-rehab/contracts";
-import { FORM_SCORE_CONFIDENCE_FLOOR, scoreRep, type RepAuxMetrics } from "../src/index.js";
+import { FORM_SCORE_CONFIDENCE_FLOOR, isFailedRep, scoreRep, type RepAuxMetrics } from "../src/index.js";
 
 const baseRep: RepEvent = {
   t: 1000,
@@ -13,7 +13,18 @@ const baseRep: RepEvent = {
   meanConfidence: 0.9
 };
 
-const aux: RepAuxMetrics = { peakTrunkLean: 3, peakSymmetry: {} };
+const aux: RepAuxMetrics = {
+  peakTrunkLean: 3,
+  peakSymmetry: {},
+  temporal: {
+    rangeOfMotion: 86,
+    smoothness: 0.8,
+    peakVelocity: 120,
+    phaseBalance: 0.9,
+    stability: 0.9,
+    sampleCount: 30
+  }
+};
 
 const criteria: FormCriterion[] = [
   {
@@ -90,5 +101,35 @@ describe("scoreRep", () => {
   it("always returns an empty compensations array — A5 is not built in the MVP", () => {
     const score = scoreRep(baseRep, aux, criteria, 1);
     expect(score.compensations).toEqual([]);
+  });
+});
+
+describe("isFailedRep — what counts toward the safety gate", () => {
+  it("counts a rep whose criterion failed outright, independent of the aggregate", () => {
+    // Why this replaced the old `score <= 50` cutoff: with the real
+    // seated-knee-extension weights, a rep reaching 140 deg of a 165-180 deg
+    // target scores 52 — above any cutoff you would pick, while having
+    // missed the entire point of the exercise. Asking "did a criterion
+    // fail" is independent of how the weighted average happens to land.
+    const shortRep: RepEvent = { ...baseRep, peakAngles: { left_knee: 140 } };
+    const score = scoreRep(shortRep, aux, criteria, 1);
+    expect(score.breakdown.find((b) => b.criterionId === "peak-extension")?.status).toBe("fail");
+    expect(isFailedRep(score)).toBe(true);
+  });
+
+  it("does not count a clean rep", () => {
+    expect(isFailedRep(scoreRep(baseRep, aux, criteria, 1))).toBe(false);
+  });
+
+  it("does not count a rep that only warns", () => {
+    const closeRep: RepEvent = { ...baseRep, peakAngles: { left_knee: 158 } };
+    const score = scoreRep(closeRep, aux, criteria, 1);
+    expect(score.breakdown.some((b) => b.status === "warn")).toBe(true);
+    expect(isFailedRep(score)).toBe(false);
+  });
+
+  it("does not count an unmeasurable criterion as a failure", () => {
+    const noJoint: RepEvent = { ...baseRep, peakAngles: {} };
+    expect(isFailedRep(scoreRep(noJoint, aux, criteria, 1))).toBe(false);
   });
 });
