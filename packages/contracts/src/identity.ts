@@ -26,7 +26,16 @@ export const UserSchema = z.object({
    * `POST /programs`, which refuses to assign an exercise targeting one of
    * these. Always `[]` for a clinician account.
    */
-  contraindicatedRegions: z.array(BodyRegionSchema)
+  contraindicatedRegions: z.array(BodyRegionSchema),
+  /**
+   * Patient-only consent flag (G5's other half — the audit log tells a
+   * patient who looked at their data; this controls whether a clinician
+   * can look at all). Turning it off does not remove the patient from
+   * their clinician's roster — joining a tenant via invite is a separate,
+   * deliberate act — it blocks `GET /patients/:id/sessions` for that
+   * patient until turned back on. Always `true` for a clinician account.
+   */
+  dataSharingEnabled: z.boolean()
 });
 export type User = z.infer<typeof UserSchema>;
 
@@ -34,6 +43,11 @@ export const UpdateContraindicationsRequestSchema = z.object({
   contraindicatedRegions: z.array(BodyRegionSchema)
 });
 export type UpdateContraindicationsRequest = z.infer<typeof UpdateContraindicationsRequestSchema>;
+
+export const UpdateDataSharingRequestSchema = z.object({
+  dataSharingEnabled: z.boolean()
+});
+export type UpdateDataSharingRequest = z.infer<typeof UpdateDataSharingRequestSchema>;
 
 export const TenantSchema = z.object({
   id: z.string(),

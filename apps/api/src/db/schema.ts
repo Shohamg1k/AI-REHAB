@@ -1,5 +1,6 @@
 import {
   bigserial,
+  boolean,
   index,
   integer,
   jsonb,
@@ -41,6 +42,9 @@ export const users = pgTable(
     // Patient-only; always [] for a clinician. Feeds E5 — see identity.ts's
     // doc comment on the contracts side.
     contraindicatedRegions: text("contraindicated_regions").array().notNull().default([]),
+    // Patient-only consent flag; always true for a clinician. See
+    // identity.ts's doc comment on the contracts side.
+    dataSharingEnabled: boolean("data_sharing_enabled").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
   },
   (t) => ({

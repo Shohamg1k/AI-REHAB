@@ -5,6 +5,7 @@ import type {
   BodyRegion,
   Program,
   ProgramExercise,
+  RomTrendSeries,
   SessionEvent,
   SessionSummary,
   Tenant,
@@ -51,6 +52,7 @@ export interface Store {
     userId: string,
     regions: BodyRegion[]
   ): Promise<User>;
+  updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User>;
 
   // --- invites ---
   createInvite(input: { tenantId: string; createdBy: string }): Promise<{
@@ -89,6 +91,7 @@ export interface Store {
   // --- projections (G2) ---
   getAdherence(tenantId: string, userId: string): Promise<AdherenceDay[]>;
   getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]>;
+  getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]>;
 
   // --- audit (G5 / F5) ---
   recordAccess(input: {

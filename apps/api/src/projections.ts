@@ -2,6 +2,7 @@ import type {
   AdherenceDay,
   BaselineEntry,
   JointName,
+  RomTrendSeries,
   SessionEvent,
   SessionSummary
 } from "@ai-rehab/contracts";
@@ -123,4 +124,56 @@ export function computeBaseline(sessions: StoredSession[]): BaselineEntry[] {
   }
 
   return baseline;
+}
+
+/**
+ * G2's range-of-motion trend — a real time series, unlike `computeBaseline`
+ * (which only ever keeps the first point per joint per exercise). Each
+ * session contributes at most one point per (exercise, joint): that
+ * session's best peak angle, so noisy individual reps don't dominate.
+ */
+export function computeRomTrend(sessions: StoredSession[]): RomTrendSeries[] {
+  const ordered = [...sessions].sort((a, b) => {
+    const aStart = sortedEvents(a).find((e) => e.type === "session_started");
+    const bStart = sortedEvents(b).find((e) => e.type === "session_started");
+    const aClock = aStart?.type === "session_started" ? aStart.wallClock : "";
+    const bClock = bStart?.type === "session_started" ? bStart.wallClock : "";
+    return aClock.localeCompare(bClock);
+  });
+
+  const seriesByExercise = new Map<string, Map<string, RomTrendSeries>>();
+
+  for (const session of ordered) {
+    let currentExerciseId: string | null = null;
+    let recordedAt: string | null = null;
+    const sessionBest = new Map<string, Map<string, number>>();
+
+    for (const event of sortedEvents(session)) {
+      if (event.type === "session_started") recordedAt = event.wallClock;
+      if (event.type === "exercise_started") currentExerciseId = event.exerciseId;
+      if (event.type === "rep_completed" && currentExerciseId) {
+        const byJoint = sessionBest.get(currentExerciseId) ?? new Map<string, number>();
+        sessionBest.set(currentExerciseId, byJoint);
+        for (const [joint, peakAngle] of Object.entries(event.rep.peakAngles) as Array<
+          [JointName, number]
+        >) {
+          const prev = byJoint.get(joint);
+          if (prev === undefined || peakAngle > prev) byJoint.set(joint, peakAngle);
+        }
+      }
+    }
+
+    if (!recordedAt) continue;
+    for (const [exerciseId, byJoint] of sessionBest) {
+      const exerciseSeries = seriesByExercise.get(exerciseId) ?? new Map<string, RomTrendSeries>();
+      seriesByExercise.set(exerciseId, exerciseSeries);
+      for (const [joint, peakAngle] of byJoint) {
+        const series = exerciseSeries.get(joint) ?? { exerciseId, joint, points: [] };
+        exerciseSeries.set(joint, series);
+        series.points.push({ recordedAt, peakAngle });
+      }
+    }
+  }
+
+  return [...seriesByExercise.values()].flatMap((byJoint) => [...byJoint.values()]);
 }

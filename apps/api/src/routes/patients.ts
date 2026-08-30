@@ -36,6 +36,12 @@ export function registerPatientRoutes(fastify: Parameters<FastifyPluginAsync>[0]
         return;
       }
 
+      const patient = await store.findUserById(auth.tenantId, patientId);
+      if (!patient?.dataSharingEnabled) {
+        forbidden(reply, "This patient has turned off data sharing with their clinician.");
+        return;
+      }
+
       await store.recordAccess({
         tenantId: auth.tenantId,
         actorId: auth.userId,

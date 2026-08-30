@@ -7,6 +7,7 @@ import type {
   CreateProgramRequest,
   Program,
   Role,
+  RomTrendSeries,
   SessionSummary,
   SyncResponse,
   User
@@ -95,6 +96,14 @@ export function updateContraindications(regions: BodyRegion[]): Promise<User> {
   );
 }
 
+export function updateDataSharing(enabled: boolean): Promise<User> {
+  return request(
+    "/me/data-sharing",
+    { method: "PUT", body: JSON.stringify({ dataSharingEnabled: enabled }) },
+    true
+  );
+}
+
 // --- patient: sync + history (G2/G6/H1/H2/G5) ---
 
 export function syncEvents(
@@ -114,6 +123,10 @@ export function fetchAdherence(): Promise<AdherenceDay[]> {
 
 export function fetchBaseline(): Promise<BaselineEntry[]> {
   return request("/projections/baseline", {}, true);
+}
+
+export function fetchRomTrend(): Promise<RomTrendSeries[]> {
+  return request("/projections/rom-trend", {}, true);
 }
 
 export function fetchAuditLog(): Promise<AuditEntry[]> {
