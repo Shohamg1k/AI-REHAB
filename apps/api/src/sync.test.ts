@@ -121,4 +121,57 @@ describe("G6 — sync is idempotent, and G2 projections read back correctly", ()
       { date: "2026-08-31", sessionCount: 1 }
     ]);
   });
+
+  it("computes a real ROM trend across sessions, one point per session using its best rep", async () => {
+    const { app } = await buildTestApp();
+    const { body: auth } = await signup(app, { email: "romtrend@example.com", password: "hunter22222", displayName: "R", role: "patient" });
+
+    function repWithAngle(seq: number, angle: number) {
+      const base = repCompletedEvent(seq, 80);
+      return { ...base, event: { ...base.event, rep: { ...base.event.rep, peakAngles: { right_knee: angle } } } };
+    }
+
+    // Session 1: two reps of the same joint — the trend point should be the
+    // session's best (90), not its last or its average.
+    await app.inject({
+      method: "POST",
+      url: "/events",
+      headers: authHeader(auth.token),
+      payload: {
+        sessionId: "rom-1",
+        events: [
+          { seq: 0, event: { type: "session_started", t: 0, sessionId: "rom-1", programId: null, wallClock: "2026-08-01T09:00:00.000Z" } },
+          { seq: 1, event: { type: "exercise_started", t: 1, exerciseId: "seated-knee-extension", prescribed: { sets: 1, reps: 2 } } },
+          repWithAngle(2, 75),
+          repWithAngle(3, 90)
+        ]
+      }
+    });
+    // Session 2, later: an improved peak angle.
+    await app.inject({
+      method: "POST",
+      url: "/events",
+      headers: authHeader(auth.token),
+      payload: {
+        sessionId: "rom-2",
+        events: [
+          { seq: 0, event: { type: "session_started", t: 0, sessionId: "rom-2", programId: null, wallClock: "2026-08-15T09:00:00.000Z" } },
+          { seq: 1, event: { type: "exercise_started", t: 1, exerciseId: "seated-knee-extension", prescribed: { sets: 1, reps: 1 } } },
+          repWithAngle(2, 112)
+        ]
+      }
+    });
+
+    const res = await app.inject({ method: "GET", url: "/projections/rom-trend", headers: authHeader(auth.token) });
+    expect(res.json()).toEqual([
+      {
+        exerciseId: "seated-knee-extension",
+        joint: "right_knee",
+        points: [
+          { recordedAt: "2026-08-01T09:00:00.000Z", peakAngle: 90 },
+          { recordedAt: "2026-08-15T09:00:00.000Z", peakAngle: 112 }
+        ]
+      }
+    ]);
+  });
 });

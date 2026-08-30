@@ -7,12 +7,19 @@ import type {
   BodyRegion,
   Program,
   ProgramExercise,
+  RomTrendSeries,
   SessionEvent,
   SessionSummary,
   Tenant,
   User
 } from "@ai-rehab/contracts";
-import { computeAdherence, computeBaseline, summariseSessions, type StoredSession } from "../projections.js";
+import {
+  computeAdherence,
+  computeBaseline,
+  computeRomTrend,
+  summariseSessions,
+  type StoredSession
+} from "../projections.js";
 import { withTenant, type Db } from "../db/client.js";
 import * as schema from "../db/schema.js";
 import { ConflictError, NotFoundError, type Store } from "./types.js";
@@ -27,6 +34,7 @@ function toUser(row: typeof schema.users.$inferSelect): User {
     displayName: row.displayName,
     role: row.role,
     contraindicatedRegions: (row.contraindicatedRegions ?? []) as BodyRegion[],
+    dataSharingEnabled: row.dataSharingEnabled,
     createdAt: row.createdAt.toISOString()
   };
 }
@@ -116,6 +124,18 @@ export class PostgresStore implements Store {
       const [row] = await tx
         .update(schema.users)
         .set({ contraindicatedRegions: regions })
+        .where(and(eq(schema.users.id, userId), eq(schema.users.tenantId, tenantId)))
+        .returning();
+      if (!row) throw new NotFoundError(`user "${userId}" not found`);
+      return toUser(row);
+    });
+  }
+
+  async updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User> {
+    return withTenant(this.db, tenantId, async (tx) => {
+      const [row] = await tx
+        .update(schema.users)
+        .set({ dataSharingEnabled: enabled })
         .where(and(eq(schema.users.id, userId), eq(schema.users.tenantId, tenantId)))
         .returning();
       if (!row) throw new NotFoundError(`user "${userId}" not found`);
@@ -343,6 +363,10 @@ export class PostgresStore implements Store {
 
   async getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]> {
     return computeBaseline(await this.fetchAllSessions(tenantId, userId));
+  }
+
+  async getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]> {
+    return computeRomTrend(await this.fetchAllSessions(tenantId, userId));
   }
 
   async recordAccess(input: {

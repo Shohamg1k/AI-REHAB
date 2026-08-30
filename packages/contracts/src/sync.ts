@@ -63,3 +63,23 @@ export const BaselineEntrySchema = z.object({
   recordedAt: z.string()
 });
 export type BaselineEntry = z.infer<typeof BaselineEntrySchema>;
+
+/**
+ * G2's range-of-motion trend: one point per session per (exercise, joint),
+ * the session's best peak angle for that joint — a session's best rep
+ * represents the ROM actually achieved that visit, not every rep's noise.
+ * Unlike `BaselineEntry` (a single first-ever reference point), this is a
+ * real time series, so it can show whether ROM is improving.
+ */
+export const RomTrendPointSchema = z.object({
+  recordedAt: z.string(),
+  peakAngle: z.number()
+});
+export type RomTrendPoint = z.infer<typeof RomTrendPointSchema>;
+
+export const RomTrendSeriesSchema = z.object({
+  exerciseId: z.string(),
+  joint: z.string(),
+  points: z.array(RomTrendPointSchema)
+});
+export type RomTrendSeries = z.infer<typeof RomTrendSeriesSchema>;

@@ -103,15 +103,17 @@ export function PatientDetailScreen({ patientId, onBack }: { patientId: string; 
             const row = selection[exercise.id]!;
             return (
               <div key={exercise.id} className="flex items-center gap-12">
-                <input
-                  type="checkbox"
-                  checked={row.selected}
-                  onChange={(e) =>
-                    setSelection((s) => ({ ...s, [exercise.id]: { ...row, selected: e.target.checked } }))
-                  }
-                  className="h-20 w-20"
-                />
-                <span className="flex-1 text-body-sm text-text-primary">{exercise.displayName}</span>
+                <label className="flex flex-1 items-center gap-12">
+                  <input
+                    type="checkbox"
+                    checked={row.selected}
+                    onChange={(e) =>
+                      setSelection((s) => ({ ...s, [exercise.id]: { ...row, selected: e.target.checked } }))
+                    }
+                    className="h-20 w-20"
+                  />
+                  <span className="text-body-sm text-text-primary">{exercise.displayName}</span>
+                </label>
                 <input
                   type="number"
                   min={1}

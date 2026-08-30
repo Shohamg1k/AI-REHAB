@@ -6,12 +6,19 @@ import type {
   BodyRegion,
   Program,
   ProgramExercise,
+  RomTrendSeries,
   SessionEvent,
   SessionSummary,
   Tenant,
   User
 } from "@ai-rehab/contracts";
-import { computeAdherence, computeBaseline, summariseSessions, type StoredSession } from "../projections.js";
+import {
+  computeAdherence,
+  computeBaseline,
+  computeRomTrend,
+  summariseSessions,
+  type StoredSession
+} from "../projections.js";
 import { ConflictError, NotFoundError, type Store } from "./types.js";
 
 const INVITE_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -59,6 +66,7 @@ export class MemoryStore implements Store {
       displayName: input.displayName,
       role: input.role,
       contraindicatedRegions: [],
+      dataSharingEnabled: true,
       passwordHash: input.passwordHash,
       createdAt: new Date().toISOString()
     };
@@ -75,6 +83,13 @@ export class MemoryStore implements Store {
     const user = this.users.get(userId);
     if (!user || user.tenantId !== tenantId) throw new NotFoundError(`user "${userId}" not found`);
     user.contraindicatedRegions = regions;
+    return stripPasswordHash(user);
+  }
+
+  async updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user || user.tenantId !== tenantId) throw new NotFoundError(`user "${userId}" not found`);
+    user.dataSharingEnabled = enabled;
     return stripPasswordHash(user);
   }
 
@@ -212,6 +227,12 @@ export class MemoryStore implements Store {
     void tenantId;
     const userSessions = this.sessions.get(userId);
     return computeBaseline(userSessions ? [...userSessions.values()] : []);
+  }
+
+  async getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]> {
+    void tenantId;
+    const userSessions = this.sessions.get(userId);
+    return computeRomTrend(userSessions ? [...userSessions.values()] : []);
   }
 
   async recordAccess(input: {

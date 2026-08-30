@@ -1,22 +1,23 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HistoryScreen } from "./HistoryScreen.js";
 import { setSession } from "../lib/authStore.js";
 
+const ME = {
+  id: "pat-1",
+  tenantId: "tenant-1",
+  email: "pat@example.com",
+  displayName: "Pat",
+  role: "patient" as const,
+  contraindicatedRegions: [],
+  dataSharingEnabled: true,
+  createdAt: "2026-01-01T00:00:00.000Z"
+};
+
 beforeEach(() => {
   vi.stubEnv("VITE_API_URL", "http://test.local");
-  setSession({
-    token: "t",
-    user: {
-      id: "pat-1",
-      tenantId: "tenant-1",
-      email: "pat@example.com",
-      displayName: "Pat",
-      role: "patient",
-      contraindicatedRegions: [],
-      createdAt: "2026-01-01T00:00:00.000Z"
-    }
-  });
+  setSession({ token: "t", user: ME });
 });
 
 afterEach(() => {
@@ -24,19 +25,32 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function mockThreeEndpoints(sessions: unknown[], adherence: unknown[], auditLog: unknown[]) {
-  global.fetch = vi.fn().mockImplementation((url: string) => {
+function mockEndpoints(overrides: {
+  sessions?: unknown[];
+  adherence?: unknown[];
+  auditLog?: unknown[];
+  romTrend?: unknown[];
+  me?: typeof ME;
+}) {
+  const { sessions = [], adherence = [], auditLog = [], romTrend = [], me = ME } = overrides;
+  global.fetch = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
     if (url.endsWith("/sessions")) return Promise.resolve({ ok: true, json: async () => sessions });
     if (url.includes("/projections/adherence")) return Promise.resolve({ ok: true, json: async () => adherence });
     if (url.endsWith("/audit-log")) return Promise.resolve({ ok: true, json: async () => auditLog });
+    if (url.includes("/projections/rom-trend")) return Promise.resolve({ ok: true, json: async () => romTrend });
+    if (url.endsWith("/me/data-sharing")) {
+      const body = JSON.parse((init?.body as string) ?? "{}");
+      return Promise.resolve({ ok: true, json: async () => ({ ...me, dataSharingEnabled: body.dataSharingEnabled }) });
+    }
+    if (url.endsWith("/auth/me")) return Promise.resolve({ ok: true, json: async () => me });
     return Promise.reject(new Error(`unexpected fetch: ${url}`));
   }) as unknown as typeof fetch;
 }
 
 describe("HistoryScreen", () => {
   it("renders sessions, adherence calendar, and audit log together", async () => {
-    mockThreeEndpoints(
-      [
+    mockEndpoints({
+      sessions: [
         {
           sessionId: "s1",
           wallClock: "2026-08-30T10:00:00.000Z",
@@ -46,8 +60,8 @@ describe("HistoryScreen", () => {
           endedReason: "completed"
         }
       ],
-      [{ date: new Date().toISOString().slice(0, 10), sessionCount: 1 }],
-      [
+      adherence: [{ date: new Date().toISOString().slice(0, 10), sessionCount: 1 }],
+      auditLog: [
         {
           id: "a1",
           actorId: "clin-1",
@@ -57,7 +71,7 @@ describe("HistoryScreen", () => {
           createdAt: "2026-08-30T11:00:00.000Z"
         }
       ]
-    );
+    });
 
     render(<HistoryScreen onBack={vi.fn()} />);
 
@@ -65,10 +79,11 @@ describe("HistoryScreen", () => {
     expect(screen.getByText(/8 reps/)).toBeInTheDocument();
     expect(screen.getByText(/Dr. Test/)).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument(); // the streak count
+    expect(screen.getByText(/First session/)).toBeInTheDocument();
   });
 
   it("shows empty states when nothing has synced yet", async () => {
-    mockThreeEndpoints([], [], []);
+    mockEndpoints({});
 
     render(<HistoryScreen onBack={vi.fn()} />);
 
@@ -86,5 +101,39 @@ describe("HistoryScreen", () => {
     render(<HistoryScreen onBack={vi.fn()} />);
 
     expect(await screen.findByText("server exploded")).toBeInTheDocument();
+  });
+
+  it("renders a range-of-motion trend with a delta since the first session", async () => {
+    mockEndpoints({
+      romTrend: [
+        {
+          exerciseId: "seated-knee-extension",
+          joint: "left_knee",
+          points: [
+            { recordedAt: "2026-08-01T00:00:00.000Z", peakAngle: 90 },
+            { recordedAt: "2026-08-15T00:00:00.000Z", peakAngle: 102 }
+          ]
+        }
+      ]
+    });
+
+    render(<HistoryScreen onBack={vi.fn()} />);
+
+    expect(await screen.findByText(/left knee/)).toBeInTheDocument();
+    expect(screen.getByText(/\+12° since first session/)).toBeInTheDocument();
+  });
+
+  it("toggling data sharing off calls the API and updates the label", async () => {
+    mockEndpoints({});
+    const user = userEvent.setup();
+
+    render(<HistoryScreen onBack={vi.fn()} />);
+
+    const toggle = await screen.findByRole("switch");
+    expect(screen.getByText(/clinician can view your session data/i)).toBeInTheDocument();
+
+    await user.click(toggle);
+
+    await waitFor(() => expect(screen.getByText(/cannot currently view/i)).toBeInTheDocument());
   });
 });
