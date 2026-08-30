@@ -10,16 +10,25 @@ A patient performs their prescribed exercises in front of a laptop or phone came
 
 ## Status
 
-**M0 + M1 built — the 15-feature MVP runs end to end.** A patient can pick an exercise, get camera setup coaching, do a coached set with live rep counting and corrective cues, bookmark a painful rep, and see a summary — all local-only. Read [`docs/STATUS.md`](docs/STATUS.md) for exactly what's verified vs. still needs a human with real hardware (short version: nobody has pointed a real camera at it yet, and no physiotherapist has reviewed the three exercises).
+**M0 + M1 (the 15-feature patient MVP) is merged and runs end to end, local-only.** M2 (a real multi-tenant backend — accounts, Postgres, cross-device sync, clinician program assignment) is built and tested on `feature/backend-data-spine`, pending merge. Read [`docs/STATUS.md`](docs/STATUS.md) for exactly what's verified vs. still needs a human with real hardware or infrastructure (short version: nobody has pointed a real camera at it yet, no physiotherapist has reviewed the three exercises, and there's no live Postgres to test the multi-tenancy policies against).
 
-### Run it
+### Run the patient app (no server needed)
 
 ```bash
 pnpm install
 pnpm --filter @ai-rehab/patient run dev
 ```
 
-Open the printed URL in a browser with a camera. Everything runs client-side — no server, no account, nothing leaves the device.
+Open the printed URL in a browser with a camera. Runs entirely client-side by default — no account, nothing leaves the device.
+
+### Run the full stack, including the backend
+
+```bash
+cp .env.example .env   # fill in JWT_SECRET — see the file for how
+docker compose up
+```
+
+Starts Postgres, `apps/api`, and the `services/rehab-engine` safety supervisor. Point `apps/patient` at it by setting `VITE_API_URL` (see `.env.example`) — this only enables an *optional* "sign in to sync" link; a full session never requires it.
 
 ```bash
 pnpm run ci      # boundaries, build, typecheck, lint, test, eval — what CI runs
@@ -60,7 +69,19 @@ packages/
 apps/
   patient/     The React app. src/worker/ runs MediaPipe + the whole core
                pipeline in a Web Worker; src/screens/ is the patient-facing
-               flow; src/lib/db.ts is the local IndexedDB event log (G1).
+               flow; src/lib/db.ts is the local IndexedDB event log (G1);
+               src/lib/{api,authStore,sync}.ts is the optional account/sync
+               layer on top of it (G6) — never required to use the app.
+  api/         The data spine (M2) — Fastify + TS. Auth, tenant-scoped
+               Postgres via Drizzle with row-level security, event sync,
+               clinician program assignment. src/store/ is a Store
+               interface with two implementations (Postgres, in-memory —
+               see its doc comment for why both exist).
+services/
+  rehab-engine/ Python + FastAPI. E5 — the session-level safety supervisor,
+               a second, coarser layer above apps/patient's real-time
+               frame-level gate. Not yet called from apps/api — see
+               docs/STATUS.md.
 docs/          Product, architecture, contracts, ADRs. Read CLAUDE.md first.
 design/        UX spec + Figma-exported screen artboards.
 ```
