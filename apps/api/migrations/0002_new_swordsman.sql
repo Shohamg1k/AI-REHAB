@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "contraindicated_regions" text[] DEFAULT '{}' NOT NULL;

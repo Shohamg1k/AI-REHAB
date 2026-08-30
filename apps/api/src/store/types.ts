@@ -2,6 +2,7 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  BodyRegion,
   Program,
   ProgramExercise,
   SessionEvent,
@@ -45,6 +46,11 @@ export interface Store {
   }): Promise<User>;
   findUserByEmail(email: string): Promise<(User & { passwordHash: string }) | null>;
   findUserById(tenantId: string, userId: string): Promise<User | null>;
+  updateContraindications(
+    tenantId: string,
+    userId: string,
+    regions: BodyRegion[]
+  ): Promise<User>;
 
   // --- invites ---
   createInvite(input: { tenantId: string; createdBy: string }): Promise<{

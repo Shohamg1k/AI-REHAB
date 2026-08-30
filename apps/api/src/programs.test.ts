@@ -27,8 +27,8 @@ describe("F6 (M2 slice) — clinician program assignment", () => {
         patientId: patient.body.user.id,
         notes: "Start gentle, twice a week.",
         exercises: [
-          { exerciseId: "sit-to-stand", sets: 2, reps: 8 },
-          { exerciseId: "seated-knee-extension", sets: 3, reps: 10 }
+          { exerciseId: "sit-to-stand", targetRegions: ["knee", "hip"], intensity: "medium", sets: 2, reps: 8 },
+          { exerciseId: "seated-knee-extension", targetRegions: ["knee"], intensity: "low", sets: 3, reps: 10 }
         ]
       }
     });
@@ -52,7 +52,7 @@ describe("F6 (M2 slice) — clinician program assignment", () => {
       method: "POST",
       url: "/programs",
       headers: authHeader(clinician.body.token),
-      payload: { patientId: outsider.body.user.id, exercises: [{ exerciseId: "sit-to-stand", sets: 1, reps: 1 }] }
+      payload: { patientId: outsider.body.user.id, exercises: [{ exerciseId: "sit-to-stand", targetRegions: ["knee", "hip"], intensity: "medium", sets: 1, reps: 1 }] }
     });
     expect(res.statusCode).toBe(403);
   });
@@ -64,7 +64,7 @@ describe("F6 (M2 slice) — clinician program assignment", () => {
       method: "POST",
       url: "/programs",
       headers: authHeader(patient.body.token),
-      payload: { patientId: patient.body.user.id, exercises: [{ exerciseId: "sit-to-stand", sets: 1, reps: 1 }] }
+      payload: { patientId: patient.body.user.id, exercises: [{ exerciseId: "sit-to-stand", targetRegions: ["knee", "hip"], intensity: "medium", sets: 1, reps: 1 }] }
     });
     expect(res.statusCode).toBe(403);
   });

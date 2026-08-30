@@ -3,6 +3,7 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  BodyRegion,
   Program,
   ProgramExercise,
   SessionEvent,
@@ -57,11 +58,23 @@ export class MemoryStore implements Store {
       email: normalizedEmail,
       displayName: input.displayName,
       role: input.role,
+      contraindicatedRegions: [],
       passwordHash: input.passwordHash,
       createdAt: new Date().toISOString()
     };
     this.users.set(user.id, user);
     this.usersByEmail.set(normalizedEmail, user.id);
+    return stripPasswordHash(user);
+  }
+
+  async updateContraindications(
+    tenantId: string,
+    userId: string,
+    regions: BodyRegion[]
+  ): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user || user.tenantId !== tenantId) throw new NotFoundError(`user "${userId}" not found`);
+    user.contraindicatedRegions = regions;
     return stripPasswordHash(user);
   }
 

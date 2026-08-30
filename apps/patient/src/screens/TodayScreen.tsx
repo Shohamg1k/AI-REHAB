@@ -3,12 +3,26 @@ import { RationaleCard } from "../components/RationaleCard.js";
 import { Button } from "../components/Button.js";
 
 /** M2/M3 (trimmed for MVP) — pick today's exercise, C6 rationale shown per option. */
-export function TodayScreen({ onPick }: { onPick: (exerciseId: string) => void }) {
+export function TodayScreen({
+  onPick,
+  onViewHistory
+}: {
+  onPick: (exerciseId: string) => void;
+  /** Only provided when signed in with a server configured — G2/H1/H2/G5's UI. */
+  onViewHistory?: () => void;
+}) {
   return (
     <div className="flex flex-col gap-20 px-16 py-24 max-w-lg mx-auto w-full">
-      <div>
-        <h1 className="text-heading-20 text-text-primary">Today's session</h1>
-        <p className="text-body-sm text-text-secondary mt-4">Choose an exercise to begin.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-heading-20 text-text-primary">Today's session</h1>
+          <p className="text-body-sm text-text-secondary mt-4">Choose an exercise to begin.</p>
+        </div>
+        {onViewHistory && (
+          <button type="button" onClick={onViewHistory} className="text-body-sm text-brand underline">
+            History
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-16">

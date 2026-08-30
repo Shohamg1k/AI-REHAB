@@ -1,4 +1,16 @@
-import type { AuthResponse, Role, SessionSummary, SyncResponse } from "@ai-rehab/contracts";
+import type {
+  AdherenceDay,
+  AuditEntry,
+  AuthResponse,
+  BaselineEntry,
+  BodyRegion,
+  CreateProgramRequest,
+  Program,
+  Role,
+  SessionSummary,
+  SyncResponse,
+  User
+} from "@ai-rehab/contracts";
 import { getSession } from "./authStore.js";
 
 /**
@@ -17,7 +29,8 @@ export class ApiUnavailableError extends Error {
 export class ApiError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
+    public body?: unknown
   ) {
     super(message);
   }
@@ -35,7 +48,11 @@ export function isApiConfigured(): boolean {
 
 async function request<T>(path: string, init: RequestInit = {}, authed = false): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  // Only when there's an actual body: Fastify's JSON body parser rejects a
+  // request that declares this content-type but sends zero bytes (a bare
+  // POST with no payload, like /invites) — found by actually clicking
+  // through the flow in a browser, not by inspection.
+  if (init.body !== undefined) headers.set("Content-Type", "application/json");
   if (authed) {
     const session = getSession();
     if (!session) throw new ApiError(401, "Not signed in.");
@@ -45,10 +62,12 @@ async function request<T>(path: string, init: RequestInit = {}, authed = false):
   const res = await fetch(`${baseUrl()}${path}`, { ...init, headers });
   const body = await res.json().catch(() => null);
   if (!res.ok) {
-    throw new ApiError(res.status, body?.message ?? body?.error ?? `Request to ${path} failed (${res.status}).`);
+    throw new ApiError(res.status, body?.message ?? body?.error ?? `Request to ${path} failed (${res.status}).`, body);
   }
   return body as T;
 }
+
+// --- auth ---
 
 export function signup(input: {
   email: string;
@@ -64,6 +83,20 @@ export function login(email: string, password: string): Promise<AuthResponse> {
   return request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
 }
 
+export function fetchMe(): Promise<User> {
+  return request("/auth/me", {}, true);
+}
+
+export function updateContraindications(regions: BodyRegion[]): Promise<User> {
+  return request(
+    "/me/contraindications",
+    { method: "PUT", body: JSON.stringify({ contraindicatedRegions: regions }) },
+    true
+  );
+}
+
+// --- patient: sync + history (G2/G6/H1/H2/G5) ---
+
 export function syncEvents(
   sessionId: string,
   events: Array<{ seq: number; event: unknown }>
@@ -73,4 +106,38 @@ export function syncEvents(
 
 export function fetchSessions(): Promise<SessionSummary[]> {
   return request("/sessions", {}, true);
+}
+
+export function fetchAdherence(): Promise<AdherenceDay[]> {
+  return request("/projections/adherence", {}, true);
+}
+
+export function fetchBaseline(): Promise<BaselineEntry[]> {
+  return request("/projections/baseline", {}, true);
+}
+
+export function fetchAuditLog(): Promise<AuditEntry[]> {
+  return request("/audit-log", {}, true);
+}
+
+export function fetchMyProgram(): Promise<Program | null> {
+  return request("/programs/mine", {}, true);
+}
+
+// --- clinician (F6) ---
+
+export function fetchPatients(): Promise<User[]> {
+  return request("/patients", {}, true);
+}
+
+export function fetchPatientSessions(patientId: string): Promise<SessionSummary[]> {
+  return request(`/patients/${patientId}/sessions`, {}, true);
+}
+
+export function createInvite(): Promise<{ code: string; expiresAt: string }> {
+  return request("/invites", { method: "POST" }, true);
+}
+
+export function createProgram(input: CreateProgramRequest): Promise<Program> {
+  return request("/programs", { method: "POST", body: JSON.stringify(input) }, true);
 }

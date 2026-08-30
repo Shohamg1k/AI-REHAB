@@ -4,6 +4,7 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  BodyRegion,
   Program,
   ProgramExercise,
   SessionEvent,
@@ -25,6 +26,7 @@ function toUser(row: typeof schema.users.$inferSelect): User {
     email: row.email,
     displayName: row.displayName,
     role: row.role,
+    contraindicatedRegions: (row.contraindicatedRegions ?? []) as BodyRegion[],
     createdAt: row.createdAt.toISOString()
   };
 }
@@ -103,6 +105,22 @@ export class PostgresStore implements Store {
       .where(and(eq(schema.users.id, userId), eq(schema.users.tenantId, tenantId)))
       .limit(1);
     return row ? toUser(row) : null;
+  }
+
+  async updateContraindications(
+    tenantId: string,
+    userId: string,
+    regions: BodyRegion[]
+  ): Promise<User> {
+    return withTenant(this.db, tenantId, async (tx) => {
+      const [row] = await tx
+        .update(schema.users)
+        .set({ contraindicatedRegions: regions })
+        .where(and(eq(schema.users.id, userId), eq(schema.users.tenantId, tenantId)))
+        .returning();
+      if (!row) throw new NotFoundError(`user "${userId}" not found`);
+      return toUser(row);
+    });
   }
 
   async createInvite(input: { tenantId: string; createdBy: string }) {
@@ -202,6 +220,8 @@ export class PostgresStore implements Store {
             tenantId: input.tenantId,
             programId: programRow.id,
             exerciseId: ex.exerciseId,
+            targetRegions: ex.targetRegions,
+            intensity: ex.intensity,
             sets: ex.sets,
             reps: ex.reps,
             sortOrder: ex.sortOrder
@@ -245,6 +265,8 @@ export class PostgresStore implements Store {
         notes: programRow.notes,
         exercises: exerciseRows.map((e) => ({
           exerciseId: e.exerciseId,
+          targetRegions: e.targetRegions as BodyRegion[],
+          intensity: e.intensity,
           sets: e.sets,
           reps: e.reps,
           sortOrder: e.sortOrder

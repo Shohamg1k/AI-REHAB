@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { BodyRegion, FormScore, RepEvent } from "@ai-rehab/contracts";
+import type { BodyRegion, FormScore, RepEvent, User } from "@ai-rehab/contracts";
 import { getExerciseSpec } from "@ai-rehab/exercises";
 import { DisclaimerBar } from "./components/DisclaimerBar.js";
 import { WelcomeScreen } from "./screens/WelcomeScreen.js";
@@ -8,10 +8,14 @@ import { CoachedSession, type CoachedSessionResult } from "./screens/CoachedSess
 import { PainCheckInScreen } from "./screens/PainCheckInScreen.js";
 import { SessionSummaryScreen } from "./screens/SessionSummaryScreen.js";
 import { AuthScreen } from "./screens/AuthScreen.js";
+import { HistoryScreen } from "./screens/HistoryScreen.js";
+import { ClinicianApp } from "./clinician/ClinicianApp.js";
 import { appendEvent } from "./lib/db.js";
 import { syncPendingSessions, syncSession } from "./lib/sync.js";
+import { clearSession, getSession } from "./lib/authStore.js";
+import { isApiConfigured } from "./lib/api.js";
 
-type Screen = "welcome" | "auth" | "today" | "session" | "pain-check-in" | "summary";
+type Screen = "welcome" | "auth" | "today" | "session" | "pain-check-in" | "summary" | "history";
 
 type ActiveSession = {
   sessionId: string;
@@ -33,6 +37,7 @@ export default function App() {
   const [exerciseId, setExerciseId] = useState<string | null>(null);
   const [completedSet, setCompletedSet] = useState<CompletedSet | null>(null);
   const [painReport, setPainReport] = useState<{ region: BodyRegion | null; severity: number } | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getSession()?.user ?? null);
   const sessionRef = useRef<ActiveSession | null>(null);
 
   useEffect(() => {
@@ -112,15 +117,47 @@ export default function App() {
     setScreen("today");
   }
 
+  function handleSignOut() {
+    clearSession();
+    setCurrentUser(null);
+    setScreen("welcome");
+  }
+
+  // ADR-0005 — a clinician gets an entirely different app shell, not a
+  // role-gated screen inside the patient flow. Still wrapped in the same
+  // disclaimer bar (E4 applies regardless of who's looking at the app).
+  if (currentUser?.role === "clinician") {
+    return (
+      <div className="min-h-screen flex flex-col bg-page">
+        <DisclaimerBar />
+        <main className="flex-1 flex flex-col">
+          <ClinicianApp user={currentUser} onSignOut={handleSignOut} />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-page">
       <DisclaimerBar />
       <main className="flex-1 flex flex-col">
         {screen === "welcome" && <WelcomeScreen onStart={handleStart} onSignIn={() => setScreen("auth")} />}
         {screen === "auth" && (
-          <AuthScreen onDone={() => setScreen("welcome")} onBack={() => setScreen("welcome")} />
+          <AuthScreen
+            onDone={(user) => {
+              setCurrentUser(user);
+              setScreen(user.role === "clinician" ? "welcome" : "today");
+            }}
+            onBack={() => setScreen("welcome")}
+          />
         )}
-        {screen === "today" && <TodayScreen onPick={handlePickExercise} />}
+        {screen === "today" && (
+          <TodayScreen
+            onPick={handlePickExercise}
+            onViewHistory={isApiConfigured() && currentUser ? () => setScreen("history") : undefined}
+          />
+        )}
+        {screen === "history" && <HistoryScreen onBack={() => setScreen("today")} />}
         {screen === "session" && exerciseId && (
           <CoachedSession
             exerciseId={exerciseId}
