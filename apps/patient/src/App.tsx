@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { BodyRegion, FormScore, RepEvent } from "@ai-rehab/contracts";
 import { getExerciseSpec } from "@ai-rehab/exercises";
 import { DisclaimerBar } from "./components/DisclaimerBar.js";
@@ -7,9 +7,11 @@ import { TodayScreen } from "./screens/TodayScreen.js";
 import { CoachedSession, type CoachedSessionResult } from "./screens/CoachedSession.js";
 import { PainCheckInScreen } from "./screens/PainCheckInScreen.js";
 import { SessionSummaryScreen } from "./screens/SessionSummaryScreen.js";
+import { AuthScreen } from "./screens/AuthScreen.js";
 import { appendEvent } from "./lib/db.js";
+import { syncPendingSessions, syncSession } from "./lib/sync.js";
 
-type Screen = "welcome" | "today" | "session" | "pain-check-in" | "summary";
+type Screen = "welcome" | "auth" | "today" | "session" | "pain-check-in" | "summary";
 
 type ActiveSession = {
   sessionId: string;
@@ -32,6 +34,12 @@ export default function App() {
   const [completedSet, setCompletedSet] = useState<CompletedSet | null>(null);
   const [painReport, setPainReport] = useState<{ region: BodyRegion | null; severity: number } | null>(null);
   const sessionRef = useRef<ActiveSession | null>(null);
+
+  useEffect(() => {
+    // G6 — flush anything a previous visit didn't manage to sync. A no-op
+    // if there's no server configured or nobody's signed in.
+    void syncPendingSessions();
+  }, []);
 
   function sessionT(): number {
     return sessionRef.current ? performance.now() - sessionRef.current.startPerf : 0;
@@ -90,7 +98,12 @@ export default function App() {
   function handleSummaryDone() {
     const session = sessionRef.current;
     if (session) {
-      appendEvent(session.sessionId, { type: "session_ended", t: sessionT(), reason: "completed" });
+      // Chained, not fire-and-forget in parallel: syncSession reads back
+      // everything written so far, so it must wait for this write to
+      // actually land or it can sync a session missing its final event.
+      void appendEvent(session.sessionId, { type: "session_ended", t: sessionT(), reason: "completed" }).then(() =>
+        syncSession(session.sessionId)
+      );
     }
     sessionRef.current = null;
     setExerciseId(null);
@@ -103,7 +116,10 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-page">
       <DisclaimerBar />
       <main className="flex-1 flex flex-col">
-        {screen === "welcome" && <WelcomeScreen onStart={handleStart} />}
+        {screen === "welcome" && <WelcomeScreen onStart={handleStart} onSignIn={() => setScreen("auth")} />}
+        {screen === "auth" && (
+          <AuthScreen onDone={() => setScreen("welcome")} onBack={() => setScreen("welcome")} />
+        )}
         {screen === "today" && <TodayScreen onPick={handlePickExercise} />}
         {screen === "session" && exerciseId && (
           <CoachedSession

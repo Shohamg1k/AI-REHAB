@@ -20,19 +20,29 @@ interface RehabDB extends DBSchema {
     value: StoredEvent;
     indexes: { sessionId: string };
   };
+  /** G6 — which sessions have been flushed to apps/api. Sync is opportunistic and best-effort, not a queue with backoff. */
+  syncedSessions: {
+    key: string; // sessionId
+    value: { sessionId: string; syncedAt: string };
+  };
 }
 
 const DB_NAME = "ai-rehab-coach";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<RehabDB>> | null = null;
 
 function getDb(): Promise<IDBPDatabase<RehabDB>> {
   if (!dbPromise) {
     dbPromise = openDB<RehabDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        const store = db.createObjectStore("events", { keyPath: "seq", autoIncrement: true });
-        store.createIndex("sessionId", "sessionId");
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const store = db.createObjectStore("events", { keyPath: "seq", autoIncrement: true });
+          store.createIndex("sessionId", "sessionId");
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore("syncedSessions", { keyPath: "sessionId" });
+        }
       }
     });
   }
@@ -62,4 +72,17 @@ export async function listSessions(): Promise<
   return started
     .map((e) => ({ sessionId: e.sessionId, wallClock: e.wallClock, programId: e.programId }))
     .sort((a, b) => (a.wallClock < b.wallClock ? 1 : -1));
+}
+
+export async function markSessionSynced(sessionId: string): Promise<void> {
+  const db = await getDb();
+  await db.put("syncedSessions", { sessionId, syncedAt: new Date().toISOString() });
+}
+
+/** Every session that has ever been logged locally but not yet flushed to apps/api. */
+export async function listUnsyncedSessionIds(): Promise<string[]> {
+  const db = await getDb();
+  const [all, syncedKeys] = await Promise.all([listSessions(), db.getAllKeys("syncedSessions")]);
+  const synced = new Set(syncedKeys);
+  return all.map((s) => s.sessionId).filter((id) => !synced.has(id));
 }

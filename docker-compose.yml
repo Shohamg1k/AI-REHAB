@@ -1,0 +1,77 @@
+version: "3.9"
+
+# Local multi-service orchestration for the data spine (M2) — apps/api,
+# Postgres, and the E5 supervisor. `docker compose up` from the repo root.
+#
+# ADR-0006 (regulatory posture / data residency) is still open — this is a
+# local/self-hosted dev posture, not a production deployment. See
+# docs/STATUS.md before pointing this at anything carrying real patient
+# data.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rehab
+      POSTGRES_PASSWORD: rehab_dev_only
+      POSTGRES_DB: rehab
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rehab"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rehab-engine:
+    build:
+      context: ./services/rehab-engine
+    # No published port on purpose: apps/api reaches this by service name
+    # on the compose-internal network only. docs/ARCHITECTURE.md §1 — "the
+    # browser never calls the Python service directly."
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      # The `rehab` role above owns every table, which means it bypasses
+      # RLS by Postgres's own default (table owners always do) — the
+      # policies in migrations/0001_rls.sql exist and are exercised by
+      # this connection's migration step, but are NOT actually enforced
+      # against it at runtime. A real deployment needs a second,
+      # non-owner role for this connection string specifically — see the
+      # comment on this in migrations/0001_rls.sql and the explicit flag
+      # in docs/STATUS.md. Not fixed here because there is no live
+      # Postgres in the environment that built this to verify a role
+      # split against.
+      DATABASE_URL: postgres://rehab:rehab_dev_only@postgres:5432/rehab
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in a .env file at the repo root — see .env.example}
+      PORT: 3001
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      REHAB_ENGINE_URL: http://rehab-engine:8000
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rehab-engine:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
