@@ -16,7 +16,13 @@ const captureQuality = {
   score: 0.9,
   framing: "ok" as const,
   lighting: "ok" as const,
-  missingJoints: []
+  missingJoints: [],
+  missingLandmarks: [],
+  landmarkChecks: [
+    { landmark: "LEFT_SHOULDER" as const, status: "ok" as const, visibility: 0.9 }
+  ],
+  guidance: [{ severity: "ok" as const, message: "Great positioning." }],
+  requiredLandmarksOk: true
 };
 
 describe("PoseFrame", () => {

@@ -28,10 +28,37 @@ export const sitToStand: ExerciseSpec = {
   progression: null,
   regression: "seated-knee-extension",
 
+  referenceMedia: {
+    type: "image",
+    url: "/reference/sit-to-stand.svg",
+    instructions:
+      "Sit toward the front of a sturdy chair, feet flat and shoulder-width apart. Lean forward slightly, push through your feet to stand fully upright, then sit back down under control.",
+    keyPoints: [
+      "Feet flat, roughly shoulder-width apart",
+      "Lean forward slightly to start the movement",
+      "Stand all the way up — hips and knees straight",
+      "Sit down slowly rather than dropping"
+    ]
+  },
+
   setup: {
     view: "side",
     posture: "seated",
-    requiredJoints: ["right_hip", "right_knee", "right_shoulder"]
+    // Joints actually scored by `criteria`: hip and knee extension, plus trunk lean.
+    requiredJoints: ["right_hip", "right_knee", "trunk"],
+    // Genuinely full-body: the movement is scored on hip and knee extension
+    // together with trunk lean, so torso and the whole working leg must all
+    // stay in frame. This is the exercise that legitimately needs the wide
+    // shot — the other two do not.
+    requiredLandmarks: [
+      "LEFT_SHOULDER",
+      "RIGHT_SHOULDER",
+      "LEFT_HIP",
+      "RIGHT_HIP",
+      "RIGHT_KNEE",
+      "RIGHT_ANKLE"
+    ],
+    framingHint: "Place the camera side-on and step back so your head, hips, knees and ankles are all in view."
   },
 
   // See the comment on seated-knee-extension's phases: the enter angle

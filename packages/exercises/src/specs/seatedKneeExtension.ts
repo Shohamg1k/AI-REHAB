@@ -23,10 +23,36 @@ export const seatedKneeExtension: ExerciseSpec = {
   progression: "sit-to-stand",
   regression: null,
 
+  referenceMedia: {
+    type: "image",
+    url: "/reference/seated-knee-extension.svg",
+    instructions:
+      "Sit tall in a chair with both feet flat on the floor. Straighten one knee until your leg is level, hold briefly, then lower it slowly.",
+    keyPoints: [
+      "Sit upright, back supported",
+      "Straighten the knee fully at the top",
+      "Hold for a moment at the top",
+      "Lower slowly — don't let the leg drop"
+    ]
+  },
+
   setup: {
     view: "front",
     posture: "seated",
-    requiredJoints: ["right_knee", "right_hip"]
+    // Joints actually scored by `criteria` — the knee angle and trunk lean.
+    requiredJoints: ["right_knee", "trunk"],
+    // Lower body plus torso. The trunk-stability criterion needs both
+    // shoulders and hips; the knee angle needs hip -> knee -> ankle. Wrists,
+    // elbows, feet and face are never measured, so they may be out of frame.
+    requiredLandmarks: [
+      "LEFT_SHOULDER",
+      "RIGHT_SHOULDER",
+      "LEFT_HIP",
+      "RIGHT_HIP",
+      "RIGHT_KNEE",
+      "RIGHT_ANKLE"
+    ],
+    framingHint: "Sit side-on to the camera with your torso, right hip, knee and ankle in view. Your arms don't need to be in frame."
   },
 
   // The concentric phase's enter angle (120°) is deliberately well below the

@@ -39,9 +39,35 @@ type CaptureQuality = {
   score: number;                      // 0..1 — drives A7 badge and G7 gating
   framing: 'ok' | 'too_close' | 'too_far' | 'partially_out_of_frame';
   lighting: 'ok' | 'dim' | 'blown_out';
-  missingJoints: JointName[];         // required-but-not-visible for this exercise
+  missingJoints: JointName[];         // legacy view, kept for events written before landmark framing
+  missingLandmarks: PoseLandmarkName[];  // required-but-not-usable, the authoritative list
+  landmarkChecks: LandmarkCheck[];    // per-required-landmark status, drives the A7 checklist
+  guidance: FramingGuidance[];        // patient-facing instructions, worst-first
+  requiredLandmarksOk: boolean;       // false => scoring is paused (G7)
+};
+
+type LandmarkCheck = {
+  landmark: PoseLandmarkName;
+  status: 'ok' | 'low_confidence' | 'out_of_frame' | 'not_detected';
+  visibility: number;                 // 0..1
+};
+
+type FramingGuidance = { severity: 'ok' | 'warn' | 'fail'; message: string };
+```
+
+**Framing is exercise-scoped, not whole-body.** `CaptureQuality` answers "can I see what *this exercise* needs", never "is the whole body visible". The landmarks judged come from `ExerciseSpec.setup.requiredLandmarks`; everything else may be out of frame without penalty. An upper-body exercise must not fail because the patient's feet are off camera.
+
+```ts
+type ReferenceMedia = {
+  type: 'image' | 'video' | 'animation';
+  url: string;                        // bundled asset path or remote URL
+  thumbnail?: string;
+  instructions: string;               // required — media is never the only channel
+  keyPoints?: string[];               // ordered technique cues
 };
 ```
+
+**Rule:** reference media is *outbound presentation only*. It is never produced from the camera and nothing writes to it at runtime — it cannot become a channel for patient imagery (ADR-0002).
 
 **Rule:** `PoseFrame` is the only place raw landmarks exist. Nothing downstream of `core/pose` sees a landmark array — it sees angles and derived features. This is what keeps the "never persist video-like data" invariant enforceable by inspection.
 
@@ -106,9 +132,12 @@ type ExerciseSpec = {
   setup: {
     view: 'front' | 'side' | 'either';
     posture: 'seated' | 'standing' | 'supine' | 'prone';
-    requiredJoints: JointName[];      // gates A7 capture quality
+    requiredJoints: JointName[];      // joints this exercise MEASURES (drives A2/A4)
+    requiredLandmarks?: PoseLandmarkName[];  // landmarks the CAMERA must see (drives A7)
+    framingHint?: string;             // plain-language setup instruction
   };
   phases: RepPhase[];                 // drives the A4 segmentation FSM
+  referenceMedia?: ReferenceMedia;    // optional demonstration image/video/animation
   criteria: FormCriterion[];          // drives A2 scoring
   compensations: CompensationRule[];  // drives A5
   cues: CueTemplate[];                // drives A3

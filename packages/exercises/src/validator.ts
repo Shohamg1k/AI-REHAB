@@ -1,4 +1,9 @@
-import { ExerciseSpecSchema, type ExerciseSpec } from "@ai-rehab/contracts";
+import {
+  ExerciseSpecSchema,
+  JOINT_TO_LANDMARKS,
+  type ExerciseSpec,
+  type PoseLandmarkName
+} from "@ai-rehab/contracts";
 
 /**
  * Authoring-time validation for the exercise DSL (A6). Checks the Zod shape
@@ -27,6 +32,23 @@ export function validateExerciseSpec(spec: ExerciseSpec): ExerciseSpec {
 
   if (spec.phases.length === 0) {
     throw new ExerciseSpecValidationError(`${spec.id}: must define at least one phase`);
+  }
+
+  // A spec that declares an explicit framing contract must still include
+  // every landmark its own measurements depend on — otherwise framing would
+  // pass while scoring silently had nothing to measure.
+  const declared = spec.setup.requiredLandmarks;
+  if (declared && declared.length > 0) {
+    const declaredSet = new Set<PoseLandmarkName>(declared);
+    for (const joint of spec.setup.requiredJoints) {
+      const needed = JOINT_TO_LANDMARKS[joint] ?? [];
+      const absent = needed.filter((l) => !declaredSet.has(l));
+      if (absent.length > 0) {
+        throw new ExerciseSpecValidationError(
+          `${spec.id}: setup.requiredLandmarks is missing ${absent.join(", ")}, needed to measure joint "${joint}"`
+        );
+      }
+    }
   }
 
   if (spec.provisional && !spec.provisionalNote) {
