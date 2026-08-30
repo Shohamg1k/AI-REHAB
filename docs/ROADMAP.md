@@ -4,7 +4,7 @@ Six milestones over sixteen weeks, then scale. Every milestone ends in something
 
 Feature IDs reference [FEATURES.md](FEATURES.md). Week estimates assume a three-person team at full time — scale proportionally.
 
-> **Current position:** M0 + M1 built (single session, 2026-08-29) — the 15-feature MVP runs end to end. Real-device validation (the M0 spike's fps/jitter measurement) and a physiotherapist's sign-off on the three exercises' reference ranges are still open. See [STATUS.md](STATUS.md).
+> **Current position:** M0 + M1 built and merged. M2 (the data spine — auth, tenant-scoped Postgres, event sync, program assignment, an E5 session supervisor) built and tested on a branch, pending merge. Real-device validation (the M0 spike's fps/jitter measurement), a physiotherapist's sign-off on the three exercises' reference ranges, and live-Postgres verification of the RLS policies are still open. See [STATUS.md](STATUS.md).
 
 ---
 

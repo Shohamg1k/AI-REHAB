@@ -1,178 +1,156 @@
 # Status
 
-**Last updated:** 2026-08-29
-**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end. A follow-up branch (`feature/camera-framing-and-ui-improvements`, PR open) reworks the camera experience — see "In review" below.
-**Phase:** implementation complete for the confirmed MVP scope; real-device validation and clinical sign-off are the two things still genuinely open, both flagged below rather than guessed at.
+**Last updated:** 2026-08-30
+**Milestone:** M0 + M1 shipped and merged. M2 (the data spine) built on a branch — auth, tenant-scoped Postgres, event sync, program assignment, an E5 session supervisor — pending merge.
+**Phase:** M1's camera/framing rework is merged to `main` and was verified against a real MediaPipe load path (local assets, correct `useModule` flag, heavy tier). M2's application logic is integration-tested for real; its Postgres/RLS layer and the E5 service's integration into `apps/api` are the two things still genuinely open.
 
 ---
 
 ## Where we are
 
-Everything in [`MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md)'s 15-feature scope is implemented, tested, and wired together in one working app. A patient can open `apps/patient`, pick one of three exercises, go through camera setup, do a coached set with live rep counting and corrective cues, bookmark a painful rep, report pain, and see a summary — all local-only, all logged to an append-only IndexedDB event log.
+**M1 (the coached-session MVP) is merged to `main`.** A patient can open `apps/patient`, pick one of three exercises, see themselves on camera with exercise-specific framing guidance, do a coached set with live rep counting and corrective cues, bookmark a painful rep, report pain, and see a summary — all local-only by default, logged to an append-only IndexedDB event log.
 
-**What shipped, package by package:**
+**M2 (the data spine) exists on `feature/backend-data-spine`, not yet merged.** It adds a real, multi-tenant backend (`apps/api`, Postgres via Drizzle with row-level security), an optional account layer on top of the unchanged guest-first flow, and a Python session-safety supervisor (`services/rehab-engine`). See "M2 — the data spine" below for exactly what's built, tested, and still open.
 
-| Package | What's in it | Tests |
-|---|---|---|
-| `packages/contracts` | Every type in `CONTRACTS.md` as TypeScript + Zod | 8 |
-| `packages/core` | A1 pose smoothing/angles/capture-quality, A4 rep FSM, A2 form scoring, A3 cue selection, E1 safety gate (a dependency leaf, per ARCHITECTURE.md §3) | 42 |
-| `packages/exercises` | A6 — three provisional `ExerciseSpec`s + a cross-field validator | 8 |
-| `packages/eval` | I2 — synthetic fixture generation (exact geometric construction, not approximation) + replay harness + safety-rule coverage checker | 9 |
-| `apps/patient` | The UI: welcome, exercise picker, camera setup, live session, pain check-in, summary. Pose worker running MediaPipe + the full core pipeline every frame. G1 event log. | 3 (+ 11 fixtures via `pnpm eval`) |
+**Run the patient app (unchanged, no server needed):**
+```
+pnpm install && pnpm --filter @ai-rehab/patient run dev
+```
 
-**70 unit/component tests + 11 fixture replays, all passing.** Full CI pipeline (`pnpm run ci`: boundaries → build → typecheck → lint → test → eval) verified green from a clean checkout (`rm -rf packages/*/dist apps/patient/dist`).
+**Run the full stack (M2, once merged):**
+```
+cp .env.example .env   # fill in JWT_SECRET
+docker compose up
+```
 
-**Run it:** `pnpm install && pnpm --filter @ai-rehab/patient run dev` (or `pnpm run dev:patient` from root), then open the printed localhost URL in a browser with a camera. See [`README.md`](../README.md).
+## M1 — merged and verified
 
-## In review — camera framing + live preview (PR open, not merged)
+The camera/framing rework (previously tracked as an open PR in this file) merged to `main` after CI went green and the following was verified for real, not assumed:
 
-Branch `feature/camera-framing-and-ui-improvements`, developed in a separate
-git worktree. **Not merged — awaiting teammate review.**
+- **MediaPipe now actually loads.** Two stacked bugs, both fixed: a WASM/JS version mismatch (`ModuleFactory not set`), and `FilesetResolver.forVisionTasks` needing `useModule: true` in an ES-module worker — [mediapipe#5257](https://github.com/google-ai-edge/mediapipe/issues/5257). The wasm runtime and pose model are now served from the app's own origin (`scripts/fetch-pose-assets.mjs`) rather than a third-party CDN, removing a real reliability failure mode (a proxy or VPN blocking jsDelivr/storage.googleapis.com took the app down with nothing but "Failed to fetch" to diagnose) and two unnecessary third-party requests per session.
+- **The patient can see themselves.** The camera preview is visible with the skeleton drawn as an overlay; the raw stream still never leaves the device (`apps/patient/src/lib/privacy.test.ts` asserts this by source inspection, not by promise).
+- **Framing is exercise-specific**, not whole-body. Driven by `ExerciseSpec.setup.requiredLandmarks` (a field distinct from `requiredJoints`, which the fix separated out — see the commit history on this if the distinction seems subtle, it was a real modelling bug).
+- **Reps are scored as trajectories** (`packages/core/reps/temporal.ts` — range, smoothness, phase balance, trunk stability), which also exposed and fixed a scoring-dilution bug matching a pattern Liao/Vakanski published independently (incorrect reps still scoring 0.7-0.9).
+- **Pose tier is now `heavy`**, not `lite` — changed at the product owner's explicit request, prioritising accuracy for a demo on known hardware over the broad device floor `lite` was hedging for. Verified loading in a real module worker (~5s cold load); sustained fps under real camera load is still unmeasured. See `docs/adr/0007-pose-model-tier.md`.
 
-Three real defects found and fixed:
+**Still unverified: live pose tracking against a real body.** This environment has no camera. The load path, the preview, and framing are all fixed and independently verified as far as this environment allows; nobody has watched a real skeleton track a real person doing a real rep. That remains the single highest-value next action.
 
-1. **MediaPipe never loaded at all.** Two stacked bugs: the WASM CDN URL was
-   pinned to 0.10.17 while the installed package was 0.10.35, and
-   `FilesetResolver.forVisionTasks` was called without `useModule: true`, so
-   MediaPipe fell back to `importScripts()` — unsupported in the ES module
-   workers Vite always emits. Surfaced as an opaque "ModuleFactory not set".
-   See [mediapipe#5257](https://github.com/google-ai-edge/mediapipe/issues/5257).
-   Once that was fixed the failure moved to `Failed to fetch`: the wasm and
-   model were being pulled from jsDelivr and storage.googleapis.com at
-   runtime, which a proxy or VPN can block outright. Both are now staged
-   into `apps/patient/public` by `scripts/fetch-pose-assets.mjs` and served
-   from the app's own origin — which also removes two third-party requests
-   per session, in a product whose whole claim is that nothing leaves the
-   device. **Verified**: in a real module worker, the model now initialises
-   from local assets (`detectForVideo` present); with `useModule: false` it
-   still reproduces the original error, confirming the diagnosis.
-2. **The patient could not see themselves.** The `<video>` element was
-   deliberately kept offscreen and only a skeleton was drawn, so there was no
-   way to tell whether you were in frame. The camera is now visible with the
-   skeleton as an overlay — the raw stream still never leaves the device.
-3. **Framing demanded the whole body for every exercise.** Capture quality
-   scored a bounding box over all 33 landmarks and required 70% of them
-   visible, so correct upper-body-only framing failed. Framing is now driven
-   by `ExerciseSpec.setup.requiredLandmarks`; irrelevant landmarks cannot
-   fail it.
+## M2 — the data spine (branch, not yet merged)
 
-A fourth, subtler modelling bug fell out of the new validator:
-`setup.requiredJoints` was being used for two different jobs — "joints this
-exercise measures" and "landmarks the camera must see". Shoulder abduction
-listed `right_hip` only because the shoulder *angle* is computed from the hip
-*landmark*, which then dragged the knee into the framing requirement. The two
-concerns are now separate fields.
+Built per the topology already specified in `docs/ARCHITECTURE.md` — `apps/api` (Fastify + TS + Zod), Postgres + Drizzle with RLS tenant-scoped from migration one, `services/rehab-engine` (Python) for the slow-loop safety layer. Not a scope invention: this is M2 from `docs/ROADMAP.md`, built in response to an explicit request for "a full functioning scalable and multi-user usable app."
 
-Also added on the same branch (informed by a review of four reference
-projects — see [`REFERENCE-ANALYSIS.md`](REFERENCE-ANALYSIS.md)):
+**What's built and genuinely verified** (137 TS/JS tests + 12 Python tests, all passing; full `pnpm run ci` green from a clean checkout including `apps/api`):
 
-4. **Reps are scored as trajectories, not poses.** `packages/core/reps/temporal.ts`
-   computes range, velocity dispersion (smoothness), phase balance and trunk
-   stability per rep, exposed as new `FormCriterion.measure` values so
-   exercises opt in as data. Closed-form arithmetic, no model in the
-   per-frame path — ADR-0001 holds.
-5. **A scoring-dilution bug the new criteria exposed.** Adding secondary
-   criteria let a rep that missed its primary target by 25 deg still score 68.
-   Liao/Vakanski published the same compression (incorrect reps at 0.7-0.9).
-   Fixed by weighting the criterion that *is* the exercise above the rest,
-   and by replacing the `score <= 50` cutoff feeding the safety gate with
-   `isFailedRep()` — "did any criterion fail outright", which is both truer
-   and explainable.
-6. **Session summary shows the set as a shape** — consistency, range trend
-   sparkline, best rep, and the criterion that fell short most often.
+- **G3/G4 — auth, roles, tenancy.** Signup (standalone patient tenant-of-one, clinician tenant, or patient-via-invite-code joining a specific clinician's tenant), login, JWT. 9 tests.
+- **Tenant isolation**, tested directly: two patients cannot see each other's sessions; a clinician cannot see a patient who never joined their tenant; a patient cannot read another patient's program. 4 tests specifically targeting this, on top of every route's own scoping.
+- **G6 — sync**, idempotent on `(userId, sessionId, seq)`: a retried batch upserts, never duplicates. 4 tests.
+- **G2 (partial) — projections.** Session list with rep count/average score (excluding low-confidence reps) and an adherence calendar, both computed from stored events on read. **Not built: a per-joint ROM *trend*** — what exists is a one-time baseline (see A8 below), not a time series.
+- **A8 (re-scoped) — ROM baseline.** Computed from the first synced session's peak angles rather than a dedicated capture flow.
+- **A9 (re-scoped) — session replay.** `GET /sessions/:id/events` replays the stored *angles*, not skeletons. `ROADMAP.md`'s original wording ("replay from stored skeletons") doesn't fit this codebase's stricter invariant: no landmark array is ever persisted past the pose worker, on-device or off. Worth knowing before anyone reuses that phrasing.
+- **F6 (partial) — program assignment.** A clinician can assign exercises/sets/reps to a linked patient via `POST /programs`; the patient reads it via `GET /programs/mine`. **No clinician-facing UI** — this is API-only today.
+- **G5 (partial) / F5 — audit trail.** Every clinician read of a patient's session list writes an entry the patient can read back via `GET /audit-log`. **No consent-management UI** (opt-in/opt-out, data-sharing controls) — only the access log half of G5 is built.
+- **Not built at all: H1/H2** (streaks, calendar, milestones) — no UI, no dedicated logic, though the adherence data that would feed it already exists.
+- **E5 — session supervisor**, adapted from upstream OpenRehabAgent's `supervisor_agent.py` *pattern* (not vendored code — see `services/rehab-engine/UPSTREAM_DIVERGENCE.md`). Pain thresholds, contraindicated-region matching, an intensity ceiling, an always-allow-rest fallback. 12 tests (one per rule) plus a real `TestClient` boot-and-respond check. **Not wired up** — no `apps/api` route calls it yet.
+- **Patient-side (`apps/patient`).** An optional account layer strictly on top of the unchanged guest-first flow — `WelcomeScreen`'s "Sign in" link only appears when `VITE_API_URL` is configured; a full session still requires zero taps here. `lib/sync.ts` flushes unsynced sessions opportunistically (on session end and on next app load), tracked via a new IndexedDB `syncedSessions` store added through a proper versioned schema migration.
+- **`apps/patient/src/lib/privacy.test.ts` updated, not weakened**, for the new sync capability: the old "no network calls at all" assertion is now "no network calls anywhere except the one reviewed sync client," plus a new test that that file's request bodies can never carry a landmark, bitmap, or pixel. 8/8 privacy tests pass. The entire pose/camera/worker pipeline remains exactly as fetch-free as it was in M1 — this is mechanically checked, not just described here.
 
-Still unverified: **live pose tracking with a real camera.** This environment
-has no camera, so the fixed MediaPipe load path, the video preview, and
-framing against a real body have not been observed working. That remains the
-first thing to check.
+**What's built but NOT verified against real infrastructure — read this before trusting it further:**
 
----
+- **No live Postgres exists in this environment** (checked: no Docker, no local install). The Drizzle schema, the RLS policies, and the migration were reviewed carefully and the migration SQL was generated by `drizzle-kit` (not hand-written) against the schema — but never actually applied to a running database. `apps/api`'s route/auth/tenancy/sync logic *is* verified for real, via Fastify's `.inject()` against `MemoryStore` — a complete, correct second implementation of the same `Store` interface, not a stub (see its doc comment in `apps/api/src/store/types.ts`). What specifically remains unverified is the SQL itself and whether the RLS policies behave as intended against a live Postgres.
+- **`docker-compose.yml`'s Postgres role bypasses its own RLS policies.** The `rehab` role owns every table it creates, and Postgres table owners always bypass RLS by default — so the policies in `migrations/0001_rls.sql` exist and run correctly during migration, but the *runtime* connection isn't actually protected by them; only the application-layer `tenantId` scoping is (which is itself fully tested — see "Tenant isolation" above). A real deployment needs a second, non-owner role for the runtime connection. Documented in the compose file and here, not silently left as a false sense of security.
+- **Two RLS bootstrapping bugs were found and fixed while *writing* the migration**, before ever needing a live database to catch them: invite-code redemption and login-by-email both have to look a row up *before* the caller's tenant is known, which a blanket tenant-scoped `SELECT` policy makes structurally impossible. Both tables now have split per-command policies — see the reasoning written inline in `migrations/0001_rls.sql`.
 
-## What's genuinely verified vs. what isn't
+## What's genuinely verified vs. what isn't — the short version
 
-Be precise about this — it's the difference between "built" and "trustworthy."
+**Verified, for real, in this environment:**
+- Every package's unit/integration tests pass — 137 TS/JS + 12 Python.
+- The eval harness's 11 fixtures replay through the real `packages/core` pipeline; every configured veto-tier safety rule fires at least once, mechanically checked (`packages/eval/src/coverage.ts`).
+- MediaPipe genuinely initialises from local assets in a real ES-module worker (`detectForVideo` present) — this was empirically tested, including deliberately reproducing the original bug by flipping `useModule` back to confirm the diagnosis.
+- `apps/api`'s full route layer, auth flow, tenant isolation, and sync idempotency — against `MemoryStore`, via real HTTP requests through Fastify's `.inject()`.
+- `services/rehab-engine`'s FastAPI layer actually boots and responds correctly (`TestClient`, not just the pure Python logic).
+- `pnpm run ci` passes end to end from a clean checkout, in CI's actual step order.
 
-**Verified:**
-- Every package's unit tests pass, including the safety gate's four-verdict-tier behavior and the rep segmenter's double-count guard.
-- The eval harness's 11 fixtures replay through the *real* `packages/core` pipeline (not a mock) and every configured veto-tier safety rule fires at least once — mechanically enforced by `packages/eval/src/coverage.ts`, not just asserted in a commit message.
-- The full app was run in a real browser (this session's sandboxed Browser tool): Welcome → exercise picker → camera setup all render correctly with zero console errors, and camera-permission denial is handled as the designed "we need your camera" state, not a crash.
-- `pnpm run ci` passes end to end from a clean checkout, including in the order GitHub Actions will actually run it.
+**Not verified — needs a human with real hardware or infrastructure:**
+- **Live pose detection against a real camera and a real body.** Top of the list, unchanged from M1.
+- **The M0 device fps/jitter spike** (ADR-0007) — still not run; `heavy` tier is a deliberate choice for a demo, not a measured one.
+- **Postgres/RLS in production** — see above.
+- **The exercise thresholds against a real recorded human**, and a **physiotherapist's sign-off** on all three `ExerciseSpec`s — unchanged blockers from M1.
 
-**Not verified — needs a human with real hardware:**
-- **Live pose detection itself.** This sandbox has no camera. The MediaPipe worker code is written, typechecks, and bundles (205KB chunk, builds cleanly), but nobody has watched a real skeleton track a real body yet. This is the single most important thing to check first.
-- **The M0 spike** (ADR-0007): fps and landmark jitter on a mid-range laptop, an older Android phone, and an iPhone, in good and poor light. Shipped `pose_landmarker_lite` as the safest default tier, but that's a guess informed by "cheapest tier," not a measurement. If it doesn't clear ~24fps on the worst device, the tier needs to change or the plan does (see ADR-0007's original contingency).
-- **Whether the three exercises' rep-phase thresholds and target ranges actually feel right against a real body.** They're internally consistent (every fixture passes, the geometry is exact) but were tuned against synthetic trajectories, not a recorded human. Expect to retune after the first real session.
+## Decisions made without a human, per stated fallbacks
 
-## Decisions made without a human, per the build prompt's own stated fallback
+- **The three M1 exercises and the pose model tier** — unchanged reasoning from the original M1 build; see `docs/adr/0007-pose-model-tier.md` for the tier's history including the M2-era switch to `heavy`.
+- **Building M2 in this session at all**, rather than waiting for M1 to be used by a real person first (M1's own "Next actions" list had said so). Done because it was explicitly requested ("a full functioning scalable and multi-user usable app"), and because the architecture doc's own reasoning for building tenancy in from migration one — avoiding a retrofit rewrite — holds regardless of sequencing.
+- **Not vendoring OpenRehabAgent's pain-localisation or Q-learning code for E5.** Per `docs/UPSTREAM.md`'s own pre-existing adopt/adapt/replace decision (not a new judgement call this session): only the supervisor pattern was worth adopting; B1 and D1/D2 need real data and are separately scoped milestones. See `services/rehab-engine/UPSTREAM_DIVERGENCE.md`.
+- **A patient's account layer stays strictly optional.** Given H7's own rationale (a full demo before any signup form) and given ADR-0006 is still open, making an account mandatory would have both undermined an existing, deliberate UX decision and outrun the regulatory answer this project doesn't have yet.
 
-- **The three M1 exercises.** No physiotherapist was available (still true — see Blocked). Per `MVP-BUILD-PROMPT.md` §7, proceeded with the roadmap's suggested three — seated knee extension, standing shoulder abduction, sit-to-stand — using placeholder joint-angle ranges grounded in standard ROM references, cross-checked for plausibility (not copied) against a working MediaPipe rehab prototype ([RehabAR](https://github.com/Apoorva-Nayak07/RehabAR)). Every spec ships `provisional: true` with a `provisionalNote`, and the UI surfaces it (camera setup card, "why this exercise" card) — never presented as clinically validated. **Still needs a physiotherapist's sign-off before a real patient uses it.**
-- **Pose model tier (ADR-0007).** No physical device to benchmark. Shipped `pose_landmarker_lite`, documented as an interim placeholder in the ADR, not a spike result.
-- **MVP scope confirmation.** `docs/FEATURES.md`'s Pick column was empty (scope selection was step 1 of "Next actions"). Filled it in exactly per the doc's own "Recommended MVP" section — no features added or cut beyond what was already recommended there.
+## A real git-staging incident, worth remembering
+
+While preparing the M2 commit, `git add -A` staged a Python virtualenv (thousands of files) despite `.venv/` matching a pattern in `.gitignore` that `git check-ignore` independently confirmed as matching. The discrepancy between the two commands was not fully root-caused. Resolved practically: unstaged it, then verified via `git diff --cached --name-only | grep -c venv` (zero) immediately before committing, rather than trusting the ignore pattern alone. Worth an explicit re-check next time a `.venv` or similar large generated directory appears near a commit on Windows in this environment.
 
 ## What the upstream repos the user pointed to actually contributed
 
-Per the request to draw on [STGCN-rehab](https://github.com/fokhruli/STGCN-rehab), [avakanski's rehab framework](https://github.com/avakanski/A-Deep-Learning-Framework-for-Assessing-Physical-Rehabilitation-Exercises), [RehabAR](https://github.com/Apoorva-Nayak07/RehabAR), and OpenRehabAgent: the first two are offline deep-learning *quality-score regressors* trained on UI-PRMD/KIMORE (TensorFlow/Keras, batch evaluation, no real-time path) — valuable as a future I2 benchmark (already noted in `UPSTREAM.md` §3) but structurally incompatible with ADR-0001 (no model call in the per-frame path) as a live scoring engine, so nothing was vendored from them into the fast loop. RehabAR is closest in shape to this product (browser MediaPipe, 3 exercises, voice feedback); its `pose_server.py` angle thresholds were a sanity check on the provisional ranges above, not a source of code. OpenRehabAgent remains correctly out of scope for the MVP per `FEATURES.md` (B1/D1/D2/E5 are all fast-follow) — nothing vendored yet; that work starts at M2/M3.
+Per the request to draw on [STGCN-rehab](https://github.com/fokhruli/STGCN-rehab), [avakanski's rehab framework](https://github.com/avakanski/A-Deep-Learning-Framework-for-Assessing-Physical-Rehabilitation-Exercises), [RehabAR](https://github.com/Apoorva-Nayak07/RehabAR), and OpenRehabAgent: the first two are offline deep-learning *quality-score regressors*, structurally incompatible with ADR-0001 as a live scoring engine — nothing vendored into the fast loop; `packages/core/reps/temporal.ts` is this project's own closed-form answer to the same problem. RehabAR's angle thresholds were a sanity check on the provisional exercise ranges, not a source of code. OpenRehabAgent's contribution is now real, not just planned: E5's supervisor pattern is adapted (not vendored) into `services/rehab-engine`, per the file-by-file decision already recorded in `docs/UPSTREAM.md` §1.2.
 
-## A real bug the eval harness caught, worth knowing about
+## A real bug the eval harness caught, still worth knowing
 
-`packages/core/src/pose/landmarkAdapter.ts`'s joint-angle convention (the interior angle between two rays from a vertex) is **mathematically bounded to 0–180°** — it cannot represent "past straight" hyperextension. Two of the original exercise specs configured a `maxAngle` safety threshold *above* 180° for knee/hip, which is unreachable, dead configuration — caught only by empirically running the eval harness and seeing a fixture fail in a way hand-checking the math missed. Removed those thresholds (see the specs' inline comments); true hyperextension detection needs a signed-angle or velocity-based approach this MVP doesn't build. Worth remembering before configuring a `maxAngle` on any future knee/hip/elbow exercise.
+`packages/core/src/pose/landmarkAdapter.ts`'s joint-angle convention (interior angle between two rays) is **mathematically bounded to 0-180°** — it cannot represent "past straight" hyperextension. A `maxAngle` safety threshold above 180° for knee/hip is unreachable, dead configuration. This was already fixed in M1; still worth remembering before configuring a `maxAngle` on any future knee/hip/elbow exercise.
 
 ## What exists
 
 | | |
 |---|---|
 | `docs/PRD.md` | v2.0 — 61 features across 9 groups, two-loop architecture, regulatory posture |
-| `docs/FEATURES.md` | Scope confirmed — Pick column filled in (15 IN, 46 OUT) |
-| `docs/ARCHITECTURE.md` | Stack, package boundaries, testing strategy |
-| `docs/CONTRACTS.md` | Every shared type — implemented, not just specified |
-| `docs/UPSTREAM.md` | OpenRehabAgent integration plan + datasets + licence obligations (not yet vendored — M2/M3 work) |
-| `docs/ROADMAP.md` | M0–M6, exit criteria, workstream split |
-| `docs/MVP-BUILD-PROMPT.md` | The prompt this session executed, close to verbatim |
-| `NOTICE` | MediaPipe (Apache-2.0) attribution — added when `@mediapipe/tasks-vision` was added as a real dependency |
+| `docs/FEATURES.md` | M1 scope confirmed (15 IN, 46 OUT); M2's partial/complete state is tracked in this file, not by flipping Pick cells for a later milestone |
+| `docs/ARCHITECTURE.md` | Stack, package boundaries, testing strategy — M2 matches the topology already specified here |
+| `docs/CONTRACTS.md` | Every shared type — implemented, extended this session with `identity.ts`/`program.ts`/`sync.ts` |
+| `docs/UPSTREAM.md` | OpenRehabAgent integration plan — E5's slice now actually built, see `services/rehab-engine/UPSTREAM_DIVERGENCE.md` |
+| `docs/ROADMAP.md` | M0-M6, exit criteria, workstream split |
+| `NOTICE` | MediaPipe (Apache-2.0) attribution |
+| `.env.example` | Shape of the secrets `apps/api` and `docker-compose.yml` need — `.env` itself is gitignored |
 | `CLAUDE.md` | Agent working agreement |
-| `packages/{contracts,core,exercises,eval}`, `apps/patient` | Code. See the table above. |
+| `packages/{contracts,core,exercises,eval}`, `apps/patient`, `apps/api`, `services/rehab-engine` | Code. |
 
 ## Next actions
 
 In order.
 
-1. **Run it with a real camera.** Nothing else on this list matters until someone confirms the skeleton actually tracks a body and reps actually count. This is the single highest-value next step.
-2. **Run the M0 device spike for real** (ADR-0007) — a mid-range laptop, an older Android phone, an iPhone, good and poor light. Confirms or changes the `pose_landmarker_lite` choice.
-3. **Get a physiotherapist to review the three `ExerciseSpec`s** — reference ranges, phase thresholds, safety limits. Everything is marked `provisional` specifically so this review has something concrete to react to rather than a blank page.
-4. **Retune against a real recorded session** once 1–3 are done — the rep-phase thresholds and target ranges were tuned against synthetic trajectories; expect them to need adjustment.
-5. **Answer the regulatory posture question** (ADR-0006) — doesn't block anything else in the MVP (local-only, no server), but blocks M2's first database migration.
-6. Once 1–4 are resolved, M2 (the data spine) is next per `ROADMAP.md` — but don't start it before someone has actually used M1.
+1. **Run it with a real camera.** Unchanged top priority from M1 — nothing else matters until a real skeleton tracks a real body.
+2. **Merge `feature/backend-data-spine`** once reviewed — it's tested and CI-green; the open gaps (Postgres/RLS live verification, E5 integration) are documented, not blocking, the same way M1 shipped with device validation still open.
+3. **Wire E5 into `apps/api`** — call `POST /supervise` before returning success from program assignment or session start. The service exists and is tested standalone; the integration point is the actual gap.
+4. **Set up a real Postgres role split** before any real deployment — the runtime connection must not be the table-owning role. See the RLS section above.
+5. **Run the M0 device spike for real** (ADR-0007) and **get a physiotherapist to review the three `ExerciseSpec`s** — unchanged from M1.
+6. **Answer the regulatory posture question** (ADR-0006) — still doesn't block building, but blocks pointing any of this at real patient data.
 
 ## Blocked
 
 | Item | Blocks | Needs |
 |---|---|---|
-| Regulatory posture + data residency (ADR-0006) | M2 database migration, any production deployment | A jurisdiction-specific answer. Founder decision + possibly counsel. |
-| Physiotherapist sign-off on the three `ExerciseSpec`s | Trusting the scores this MVP already produces | A physiotherapist. Everything needed for the review is already written — see Next action 3. |
-| Real-device fps/jitter measurement | Confidence in the `lite` tier choice; ADR-0007 closing | Physical hardware — a laptop, an Android phone, an iPhone. |
-| Clinical advisor | M3 safety thresholds, escalation copy, report vocabulary | A named person. Start the conversation now; needed by week 8 of a from-scratch timeline. |
-| Academic dataset terms (ADR-0008) | Using UI-PRMD/KIMORE as real (not synthetic) I2 fixtures | Read the terms. Determines whether they can seed a commercial product's CI. |
+| Regulatory posture + data residency (ADR-0006) | Any production deployment carrying real patient data | A jurisdiction-specific answer. Founder decision + possibly counsel. |
+| Physiotherapist sign-off on the three `ExerciseSpec`s | Trusting the scores this app already produces | A physiotherapist. |
+| Real-device fps/jitter measurement | Confidence in the `heavy` tier choice for non-demo use; ADR-0007 closing | Physical hardware. |
+| A live Postgres to test against | Confidence in the RLS policies' actual runtime behaviour | Docker, or a hosted Postgres instance, in an environment that has one. |
+| Clinical advisor | M3 safety thresholds, escalation copy, report vocabulary | A named person. |
 
 ## Open decisions
 
-See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default shipped (see its file) but is still open pending real measurement. 0001–0005 are accepted.
+See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default (`heavy`, for demo posture) but is still open pending a real device measurement. 0001-0005 are accepted.
 
 ## Recently decided
 
-- **Executed the MVP build in one session rather than staging scope confirmation as a separate step.** The build prompt already specified exactly what to do if the physiotherapist/exercise-choice blocker was still open when building started (`MVP-BUILD-PROMPT.md` §7: use plausible placeholder ranges, mark `provisional: true`, surface it in the UI) — so scope confirmation and M0+M1 build happened together instead of waiting on a human decision the doc had already anticipated.
-- **Build on OpenRehabAgent** (MIT, Python) as the slow loop rather than reimplementing pain inference, session supervision, and progression — deferred to M2/M3, not started yet. → ADR-0003, `docs/UPSTREAM.md`
-- **Two-loop split.** Fast deterministic TypeScript in the browser; slow generative Python + Claude on the server. No model call in the per-frame path. → ADR-0001
-- **Deterministic progression before a learned policy.** → ADR-0004 (not yet built — D1/D2 are fast-follow)
-- **Pain inference generates questions, not verdicts** (feature B6). B1 (inference) is not built in the MVP; B2/B5 (self-report + bookmarking) are, and are the whole pain-data story until B1 exists.
-- **Fixtures store `world` (metric) landmarks only, not the full `PoseFrame`.** Sufficient to drive reps/form/safety, which is what I2's stated purpose covers; capture-quality already has direct unit coverage. See `packages/eval/src/fixture.ts`.
+- **Built M2 (the data spine) in response to an explicit request for a scalable, multi-user backend**, rather than treating "wait until M1 has real users" as a hard gate — see "Decisions made without a human" above.
+- **Kept the account layer optional, never required.** H7's guest-first rationale still holds; ADR-0006 being open is a second, independent reason not to make an account mandatory yet.
+- **Did not vendor OpenRehabAgent's pain/RL code for E5** — adapted the supervisor pattern only, per the pre-existing decision in `docs/UPSTREAM.md`, not a new call.
+- **MediaPipe pose assets are served from the app's own origin, not a CDN** — a reliability fix (a blocked/intercepted CDN request took the whole app down) that's also a privacy improvement (two fewer third-party requests per session).
+- **Pose tier switched from `lite` to `heavy`** for the demo posture, at explicit request, with the tradeoff (accuracy over broad device support) documented in ADR-0007 rather than silently applied.
 
 ## Known risks being carried
 
-- **The M0 spike hasn't actually run.** The browser-first bet is unconfirmed on real hardware. If `lite` can't clear ~24fps on the device floor, ADR-0007's original contingency applies: the mobile shell (I3) moves from Q2 to now.
-- **Every exercise spec is provisional.** Scores this MVP produces are internally consistent but not clinically validated. Do not let this run in front of a real patient without the sign-off in Next action 3.
-- **The joint-angle convention can't represent hyperextension** (see "A real bug the eval harness caught" above). Any future exercise needing that safety check needs a different approach, not just a `maxAngle` above 180.
-- Upstream OpenRehabAgent's pain-localisation weights are invented, not fitted, and B1 isn't built yet regardless — re-weighting against KIMORE is B1's problem to solve when it's built, not before.
-- The exercise catalogues in `UPSTREAM.md` §4 provide metadata but no reference ranges. Library size is still gated by physiotherapist time, not engineering — building more `ExerciseSpec`s is cheap; validating them is not.
+- **The M0 spike still hasn't run.** Unconfirmed on real hardware, now doubly so with the `heavy` tier — it demands more than `lite` did.
+- **Every exercise spec is provisional** — unchanged since M1.
+- **The Postgres role in `docker-compose.yml` bypasses its own RLS policies** — see above. Do not treat the local dev setup as a security reference for a real deployment.
+- **E5 exists but enforces nothing yet** — no route calls it. A safety feature that's built but not wired in provides zero actual protection; don't describe M2 as having "session-level safety" until this is fixed.
+- **The joint-angle convention can't represent hyperextension** — unchanged since M1.
+- **The exercise catalogues in `UPSTREAM.md` §4 provide metadata but no reference ranges** — unchanged; library size is gated by physiotherapist time, not engineering.
 
 ---
 

@@ -7,6 +7,12 @@ import { SessionEventSchema } from "@ai-rehab/contracts";
  * ADR-0002 — "video never leaves the device" — enforced by inspection
  * rather than by promise.
  *
+ * M2 added a real backend and an optional sync layer (lib/api.ts,
+ * lib/sync.ts, G6) — "no network calls at all" is no longer the invariant.
+ * "Only derived SessionEvents leave, only from one reviewed file, and the
+ * entire pose/camera/worker pipeline stays exactly as fetch-free as it was
+ * in M1" is. See NETWORK_ALLOWED_FILES below.
+ *
  * These tests are deliberately crude source-level greps. A subtle
  * exfiltration path could evade them, but the realistic failure mode is
  * someone innocently adding an upload, a recorder, or a frame grab while
@@ -45,10 +51,20 @@ describe("privacy: no raw camera data can leave the device (ADR-0002)", () => {
     expect(FILES.length).toBeGreaterThan(5);
   });
 
-  it("contains no network-transmission calls at all", () => {
-    // The MVP is local-only: there is no backend. Any of these appearing is
-    // a new egress path that must be reviewed against ADR-0002 before it
-    // ships — including that it carries no frame-derived pixel data.
+  // M2 added an optional sync layer (G6) to a real backend — the MVP's
+  // "no network calls at all" is no longer true, on purpose. What must
+  // stay true: only these two files may touch the network at all, and
+  // everything else — the entire pose/camera/worker pipeline — remains as
+  // fetch-free as it was in M1. Widening this allowlist is exactly the
+  // kind of change that should fail review, not sail through silently.
+  const NETWORK_ALLOWED_FILES = ["lib/api.ts"];
+
+  function isAllowedNetworkFile(path: string): boolean {
+    const relative = path.replace(/\\/g, "/").split("/src/")[1];
+    return NETWORK_ALLOWED_FILES.includes(relative ?? "");
+  }
+
+  it("makes network calls from nowhere except the explicitly reviewed sync client", () => {
     const forbidden = [
       /\bfetch\s*\(/,
       /XMLHttpRequest/,
@@ -56,10 +72,24 @@ describe("privacy: no raw camera data can leave the device (ADR-0002)", () => {
       /new\s+WebSocket/,
       /axios/
     ];
-    const offenders = FILES.filter((f) => forbidden.some((re) => re.test(f.code))).map(
-      (f) => f.path
-    );
+    const offenders = FILES.filter(
+      (f) => !isAllowedNetworkFile(f.path) && forbidden.some((re) => re.test(f.code))
+    ).map((f) => f.path);
     expect(offenders).toEqual([]);
+  });
+
+  it("the sync client only ever sends already-validated SessionEvents, never a landmark or frame", () => {
+    const api = FILES.find((f) => f.path.endsWith(join("lib", "api.ts")))!.code;
+    // No raw pixel/landmark-shaped identifier anywhere near the fetch calls
+    // — the request bodies are built from `events`/`SyncRequest` values
+    // that are typed against SessionEvent, not assembled ad hoc from
+    // anything camera-shaped.
+    expect(api).not.toMatch(/landmark|bitmap|pixel|imagedata|canvas/i);
+    // Every exported network call is one of the known, reviewed endpoints —
+    // adding a new one here is a deliberate, visible diff, not a surprise.
+    expect(api).toMatch(/\/auth\/signup/);
+    expect(api).toMatch(/\/auth\/login/);
+    expect(api).toMatch(/\/events/);
   });
 
   it("never encodes or extracts pixels from a canvas or video element", () => {

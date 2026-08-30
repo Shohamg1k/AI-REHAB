@@ -13,6 +13,10 @@
  *      (it is a dependency leaf).
  *   3. apps/patient may not import apps/api or services/rehab-engine.
  *   4. Nothing may import from fixtures/raw.
+ *   5. apps/api may only depend on packages/contracts among this repo's own
+ *      workspace packages (docs/ARCHITECTURE.md §3: "apps/api ← depends on
+ *      contracts"). External npm packages (fastify, drizzle-orm, ...) are
+ *      unaffected — this only catches a same-repo boundary violation.
  *
  * Runs as `pnpm lint:boundaries`, wired into `pnpm ci` and the GitHub Actions
  * workflow. Exits non-zero (and prints every violation) on failure.
@@ -94,6 +98,13 @@ check("apps/patient", "ARCHITECTURE.md §3 rule 3", (spec) => {
 
 check(".", "ARCHITECTURE.md §3 rule 4", (spec) => {
   if (spec.includes("fixtures/raw")) return "nothing may import from fixtures/raw";
+  return null;
+});
+
+check("apps/api", "ARCHITECTURE.md §3 rule 5", (spec) => {
+  if (spec.includes("@ai-rehab/core") || spec.includes("@ai-rehab/exercises")) {
+    return "apps/api may only depend on @ai-rehab/contracts among this repo's workspace packages";
+  }
   return null;
 });
 
