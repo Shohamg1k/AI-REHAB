@@ -47,7 +47,7 @@ const ctx = globalThis as unknown as {
 // the runtime and the JS bindings cannot drift apart — the version mismatch
 // that produced "ModuleFactory not set".
 const WASM_URL = new URL("/mediapipe/wasm", self.location.origin).href;
-const MODEL_URL = new URL("/mediapipe/models/pose_landmarker_lite.task", self.location.origin)
+const MODEL_URL = new URL("/mediapipe/models/pose_landmarker_heavy.task", self.location.origin)
   .href;
 
 let landmarker: PoseLandmarker | null = null;

@@ -30,16 +30,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "..", "apps", "patient", "public");
 const WASM_DEST = join(PUBLIC_DIR, "mediapipe", "wasm");
 const MODEL_DEST_DIR = join(PUBLIC_DIR, "mediapipe", "models");
-const MODEL_FILE = "pose_landmarker_lite.task";
+
+// `heavy` — highest-accuracy tier, per docs/adr/0007-pose-model-tier.md.
+// Chosen for the hackathon demo posture: a controlled environment (known
+// hardware, good lighting, short session) where accuracy matters more than
+// the broad device floor `lite` was hedging for. Swapping tiers means
+// changing this URL, the filename below, and the worker's MODEL_URL.
+const MODEL_FILE = "pose_landmarker_heavy.task";
 const MODEL_DEST = join(MODEL_DEST_DIR, MODEL_FILE);
-
-// `lite` per docs/adr/0007-pose-model-tier.md — the interim default pending
-// a real device spike. Swapping tiers means changing this URL and the
-// filename the worker asks for.
 const MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task";
 
-const MIN_PLAUSIBLE_MODEL_BYTES = 1_000_000;
+const MIN_PLAUSIBLE_MODEL_BYTES = 5_000_000; // heavy is ~29MB; catches a truncated/intercepted download
 
 async function exists(path) {
   try {
@@ -86,7 +88,7 @@ async function fetchModel() {
     return;
   }
 
-  console.log(`  downloading pose model (~5.8 MB)…`);
+  console.log(`  downloading pose model (~29 MB, heavy tier)…`);
   const response = await fetch(MODEL_URL);
   if (!response.ok) {
     throw new Error(`model download failed: HTTP ${response.status} from ${MODEL_URL}`);
