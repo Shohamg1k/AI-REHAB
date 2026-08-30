@@ -38,7 +38,10 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_" }
+      ],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/consistent-type-imports": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }]
@@ -46,7 +49,7 @@ export default [
   },
   {
     // CLI entry points — printing to stdout is the whole point.
-    files: ["**/bin/**/*.ts"],
+    files: ["**/bin/**/*.ts", "**/db/migrate.ts"],
     rules: {
       "no-console": "off"
     }

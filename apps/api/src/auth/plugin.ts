@@ -21,7 +21,7 @@ declare module "fastify" {
  * a separate allowlist.
  */
 const authPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-  fastify.decorate("authenticate", async (request, reply) => {
+  fastify.decorate("authenticate", async (request: FastifyRequest, reply: FastifyReply) => {
     const header = request.headers.authorization;
     if (!header?.startsWith("Bearer ")) {
       reply.code(401).send({ error: "unauthorized", message: "Missing bearer token." });
