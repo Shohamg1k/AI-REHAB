@@ -107,7 +107,7 @@ describe("tenant isolation", () => {
       method: "POST",
       url: "/programs",
       headers: authHeader(clinician.body.token),
-      payload: { patientId: patientA.body.user.id, exercises: [{ exerciseId: "seated-knee-extension", sets: 3, reps: 10 }] }
+      payload: { patientId: patientA.body.user.id, exercises: [{ exerciseId: "seated-knee-extension", targetRegions: ["knee"], intensity: "low", sets: 3, reps: 10 }] }
     });
 
     // GET /programs/mine is always scoped to the caller's own userId+tenant —

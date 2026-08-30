@@ -38,6 +38,9 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     displayName: text("display_name").notNull(),
     role: text("role", { enum: ["patient", "clinician"] }).notNull(),
+    // Patient-only; always [] for a clinician. Feeds E5 — see identity.ts's
+    // doc comment on the contracts side.
+    contraindicatedRegions: text("contraindicated_regions").array().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
   },
   (t) => ({
@@ -117,6 +120,10 @@ export const programExercises = pgTable(
       .notNull()
       .references(() => programs.id, { onDelete: "cascade" }),
     exerciseId: text("exercise_id").notNull(), // references packages/exercises' catalogue id, not FK — no DB dependency on app data
+    // Snapshotted from the client at creation time (see contracts'
+    // program.ts doc comment) — apps/api never imports @ai-rehab/exercises.
+    targetRegions: text("target_regions").array().notNull().default([]),
+    intensity: text("intensity", { enum: ["none", "low", "medium", "high"] }).notNull().default("low"),
     sets: integer("sets").notNull(),
     reps: integer("reps").notNull(),
     sortOrder: integer("sort_order").notNull()

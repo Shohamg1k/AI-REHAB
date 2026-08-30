@@ -15,6 +15,9 @@ export const BODY_REGIONS = [
 export const BodyRegionSchema = z.enum(BODY_REGIONS);
 export type BodyRegion = z.infer<typeof BodyRegionSchema>;
 
+export const IntensitySchema = z.enum(["none", "low", "medium", "high"]);
+export type Intensity = z.infer<typeof IntensitySchema>;
+
 export const RepPhaseSchema = z.object({
   name: z.string(),
   joint: JointNameSchema,
@@ -125,7 +128,7 @@ export const ExerciseSpecSchema = z.object({
 
   targetRegions: z.array(BodyRegionSchema),
   contraindicatedRegions: z.array(BodyRegionSchema),
-  intensity: z.enum(["none", "low", "medium", "high"]),
+  intensity: IntensitySchema,
   difficulty: z.number().min(0).max(5),
   movementType: z.enum(["mobility", "strength", "control", "balance", "recovery"]),
   progression: z.string().nullable(),

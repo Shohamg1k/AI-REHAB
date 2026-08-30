@@ -49,7 +49,7 @@ export default [
   },
   {
     // CLI entry points — printing to stdout is the whole point.
-    files: ["**/bin/**/*.ts", "**/db/migrate.ts"],
+    files: ["**/bin/**/*.ts", "**/db/migrate.ts", "**/devMemoryServer.ts"],
     rules: {
       "no-console": "off"
     }

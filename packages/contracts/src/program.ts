@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BodyRegionSchema, IntensitySchema } from "./exercise.js";
 
 /**
  * F6 (M2 slice) — a clinician's prescription for a patient: which
@@ -6,9 +7,18 @@ import { z } from "zod";
  * rather than importing `@ai-rehab/exercises` — contracts depends on
  * nothing, and the exercise catalogue is data the API doesn't need to
  * understand, only to pass through to the client that does.
+ *
+ * `targetRegions`/`intensity` are a snapshot the *client* supplies at
+ * creation time (it has the full `ExerciseSpec` catalogue; `apps/api`
+ * deliberately does not — see `docs/ARCHITECTURE.md` §3's dependency rule
+ * and `scripts/lint-boundaries.mjs` rule 5). This is what feeds E5's
+ * contraindicated-region check in `POST /programs` without apps/api ever
+ * needing to know what an exercise actually is.
  */
 export const ProgramExerciseSchema = z.object({
   exerciseId: z.string().min(1),
+  targetRegions: z.array(BodyRegionSchema),
+  intensity: IntensitySchema,
   sets: z.number().int().positive(),
   reps: z.number().int().positive(),
   sortOrder: z.number().int().nonnegative()

@@ -12,6 +12,7 @@ import { registerSessionRoutes } from "./routes/sessions.js";
 import { registerProjectionRoutes } from "./routes/projections.js";
 import { registerAuditRoutes } from "./routes/audit.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerProfileRoutes } from "./routes/profile.js";
 import type { Store } from "./store/types.js";
 
 /**
@@ -45,6 +46,7 @@ export async function buildApp(opts: { store: Store; corsOrigin?: string | strin
   registerSessionRoutes(fastify, opts.store);
   registerProjectionRoutes(fastify, opts.store);
   registerAuditRoutes(fastify, opts.store);
+  registerProfileRoutes(fastify, opts.store);
 
   return fastify;
 }

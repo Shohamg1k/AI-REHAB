@@ -15,6 +15,20 @@
       "when": 1788108906168,
       "tag": "0001_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788115009353,
+      "tag": "0002_new_swordsman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788115334533,
+      "tag": "0003_lively_nick_fury",
+      "breakpoints": true
     }
   ]
 }

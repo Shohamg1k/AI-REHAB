@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BodyRegionSchema } from "./exercise.js";
 
 /**
  * M2 — the data spine (G3/G4). A tenant is a clinic (or, for a
@@ -18,9 +19,21 @@ export const UserSchema = z.object({
   email: z.string().email(),
   displayName: z.string().min(1),
   role: RoleSchema,
-  createdAt: z.string()
+  createdAt: z.string(),
+  /**
+   * Patient-only, self- or clinician-declared. Feeds E5's session
+   * supervisor (`services/rehab-engine`) — see
+   * `POST /programs`, which refuses to assign an exercise targeting one of
+   * these. Always `[]` for a clinician account.
+   */
+  contraindicatedRegions: z.array(BodyRegionSchema)
 });
 export type User = z.infer<typeof UserSchema>;
+
+export const UpdateContraindicationsRequestSchema = z.object({
+  contraindicatedRegions: z.array(BodyRegionSchema)
+});
+export type UpdateContraindicationsRequest = z.infer<typeof UpdateContraindicationsRequestSchema>;
 
 export const TenantSchema = z.object({
   id: z.string(),

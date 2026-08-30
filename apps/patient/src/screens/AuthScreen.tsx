@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Role } from "@ai-rehab/contracts";
+import type { Role, User } from "@ai-rehab/contracts";
 import { ApiError, login, signup } from "../lib/api.js";
 import { setSession } from "../lib/authStore.js";
 import { Button } from "../components/Button.js";
@@ -8,8 +8,12 @@ import { Button } from "../components/Button.js";
  * Optional account layer (G3/G4). Reachable only from a link on
  * WelcomeScreen — never inserted into the guest flow itself. H7 stays the
  * default: a full session works with zero taps here.
+ *
+ * `onDone` hands back the signed-in user so the caller can role-gate —
+ * ADR-0005: a clinician gets an entirely different app shell, not just a
+ * different screen (see ClinicianApp.tsx).
  */
-export function AuthScreen({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
+export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; onBack: () => void }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [role, setRole] = useState<Role>("patient");
   const [email, setEmail] = useState("");
@@ -29,7 +33,7 @@ export function AuthScreen({ onDone, onBack }: { onDone: () => void; onBack: () 
           ? await login(email, password)
           : await signup({ email, password, displayName, role, inviteCode: inviteCode || undefined });
       setSession(result);
-      onDone();
+      onDone(result.user);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Check your connection and try again.");
     } finally {
