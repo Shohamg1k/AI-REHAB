@@ -15,13 +15,28 @@ export type LiveSessionState = {
   cameraStatus: "idle" | "requesting" | "granted" | "denied" | "error";
   workerStatus: "idle" | "loading" | "ready" | "error";
   errorMessage: string | null;
+  /** Landmark coordinates for the skeleton overlay. Never pixel data (ADR-0002). */
   landmarks: Landmark[] | null;
+  personDetected: boolean;
   captureQuality: CaptureQuality | null;
   jointAngles: JointAngles | null;
   safetyVerdict: SafetyVerdict | null;
   activeCue: CoachingCue | null;
   reps: Array<{ rep: RepEvent; score: FormScore }>;
 };
+
+/**
+ * Whether the pipeline currently has enough signal to score. `tracking` and
+ * `no_person` both mean "scoring is paused" — kept distinct because they
+ * need different guidance ("reposition" vs "step back into view").
+ */
+export type SignalStatus = "ok" | "insufficient" | "no_person" | "pending";
+
+export function signalStatusOf(state: LiveSessionState): SignalStatus {
+  if (!state.captureQuality) return "pending";
+  if (!state.personDetected) return "no_person";
+  return state.captureQuality.requiredLandmarksOk ? "ok" : "insufficient";
+}
 
 // Target the M0 spike's stated floor (docs/ROADMAP.md M0 exit criterion:
 // "≥24fps on the worst device we intend to support") rather than 30 — this
@@ -35,6 +50,7 @@ const INITIAL_STATE: LiveSessionState = {
   workerStatus: "idle",
   errorMessage: null,
   landmarks: null,
+  personDetected: false,
   captureQuality: null,
   jointAngles: null,
   safetyVerdict: null,
@@ -44,8 +60,16 @@ const INITIAL_STATE: LiveSessionState = {
 
 /**
  * Owns the camera capture loop and the pose worker for one live session.
- * The camera frame never touches React state or leaves this hook as a
- * frame — only the worker's derived results do (ADR-0002).
+ *
+ * Privacy boundary (ADR-0002), stated precisely because this is the one
+ * place the raw stream exists:
+ * - The `MediaStream` is attached directly to a `<video>` element for the
+ *   patient to see, and is never read into any other sink.
+ * - Each frame becomes a transient `ImageBitmap`, transferred to the pose
+ *   worker, and closed there immediately after detection. It is never
+ *   retained, encoded, uploaded, or written to storage.
+ * - Nothing pixel-derived enters React state. What comes back out of the
+ *   worker is landmark coordinates and derived metrics only.
  */
 export function useLiveSession(exerciseId: string) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -57,6 +81,26 @@ export function useLiveSession(exerciseId: string) {
   const startedRef = useRef(false);
 
   const [state, setState] = useState<LiveSessionState>(INITIAL_STATE);
+
+  /**
+   * Ref callback for the visible `<video>`. The patient must be able to see
+   * themselves, so the stream is bound to a rendered element rather than an
+   * offscreen one. Screens mount and unmount their own video element (setup
+   * -> live), so binding happens here on every attach rather than once at
+   * stream acquisition.
+   */
+  const attachVideo = useCallback((el: HTMLVideoElement | null) => {
+    videoRef.current = el;
+    if (!el) return;
+    el.muted = true;
+    el.playsInline = true;
+    if (streamRef.current && el.srcObject !== streamRef.current) {
+      el.srcObject = streamRef.current;
+      void el.play().catch(() => {
+        /* autoplay can be refused until a gesture; the capture loop waits on readyState */
+      });
+    }
+  }, []);
 
   const loop = useCallback(() => {
     const tick = (time: number) => {
@@ -92,6 +136,7 @@ export function useLiveSession(exerciseId: string) {
     }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
     videoRef.current = null;
     startedRef.current = false;
   }, []);
@@ -108,12 +153,14 @@ export function useLiveSession(exerciseId: string) {
       });
       streamRef.current = stream;
 
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      video.muted = true;
-      video.playsInline = true;
-      await video.play();
-      videoRef.current = video;
+      // The element may already be mounted (the setup screen renders it
+      // before permission resolves); if so bind now, otherwise `attachVideo`
+      // binds it when it mounts.
+      const mounted = videoRef.current;
+      if (mounted && mounted.srcObject !== stream) {
+        mounted.srcObject = stream;
+        void mounted.play().catch(() => {});
+      }
 
       setState((s) => ({ ...s, cameraStatus: "granted" }));
     } catch (err) {
@@ -151,9 +198,12 @@ export function useLiveSession(exerciseId: string) {
       setState((s) => ({
         ...s,
         landmarks: msg.landmarks,
+        personDetected: msg.personDetected,
         captureQuality: msg.captureQuality,
         jointAngles: msg.jointAngles,
-        safetyVerdict: msg.safetyVerdict,
+        // Keep the last real verdict when there's no pose to judge, rather
+        // than clearing a standing block because the patient left the frame.
+        safetyVerdict: msg.safetyVerdict ?? s.safetyVerdict,
         reps: msg.closedRep ? [...s.reps, msg.closedRep] : s.reps,
         activeCue: msg.cue ?? s.activeCue
       }));
@@ -166,7 +216,10 @@ export function useLiveSession(exerciseId: string) {
         }, 4000);
       }
 
-      if (msg.safetyVerdict.verdict === "block" || msg.safetyVerdict.verdict === "escalate") {
+      if (
+        msg.safetyVerdict &&
+        (msg.safetyVerdict.verdict === "block" || msg.safetyVerdict.verdict === "escalate")
+      ) {
         speak(msg.safetyVerdict.reason, { urgent: true });
       }
     };
@@ -177,5 +230,5 @@ export function useLiveSession(exerciseId: string) {
 
   useEffect(() => stop, [stop]); // stop the camera and worker on unmount, no matter how we got here
 
-  return { state, start, stop };
+  return { state, start, stop, attachVideo };
 }

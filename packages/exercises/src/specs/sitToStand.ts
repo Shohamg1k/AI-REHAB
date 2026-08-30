@@ -28,10 +28,37 @@ export const sitToStand: ExerciseSpec = {
   progression: null,
   regression: "seated-knee-extension",
 
+  referenceMedia: {
+    type: "image",
+    url: "/reference/sit-to-stand.svg",
+    instructions:
+      "Sit toward the front of a sturdy chair, feet flat and shoulder-width apart. Lean forward slightly, push through your feet to stand fully upright, then sit back down under control.",
+    keyPoints: [
+      "Feet flat, roughly shoulder-width apart",
+      "Lean forward slightly to start the movement",
+      "Stand all the way up — hips and knees straight",
+      "Sit down slowly rather than dropping"
+    ]
+  },
+
   setup: {
     view: "side",
     posture: "seated",
-    requiredJoints: ["right_hip", "right_knee", "right_shoulder"]
+    // Joints actually scored by `criteria`: hip and knee extension, plus trunk lean.
+    requiredJoints: ["right_hip", "right_knee", "trunk"],
+    // Genuinely full-body: the movement is scored on hip and knee extension
+    // together with trunk lean, so torso and the whole working leg must all
+    // stay in frame. This is the exercise that legitimately needs the wide
+    // shot — the other two do not.
+    requiredLandmarks: [
+      "LEFT_SHOULDER",
+      "RIGHT_SHOULDER",
+      "LEFT_HIP",
+      "RIGHT_HIP",
+      "RIGHT_KNEE",
+      "RIGHT_ANKLE"
+    ],
+    framingHint: "Place the camera side-on and step back so your head, hips, knees and ankles are all in view."
   },
 
   // See the comment on seated-knee-extension's phases: the enter angle
@@ -53,13 +80,31 @@ export const sitToStand: ExerciseSpec = {
 
   criteria: [
     {
+      id: "smoothness",
+      label: "Controlled, steady movement",
+      joint: "right_hip",
+      measure: "smoothness",
+      target: { min: 0.5, max: 1 },
+      tolerance: { warn: 0.15, fail: 0.3 },
+      weight: 1
+    },
+    {
+      id: "phase-balance",
+      label: "Lowering as slowly as lifting",
+      joint: "right_hip",
+      measure: "phase_balance",
+      target: { min: 0.6, max: 1 },
+      tolerance: { warn: 0.2, fail: 0.35 },
+      weight: 1
+    },
+    {
       id: "stand-tall",
       label: "Full hip extension when standing",
       joint: "right_hip",
       measure: "peak_angle",
       target: { min: 160, max: 185 },
       tolerance: { warn: 10, fail: 20 },
-      weight: 2
+      weight: 3
     },
     {
       id: "knee-extension",
@@ -68,7 +113,7 @@ export const sitToStand: ExerciseSpec = {
       measure: "peak_angle",
       target: { min: 160, max: 185 },
       tolerance: { warn: 10, fail: 20 },
-      weight: 2
+      weight: 3
     },
     {
       id: "tempo",
@@ -93,6 +138,22 @@ export const sitToStand: ExerciseSpec = {
   compensations: [],
 
   cues: [
+    {
+      id: "smoother",
+      triggerCriterion: "smoothness",
+      direction: "under",
+      text: "Try to move at one steady speed rather than in bursts.",
+      cooldownMs: 10000,
+      priority: 2
+    },
+    {
+      id: "control-the-return",
+      triggerCriterion: "phase-balance",
+      direction: "under",
+      text: "Lower back down as slowly as you lifted — don't let it drop.",
+      cooldownMs: 10000,
+      priority: 2
+    },
     {
       id: "stand-tall-cue",
       triggerCriterion: "stand-tall",

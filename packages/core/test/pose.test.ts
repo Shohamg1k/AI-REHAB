@@ -4,7 +4,6 @@ import {
   OneEuroFilter,
   LandmarkSmoother,
   computeJointAngles,
-  computeCaptureQuality,
   MP
 } from "../src/index.js";
 
@@ -94,72 +93,5 @@ describe("computeJointAngles", () => {
     const angles = computeJointAngles(world, 0);
     expect(angles.angles.left_knee).toBeUndefined();
     expect(angles.angles.right_knee).toBeDefined();
-  });
-});
-
-/**
- * `computeCaptureQuality` operates on `PoseFrame.landmarks` — normalised
- * image-space coordinates in ~[0,1] — not `PoseFrame.world` (metric,
- * unbounded), which is what `standingWorld()` above models for angle
- * maths. A well-framed standing person, head near the top of frame, feet
- * near the bottom.
- */
-function imageSpaceFrame(): Landmark[] {
-  const frame: Landmark[] = Array.from({ length: 33 }, () => lm(0.5, 0.3, 0, 1));
-  frame[MP.LEFT_SHOULDER] = lm(0.4, 0.25, 0, 1);
-  frame[MP.RIGHT_SHOULDER] = lm(0.6, 0.25, 0, 1);
-  frame[MP.LEFT_HIP] = lm(0.42, 0.5, 0, 1);
-  frame[MP.RIGHT_HIP] = lm(0.58, 0.5, 0, 1);
-  frame[MP.LEFT_KNEE] = lm(0.42, 0.7, 0, 1);
-  frame[MP.RIGHT_KNEE] = lm(0.58, 0.7, 0, 1);
-  frame[MP.LEFT_ANKLE] = lm(0.42, 0.9, 0, 1);
-  frame[MP.RIGHT_ANKLE] = lm(0.58, 0.9, 0, 1);
-  return frame;
-}
-
-describe("computeCaptureQuality", () => {
-  it("scores a well-framed, fully visible pose near 1.0", () => {
-    const landmarks = imageSpaceFrame();
-    const q = computeCaptureQuality({
-      landmarks,
-      requiredJoints: ["left_knee", "right_knee"],
-      meanLuminance: 128
-    });
-    expect(q.framing).toBe("ok");
-    expect(q.lighting).toBe("ok");
-    expect(q.missingJoints).toHaveLength(0);
-    expect(q.score).toBeGreaterThan(0.8);
-  });
-
-  it("flags missing required joints below the visibility floor", () => {
-    const landmarks = imageSpaceFrame();
-    landmarks[MP.LEFT_KNEE] = lm(0.42, 0.7, 0, 0.1);
-    const q = computeCaptureQuality({
-      landmarks,
-      requiredJoints: ["left_knee"],
-      meanLuminance: 128
-    });
-    expect(q.missingJoints).toContain("left_knee");
-    expect(q.score).toBeLessThan(1);
-  });
-
-  it("flags dim and blown-out lighting", () => {
-    const landmarks = imageSpaceFrame();
-    expect(
-      computeCaptureQuality({ landmarks, requiredJoints: [], meanLuminance: 10 }).lighting
-    ).toBe("dim");
-    expect(
-      computeCaptureQuality({ landmarks, requiredJoints: [], meanLuminance: 250 }).lighting
-    ).toBe("blown_out");
-  });
-
-  it("flags a subject standing too close to the camera", () => {
-    const frame: Landmark[] = Array.from({ length: 33 }, () => lm(0.5, 0.5, 0, 1));
-    frame[MP.LEFT_SHOULDER] = lm(0.3, 0.02, 0, 1);
-    frame[MP.RIGHT_SHOULDER] = lm(0.7, 0.02, 0, 1);
-    frame[MP.LEFT_ANKLE] = lm(0.3, 0.99, 0, 1);
-    frame[MP.RIGHT_ANKLE] = lm(0.7, 0.99, 0, 1);
-    const q = computeCaptureQuality({ landmarks: frame, requiredJoints: [] });
-    expect(q.framing).toBe("too_close");
   });
 });

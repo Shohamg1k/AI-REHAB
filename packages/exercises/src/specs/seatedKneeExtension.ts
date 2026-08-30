@@ -23,10 +23,36 @@ export const seatedKneeExtension: ExerciseSpec = {
   progression: "sit-to-stand",
   regression: null,
 
+  referenceMedia: {
+    type: "image",
+    url: "/reference/seated-knee-extension.svg",
+    instructions:
+      "Sit tall in a chair with both feet flat on the floor. Straighten one knee until your leg is level, hold briefly, then lower it slowly.",
+    keyPoints: [
+      "Sit upright, back supported",
+      "Straighten the knee fully at the top",
+      "Hold for a moment at the top",
+      "Lower slowly — don't let the leg drop"
+    ]
+  },
+
   setup: {
     view: "front",
     posture: "seated",
-    requiredJoints: ["right_knee", "right_hip"]
+    // Joints actually scored by `criteria` — the knee angle and trunk lean.
+    requiredJoints: ["right_knee", "trunk"],
+    // Lower body plus torso. The trunk-stability criterion needs both
+    // shoulders and hips; the knee angle needs hip -> knee -> ankle. Wrists,
+    // elbows, feet and face are never measured, so they may be out of frame.
+    requiredLandmarks: [
+      "LEFT_SHOULDER",
+      "RIGHT_SHOULDER",
+      "LEFT_HIP",
+      "RIGHT_HIP",
+      "RIGHT_KNEE",
+      "RIGHT_ANKLE"
+    ],
+    framingHint: "Sit side-on to the camera with your torso, right hip, knee and ankle in view. Your arms don't need to be in frame."
   },
 
   // The concentric phase's enter angle (120°) is deliberately well below the
@@ -52,13 +78,37 @@ export const seatedKneeExtension: ExerciseSpec = {
 
   criteria: [
     {
+      id: "smoothness",
+      label: "Controlled, steady movement",
+      joint: "right_knee",
+      measure: "smoothness",
+      target: { min: 0.5, max: 1 },
+      tolerance: { warn: 0.15, fail: 0.3 },
+      weight: 1
+    },
+    {
+      id: "phase-balance",
+      label: "Lowering as slowly as lifting",
+      joint: "right_knee",
+      measure: "phase_balance",
+      target: { min: 0.6, max: 1 },
+      tolerance: { warn: 0.2, fail: 0.35 },
+      weight: 1
+    },
+    {
       id: "peak-extension",
       label: "Peak knee extension",
       joint: "right_knee",
       measure: "peak_angle",
       target: { min: 165, max: 180 },
       tolerance: { warn: 5, fail: 15 },
-      weight: 2
+      // Weighted well above the secondary criteria on purpose. Adding
+      // smoothness/tempo criteria diluted this one enough that a rep with
+      // badly insufficient range still scored ~68 — "pretty good" for a rep
+      // that missed the point of the exercise. Liao/Vakanski hit the same
+      // compression (their deliberately-incorrect reps scored 0.7-0.9); the
+      // fix is to let the criterion that IS the exercise dominate.
+      weight: 4
     },
     {
       id: "tempo",
@@ -83,6 +133,22 @@ export const seatedKneeExtension: ExerciseSpec = {
   compensations: [],
 
   cues: [
+    {
+      id: "smoother",
+      triggerCriterion: "smoothness",
+      direction: "under",
+      text: "Try to move at one steady speed rather than in bursts.",
+      cooldownMs: 10000,
+      priority: 2
+    },
+    {
+      id: "control-the-return",
+      triggerCriterion: "phase-balance",
+      direction: "under",
+      text: "Lower back down as slowly as you lifted — don't let it drop.",
+      cooldownMs: 10000,
+      priority: 2
+    },
     {
       id: "straighten-more",
       triggerCriterion: "peak-extension",

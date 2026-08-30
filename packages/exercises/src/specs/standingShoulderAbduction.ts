@@ -27,10 +27,40 @@ export const standingShoulderAbduction: ExerciseSpec = {
   progression: null,
   regression: null,
 
+  referenceMedia: {
+    type: "image",
+    url: "/reference/standing-shoulder-abduction.svg",
+    instructions:
+      "Stand tall with your arm relaxed at your side, then lift it out to the side until it reaches shoulder height. Lower it slowly under control.",
+    keyPoints: [
+      "Start with your arm hanging relaxed at your side",
+      "Lift out to the side, not forward",
+      "Stop at shoulder height — no higher",
+      "Lower slowly; don't let the arm drop"
+    ]
+  },
+
   setup: {
     view: "front",
     posture: "standing",
-    requiredJoints: ["right_shoulder", "right_elbow", "right_hip"]
+    // Only joints this exercise actually measures. `right_hip` used to be
+    // listed here because the shoulder *angle* is computed from the hip
+    // landmark — but that is a landmark dependency, not a measured joint,
+    // and conflating the two is what made framing demand the whole body.
+    requiredJoints: ["right_shoulder", "trunk"],
+    // Upper body only. The shoulder angle is measured hip -> shoulder ->
+    // elbow, so the hips are needed as the reference vector, but knees,
+    // ankles and feet are irrelevant here — a patient framing only their
+    // upper body is correctly framed for this exercise.
+    requiredLandmarks: [
+      "LEFT_SHOULDER",
+      "RIGHT_SHOULDER",
+      "RIGHT_ELBOW",
+      "RIGHT_WRIST",
+      "LEFT_HIP",
+      "RIGHT_HIP"
+    ],
+    framingHint: "Keep your shoulders, right arm and hips in view. Your legs don't need to be in frame."
   },
 
   // See the comment on seated-knee-extension's phases: the enter angle
@@ -52,13 +82,31 @@ export const standingShoulderAbduction: ExerciseSpec = {
 
   criteria: [
     {
+      id: "smoothness",
+      label: "Controlled, steady movement",
+      joint: "right_shoulder",
+      measure: "smoothness",
+      target: { min: 0.5, max: 1 },
+      tolerance: { warn: 0.15, fail: 0.3 },
+      weight: 1
+    },
+    {
+      id: "phase-balance",
+      label: "Lowering as slowly as lifting",
+      joint: "right_shoulder",
+      measure: "phase_balance",
+      target: { min: 0.6, max: 1 },
+      tolerance: { warn: 0.2, fail: 0.35 },
+      weight: 1
+    },
+    {
       id: "peak-abduction",
       label: "Arm raised to shoulder height",
       joint: "right_shoulder",
       measure: "peak_angle",
       target: { min: 80, max: 110 },
       tolerance: { warn: 10, fail: 25 },
-      weight: 2
+      weight: 4
     },
     {
       id: "tempo",
@@ -83,6 +131,22 @@ export const standingShoulderAbduction: ExerciseSpec = {
   compensations: [],
 
   cues: [
+    {
+      id: "smoother",
+      triggerCriterion: "smoothness",
+      direction: "under",
+      text: "Try to move at one steady speed rather than in bursts.",
+      cooldownMs: 10000,
+      priority: 2
+    },
+    {
+      id: "control-the-return",
+      triggerCriterion: "phase-balance",
+      direction: "under",
+      text: "Lower back down as slowly as you lifted — don't let it drop.",
+      cooldownMs: 10000,
+      priority: 2
+    },
     {
       id: "raise-higher",
       triggerCriterion: "peak-abduction",

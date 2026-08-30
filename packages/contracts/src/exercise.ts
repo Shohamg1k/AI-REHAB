@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { JointNameSchema } from "./pose.js";
+import { PoseLandmarkNameSchema } from "./landmarks.js";
 
 export const BODY_REGIONS = [
   "shoulder",
@@ -30,7 +31,23 @@ export const FormCriterionSchema = z.object({
   id: z.string(),
   label: z.string(),
   joint: JointNameSchema,
-  measure: z.enum(["peak_angle", "end_angle", "tempo_ms", "symmetry", "trunk_lean"]),
+  /**
+   * What this criterion reads off the rep. The first five are single-value
+   * readings; the last four summarise the movement's shape over time (see
+   * packages/core/src/reps/temporal.ts) so a rep is scored as a trajectory
+   * rather than a pose snapshot.
+   */
+  measure: z.enum([
+    "peak_angle",
+    "end_angle",
+    "tempo_ms",
+    "symmetry",
+    "trunk_lean",
+    "range_of_motion",
+    "smoothness",
+    "phase_balance",
+    "stability"
+  ]),
   target: z.object({ min: z.number(), max: z.number() }),
   tolerance: z.object({ warn: z.number().nonnegative(), fail: z.number().nonnegative() }),
   weight: z.number().positive()
@@ -69,6 +86,27 @@ export const SafetyThresholdsSchema = z.object({
 export type SafetyThresholds = z.infer<typeof SafetyThresholdsSchema>;
 
 /**
+ * Optional demonstration material for an exercise, resolved from exercise
+ * data rather than hardcoded in a component — adding a video to an exercise
+ * is authoring, not a UI change.
+ *
+ * `url` may be a bundled asset path or a remote URL. It is *outbound
+ * presentation media only*: it is never produced from, and never mixed
+ * with, the patient's camera. Nothing in this product writes to this field
+ * at runtime (ADR-0002).
+ */
+export const ReferenceMediaSchema = z.object({
+  type: z.enum(["image", "video", "animation"]),
+  url: z.string().min(1),
+  thumbnail: z.string().min(1).optional(),
+  /** Alt text / caption. Required so reference media is never image-only. */
+  instructions: z.string().min(1),
+  /** Ordered technique cues shown alongside the media. */
+  keyPoints: z.array(z.string().min(1)).optional()
+});
+export type ReferenceMedia = z.infer<typeof ReferenceMediaSchema>;
+
+/**
  * The exercise DSL (A6) — the leverage point of the whole system. An
  * exercise is data, not code; adding one is authoring, not engineering.
  *
@@ -93,10 +131,22 @@ export const ExerciseSpecSchema = z.object({
   progression: z.string().nullable(),
   regression: z.string().nullable(),
 
+  referenceMedia: ReferenceMediaSchema.optional(),
+
   setup: z.object({
     view: z.enum(["front", "side", "either"]),
     posture: z.enum(["seated", "standing", "supine", "prone"]),
-    requiredJoints: z.array(JointNameSchema)
+    requiredJoints: z.array(JointNameSchema),
+    /**
+     * The framing contract (A7). Only these landmarks are validated before
+     * and during the exercise — everything else may be out of shot without
+     * penalty. Optional for backward compatibility: a spec that omits it
+     * falls back to `landmarksForJoints(requiredJoints)`, which is what
+     * every pre-existing spec effectively meant.
+     */
+    requiredLandmarks: z.array(PoseLandmarkNameSchema).optional(),
+    /** Plain-language framing hint shown before the camera starts. */
+    framingHint: z.string().optional()
   }),
   phases: z.array(RepPhaseSchema).min(1),
   criteria: z.array(FormCriterionSchema).min(1),

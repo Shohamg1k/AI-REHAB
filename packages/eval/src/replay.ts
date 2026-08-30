@@ -1,6 +1,7 @@
 import type { FormScore, SafetyVerdict } from "@ai-rehab/contracts";
 import {
   computeJointAngles,
+  isFailedRep,
   createRepSegmenterState,
   evaluateSafety,
   scoreRep,
@@ -8,15 +9,6 @@ import {
 } from "@ai-rehab/core";
 import { getExerciseSpec } from "@ai-rehab/exercises";
 import type { Fixture } from "./fixture.js";
-
-/**
- * A rep below this score counts toward the safety gate's
- * `consecutiveFailedReps` input — mirrors the bookkeeping the patient app's
- * session loop is responsible for in production (packages/core/safety
- * takes the counter as external input by design; see CLAUDE.md invariant 3
- * — the gate itself has no state and no memory of prior reps).
- */
-const PASS_SCORE_THRESHOLD = 50;
 
 export type ReplayResult = {
   fixtureId: string;
@@ -62,7 +54,7 @@ export function replayFixture(fixture: Fixture): ReplayResult {
     if (step.closedRep) {
       const score = scoreRep(step.closedRep.rep, step.closedRep.aux, spec.criteria, 1);
       formScores.push(score);
-      consecutiveFailedReps = score.score <= PASS_SCORE_THRESHOLD ? consecutiveFailedReps + 1 : 0;
+      consecutiveFailedReps = isFailedRep(score) ? consecutiveFailedReps + 1 : 0;
     }
   }
 
