@@ -11,3 +11,6 @@ export * from "./pain.js";
 export * from "./safety.js";
 export * from "./adaptation.js";
 export * from "./event.js";
+export * from "./identity.js";
+export * from "./program.js";
+export * from "./sync.js";
