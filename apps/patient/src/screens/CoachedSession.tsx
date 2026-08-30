@@ -3,10 +3,11 @@ import { getExerciseSpec } from "@ai-rehab/exercises";
 import type { FormScore, RepEvent } from "@ai-rehab/contracts";
 import { useLiveSession } from "../hooks/useLiveSession.js";
 import { appendEvent } from "../lib/db.js";
+import { ExerciseIntroScreen } from "./ExerciseIntroScreen.js";
 import { CameraSetupScreen } from "./CameraSetupScreen.js";
 import { LiveSessionScreen } from "./LiveSessionScreen.js";
 
-type Phase = "setup" | "live";
+type Phase = "intro" | "setup" | "live";
 
 export type CoachedSessionResult = {
   reps: Array<{ rep: RepEvent; score: FormScore }>;
@@ -25,25 +26,23 @@ export function CoachedSession({
   exerciseId,
   sessionId,
   sessionT,
-  onFinish
+  onFinish,
+  onCancel
 }: {
   exerciseId: string;
   sessionId: string;
   sessionT: () => number;
   onFinish: (result: CoachedSessionResult) => void;
+  onCancel: () => void;
 }) {
   const spec = getExerciseSpec(exerciseId);
-  const { state, start, stop } = useLiveSession(exerciseId);
-  const [phase, setPhase] = useState<Phase>("setup");
+  const { state, start, stop, attachVideo } = useLiveSession(exerciseId);
+  const [phase, setPhase] = useState<Phase>("intro");
 
   const loggedRepCount = useRef(0);
   const loggedCueKey = useRef<string | null>(null);
   const loggedVerdictTier = useRef<string>("allow");
   const bookmarkedRepIndex = useRef<number | null>(null);
-
-  useEffect(() => {
-    void start();
-  }, [start]);
 
   useEffect(() => {
     for (let i = loggedRepCount.current; i < state.reps.length; i++) {
@@ -104,14 +103,39 @@ export function CoachedSession({
     onFinish({ reps: state.reps, bookmarkedRepIndex: bookmarkedRepIndex.current });
   }
 
+  if (phase === "intro") {
+    return (
+      <ExerciseIntroScreen
+        spec={spec}
+        onStart={() => {
+          setPhase("setup");
+          void start();
+        }}
+        onBack={onCancel}
+      />
+    );
+  }
+
   if (phase === "setup") {
-    return <CameraSetupScreen spec={spec} liveState={state} onContinue={handleSetupContinue} />;
+    return (
+      <CameraSetupScreen
+        spec={spec}
+        liveState={state}
+        attachVideo={attachVideo}
+        onContinue={handleSetupContinue}
+        onBack={() => {
+          stop();
+          onCancel();
+        }}
+      />
+    );
   }
 
   return (
     <LiveSessionScreen
       spec={spec}
       liveState={state}
+      attachVideo={attachVideo}
       onBookmarkPain={handleBookmarkPain}
       onEndExercise={handleEndExercise}
     />

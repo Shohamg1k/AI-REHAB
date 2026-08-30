@@ -111,6 +111,10 @@ export default function App() {
             sessionId={sessionRef.current?.sessionId ?? newSessionId()}
             sessionT={sessionT}
             onFinish={handleSessionFinish}
+            onCancel={() => {
+              setExerciseId(null);
+              setScreen("today");
+            }}
           />
         )}
         {screen === "pain-check-in" && (
