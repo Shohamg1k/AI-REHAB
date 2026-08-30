@@ -1,5 +1,6 @@
 import type { FormCriterion, FormScore, FormScoreBreakdownItem, RepEvent } from "@ai-rehab/contracts";
 import type { RepAuxMetrics } from "../reps/segmentation.js";
+import { MIN_TEMPORAL_SAMPLES } from "../reps/temporal.js";
 
 /**
  * Form scoring (A2). Weighted `FormCriterion` evaluation over one closed
@@ -18,6 +19,11 @@ function measureValue(
   rep: RepEvent,
   aux: RepAuxMetrics
 ): number | undefined {
+  // Temporal metrics computed from too few samples are not merely imprecise,
+  // they are meaningless — returning undefined excludes the criterion from
+  // the score rather than penalising the patient for a short observation.
+  const unreliable = aux.temporal.sampleCount < MIN_TEMPORAL_SAMPLES;
+
   switch (criterion.measure) {
     case "peak_angle":
       return rep.peakAngles[criterion.joint];
@@ -27,6 +33,14 @@ function measureValue(
       return rep.tempoMs;
     case "trunk_lean":
       return aux.peakTrunkLean;
+    case "range_of_motion":
+      return unreliable ? undefined : aux.temporal.rangeOfMotion;
+    case "smoothness":
+      return unreliable ? undefined : aux.temporal.smoothness;
+    case "phase_balance":
+      return unreliable ? undefined : aux.temporal.phaseBalance;
+    case "stability":
+      return unreliable ? undefined : aux.temporal.stability;
     case "symmetry": {
       // criterion.joint names a side (e.g. 'left_knee'); the symmetry map is
       // keyed by the joint *group* — strip the side prefix to look it up.
@@ -121,4 +135,18 @@ export function scoreRep(
     confidence,
     reason
   };
+}
+
+/**
+ * Whether a rep counts toward the safety gate's `consecutiveFailedReps`.
+ *
+ * Deliberately not a score cutoff. A weighted average can sit above any
+ * threshold you pick while the criterion that *is* the exercise failed
+ * outright — a knee extension reaching 140° of a 165–180° target scored 52,
+ * which no score-based cutoff classifies honestly. Asking "did any criterion
+ * actually fail" is both truer and explainable: the reason string already
+ * names which one.
+ */
+export function isFailedRep(score: FormScore): boolean {
+  return score.breakdown.some((item) => item.status === "fail");
 }

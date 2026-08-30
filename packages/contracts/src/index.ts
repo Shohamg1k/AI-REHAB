@@ -2,6 +2,7 @@
 // docs/ARCHITECTURE.md §3. Every other package imports types from here
 // rather than redeclaring a shared shape locally (CLAUDE.md §4).
 
+export * from "./landmarks.js";
 export * from "./pose.js";
 export * from "./exercise.js";
 export * from "./rep.js";

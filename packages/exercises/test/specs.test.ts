@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { JOINT_TO_LANDMARKS } from "@ai-rehab/contracts";
 import { EXERCISES, EXERCISES_BY_ID, getExerciseSpec, validateExerciseSpec } from "../src/index.js";
 
 describe("exercise catalogue (A6)", () => {
@@ -61,6 +62,67 @@ describe("exercise catalogue (A6)", () => {
     for (const spec of EXERCISES) {
       expect(spec.phases.length).toBeGreaterThanOrEqual(2);
       expect(spec.rationale.length).toBeGreaterThan(10);
+    }
+  });
+});
+
+describe("framing configuration (A7)", () => {
+  it("every spec declares an explicit requiredLandmarks framing contract", () => {
+    for (const spec of EXERCISES) {
+      expect(spec.setup.requiredLandmarks?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it("requiredLandmarks covers every landmark the spec's measured joints need", () => {
+    // Same invariant the validator enforces, asserted here so a reviewer can
+    // see it rather than having to trust the import-time check.
+    for (const spec of EXERCISES) {
+      const declared = new Set(spec.setup.requiredLandmarks ?? []);
+      for (const joint of spec.setup.requiredJoints) {
+        for (const landmark of JOINT_TO_LANDMARKS[joint]) {
+          expect(declared.has(landmark)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("the upper-body exercise does not require any leg landmark", () => {
+    const spec = EXERCISES_BY_ID.get("standing-shoulder-abduction")!;
+    const required = spec.setup.requiredLandmarks ?? [];
+    for (const leg of ["LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_FOOT_INDEX"]) {
+      expect(required).not.toContain(leg);
+    }
+  });
+
+  it("the lower-body exercise does not require wrist or face landmarks", () => {
+    const spec = EXERCISES_BY_ID.get("seated-knee-extension")!;
+    const required = spec.setup.requiredLandmarks ?? [];
+    for (const upper of ["LEFT_WRIST", "RIGHT_WRIST", "NOSE", "LEFT_EAR"]) {
+      expect(required).not.toContain(upper);
+    }
+  });
+
+  it("gives every exercise a plain-language framing hint", () => {
+    for (const spec of EXERCISES) {
+      expect(spec.setup.framingHint?.length ?? 0).toBeGreaterThan(10);
+    }
+  });
+});
+
+describe("reference media", () => {
+  it("every exercise ships demonstration material with instructions", () => {
+    for (const spec of EXERCISES) {
+      expect(spec.referenceMedia).toBeDefined();
+      expect(spec.referenceMedia!.instructions.length).toBeGreaterThan(10);
+      expect(spec.referenceMedia!.url.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("reference media is a local bundled asset, not a third-party URL", () => {
+    // Keeps the exercise demo working offline and avoids leaking which
+    // exercise a patient is doing to a third-party host.
+    for (const spec of EXERCISES) {
+      expect(spec.referenceMedia!.url.startsWith("/")).toBe(true);
     }
   });
 });

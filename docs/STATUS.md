@@ -1,7 +1,7 @@
 # Status
 
 **Last updated:** 2026-08-29
-**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end.
+**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end. A follow-up branch (`feature/camera-framing-and-ui-improvements`, PR open) reworks the camera experience — see "In review" below.
 **Phase:** implementation complete for the confirmed MVP scope; real-device validation and clinical sign-off are the two things still genuinely open, both flagged below rather than guessed at.
 
 ---
@@ -23,6 +23,70 @@ Everything in [`MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md)'s 15-feature scope is
 **70 unit/component tests + 11 fixture replays, all passing.** Full CI pipeline (`pnpm run ci`: boundaries → build → typecheck → lint → test → eval) verified green from a clean checkout (`rm -rf packages/*/dist apps/patient/dist`).
 
 **Run it:** `pnpm install && pnpm --filter @ai-rehab/patient run dev` (or `pnpm run dev:patient` from root), then open the printed localhost URL in a browser with a camera. See [`README.md`](../README.md).
+
+## In review — camera framing + live preview (PR open, not merged)
+
+Branch `feature/camera-framing-and-ui-improvements`, developed in a separate
+git worktree. **Not merged — awaiting teammate review.**
+
+Three real defects found and fixed:
+
+1. **MediaPipe never loaded at all.** Two stacked bugs: the WASM CDN URL was
+   pinned to 0.10.17 while the installed package was 0.10.35, and
+   `FilesetResolver.forVisionTasks` was called without `useModule: true`, so
+   MediaPipe fell back to `importScripts()` — unsupported in the ES module
+   workers Vite always emits. Surfaced as an opaque "ModuleFactory not set".
+   See [mediapipe#5257](https://github.com/google-ai-edge/mediapipe/issues/5257).
+   Once that was fixed the failure moved to `Failed to fetch`: the wasm and
+   model were being pulled from jsDelivr and storage.googleapis.com at
+   runtime, which a proxy or VPN can block outright. Both are now staged
+   into `apps/patient/public` by `scripts/fetch-pose-assets.mjs` and served
+   from the app's own origin — which also removes two third-party requests
+   per session, in a product whose whole claim is that nothing leaves the
+   device. **Verified**: in a real module worker, the model now initialises
+   from local assets (`detectForVideo` present); with `useModule: false` it
+   still reproduces the original error, confirming the diagnosis.
+2. **The patient could not see themselves.** The `<video>` element was
+   deliberately kept offscreen and only a skeleton was drawn, so there was no
+   way to tell whether you were in frame. The camera is now visible with the
+   skeleton as an overlay — the raw stream still never leaves the device.
+3. **Framing demanded the whole body for every exercise.** Capture quality
+   scored a bounding box over all 33 landmarks and required 70% of them
+   visible, so correct upper-body-only framing failed. Framing is now driven
+   by `ExerciseSpec.setup.requiredLandmarks`; irrelevant landmarks cannot
+   fail it.
+
+A fourth, subtler modelling bug fell out of the new validator:
+`setup.requiredJoints` was being used for two different jobs — "joints this
+exercise measures" and "landmarks the camera must see". Shoulder abduction
+listed `right_hip` only because the shoulder *angle* is computed from the hip
+*landmark*, which then dragged the knee into the framing requirement. The two
+concerns are now separate fields.
+
+Also added on the same branch (informed by a review of four reference
+projects — see [`REFERENCE-ANALYSIS.md`](REFERENCE-ANALYSIS.md)):
+
+4. **Reps are scored as trajectories, not poses.** `packages/core/reps/temporal.ts`
+   computes range, velocity dispersion (smoothness), phase balance and trunk
+   stability per rep, exposed as new `FormCriterion.measure` values so
+   exercises opt in as data. Closed-form arithmetic, no model in the
+   per-frame path — ADR-0001 holds.
+5. **A scoring-dilution bug the new criteria exposed.** Adding secondary
+   criteria let a rep that missed its primary target by 25 deg still score 68.
+   Liao/Vakanski published the same compression (incorrect reps at 0.7-0.9).
+   Fixed by weighting the criterion that *is* the exercise above the rest,
+   and by replacing the `score <= 50` cutoff feeding the safety gate with
+   `isFailedRep()` — "did any criterion fail outright", which is both truer
+   and explainable.
+6. **Session summary shows the set as a shape** — consistency, range trend
+   sparkline, best rep, and the criterion that fell short most often.
+
+Still unverified: **live pose tracking with a real camera.** This environment
+has no camera, so the fixed MediaPipe load path, the video preview, and
+framing against a real body have not been observed working. That remains the
+first thing to check.
+
+---
 
 ## What's genuinely verified vs. what isn't
 
