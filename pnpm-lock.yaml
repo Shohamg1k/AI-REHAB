@@ -51,7 +51,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/exercises
       '@mediapipe/tasks-vision':
-        specifier: ^0.10.17
+        specifier: 0.10.35
         version: 0.10.35
       idb:
         specifier: ^8.0.0

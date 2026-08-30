@@ -1,7 +1,7 @@
 # Status
 
 **Last updated:** 2026-08-29
-**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end.
+**Milestone:** M0 + M1 built. The 15-feature MVP runs end to end. A follow-up branch (`feature/camera-framing-and-ui-improvements`, PR open) reworks the camera experience — see "In review" below.
 **Phase:** implementation complete for the confirmed MVP scope; real-device validation and clinical sign-off are the two things still genuinely open, both flagged below rather than guessed at.
 
 ---
@@ -23,6 +23,43 @@ Everything in [`MVP-BUILD-PROMPT.md`](MVP-BUILD-PROMPT.md)'s 15-feature scope is
 **70 unit/component tests + 11 fixture replays, all passing.** Full CI pipeline (`pnpm run ci`: boundaries → build → typecheck → lint → test → eval) verified green from a clean checkout (`rm -rf packages/*/dist apps/patient/dist`).
 
 **Run it:** `pnpm install && pnpm --filter @ai-rehab/patient run dev` (or `pnpm run dev:patient` from root), then open the printed localhost URL in a browser with a camera. See [`README.md`](../README.md).
+
+## In review — camera framing + live preview (PR open, not merged)
+
+Branch `feature/camera-framing-and-ui-improvements`, developed in a separate
+git worktree. **Not merged — awaiting teammate review.**
+
+Three real defects found and fixed:
+
+1. **MediaPipe never loaded at all.** Two stacked bugs: the WASM CDN URL was
+   pinned to 0.10.17 while the installed package was 0.10.35, and
+   `FilesetResolver.forVisionTasks` was called without `useModule: true`, so
+   MediaPipe fell back to `importScripts()` — unsupported in the ES module
+   workers Vite always emits. Surfaced as an opaque "ModuleFactory not set".
+   See [mediapipe#5257](https://github.com/google-ai-edge/mediapipe/issues/5257).
+2. **The patient could not see themselves.** The `<video>` element was
+   deliberately kept offscreen and only a skeleton was drawn, so there was no
+   way to tell whether you were in frame. The camera is now visible with the
+   skeleton as an overlay — the raw stream still never leaves the device.
+3. **Framing demanded the whole body for every exercise.** Capture quality
+   scored a bounding box over all 33 landmarks and required 70% of them
+   visible, so correct upper-body-only framing failed. Framing is now driven
+   by `ExerciseSpec.setup.requiredLandmarks`; irrelevant landmarks cannot
+   fail it.
+
+A fourth, subtler modelling bug fell out of the new validator:
+`setup.requiredJoints` was being used for two different jobs — "joints this
+exercise measures" and "landmarks the camera must see". Shoulder abduction
+listed `right_hip` only because the shoulder *angle* is computed from the hip
+*landmark*, which then dragged the knee into the framing requirement. The two
+concerns are now separate fields.
+
+Still unverified: **live pose tracking with a real camera.** This environment
+has no camera, so the fixed MediaPipe load path, the video preview, and
+framing against a real body have not been observed working. That remains the
+first thing to check.
+
+---
 
 ## What's genuinely verified vs. what isn't
 
