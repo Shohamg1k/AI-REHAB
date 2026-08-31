@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "routine" text[] DEFAULT '{}' NOT NULL;

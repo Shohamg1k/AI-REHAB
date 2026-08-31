@@ -16,7 +16,11 @@ A patient can now pick which exercises they do — during onboarding, and afterw
 
 **Onboarding starts with everything ticked.** That keeps the default byte-identical to the previous behaviour, makes it a subtractive choice (the easier one to make about your own body), and avoids the app implying a clinical recommendation — choosing a *smaller* starting set for someone would be one, and nothing here is qualified to make it.
 
-Stored locally, like the rest of a guest's data, so **it does not follow a signed-in patient between devices**. Syncing it needs a patient-owned routine on the server, which is new backend surface and a larger decision than a preference warrants today.
+**The routine syncs.** It lives on the `users` row (migration `0006`) and rides along with `/auth/me`, so a second device picks it up at sign-in with no extra request. `PUT /me/routine` is patient-only — a clinician expressing what a patient should do is a Program, which goes through the E5 contraindication check first, and this does not.
+
+Local stays the copy the UI reads: it is the only copy a guest has, it works offline, and an unreachable server degrades the feature to where it was rather than breaking it. Pushes are fire-and-forget for the same reason — a failed sync costs cross-device consistency, never the patient's choice.
+
+**The conflict policy is deliberately blunt: the server wins at sign-in, last save wins after that.** No merge, no vector clock. Two devices editing days apart is not worth a synchronisation algorithm — the loser is one tap to fix, and the machinery would outlive its usefulness. Merging would produce a combined list neither device asked for.
 
 ---
 
@@ -102,7 +106,6 @@ Each of these is a case where reproducing the mock would have meant the app asse
 - **The fake iOS status bar** (`9:41 · 5G ▮▮▮`) is an artboard convention for showing a phone screen. A web page drawing a counterfeit OS status bar would be lying about the time and the signal.
 - **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
 - **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
-- **A routine does not sync.** It is stored on the device, so a signed-in patient who switches phones picks their routine again. A preference, not clinical data — but still a gap.
 - **Messaging has no notifications, no read receipts, and no attachments.** A patient cannot tell whether their clinician has seen a message. That is a real gap, not a simplification.
 - **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
 - **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.

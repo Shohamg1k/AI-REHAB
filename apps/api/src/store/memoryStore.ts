@@ -73,6 +73,7 @@ export class MemoryStore implements Store {
       role: input.role,
       contraindicatedRegions: [],
       dataSharingEnabled: true,
+      routine: [],
       passwordHash: input.passwordHash,
       createdAt: new Date().toISOString()
     };
@@ -113,6 +114,13 @@ export class MemoryStore implements Store {
       clinicianId: invite.createdBy,
       patientId: userId
     });
+    return stripPasswordHash(user);
+  }
+
+  async updateRoutine(tenantId: string, userId: string, exerciseIds: string[]): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user || user.tenantId !== tenantId) throw new NotFoundError(`user "${userId}" not found`);
+    user.routine = exerciseIds;
     return stripPasswordHash(user);
   }
 

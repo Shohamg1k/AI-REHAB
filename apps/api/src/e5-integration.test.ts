@@ -224,3 +224,84 @@ describe("patient contraindications profile", () => {
     expect(res.statusCode).toBe(403);
   });
 });
+
+/**
+ * The routine is a patient preference, stored server-side only so it follows
+ * them between devices. It is deliberately *not* a Program: a clinician
+ * expressing what a patient should do goes through the E5 contraindication
+ * check first, and this does not.
+ */
+describe("patient routine (cross-device sync)", () => {
+  it("round-trips through the user record, so another device reads it back", async () => {
+    const { app } = await buildTestApp();
+    const { body: auth } = await signup(app, {
+      email: "routine@example.com",
+      password: "hunter22222",
+      displayName: "R",
+      role: "patient"
+    });
+
+    // A new account has not chosen yet, which is distinct from choosing none.
+    expect(auth.user.routine).toEqual([]);
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/me/routine",
+      headers: authHeader(auth.token),
+      payload: { exerciseIds: ["sit-to-stand", "seated-neck-side-tilt"] }
+    });
+    expect(res.statusCode).toBe(200);
+
+    // What a second device sees when it signs in.
+    const me = await app.inject({ method: "GET", url: "/auth/me", headers: authHeader(auth.token) });
+    expect(me.json().routine).toEqual(["sit-to-stand", "seated-neck-side-tilt"]);
+  });
+
+  it("keeps one patient's routine out of another's", async () => {
+    const { app } = await buildTestApp();
+    const a = await signup(app, {
+      email: "routine-a@example.com",
+      password: "hunter22222",
+      displayName: "A",
+      role: "patient"
+    });
+    const b = await signup(app, {
+      email: "routine-b@example.com",
+      password: "hunter22222",
+      displayName: "B",
+      role: "patient"
+    });
+
+    await app.inject({
+      method: "PUT",
+      url: "/me/routine",
+      headers: authHeader(a.body.token),
+      payload: { exerciseIds: ["seated-elbow-flexion"] }
+    });
+
+    const meB = await app.inject({
+      method: "GET",
+      url: "/auth/me",
+      headers: authHeader(b.body.token)
+    });
+    expect(meB.json().routine).toEqual([]);
+  });
+
+  it("a clinician account has no routine to set", async () => {
+    const { app } = await buildTestApp();
+    const { body: auth } = await signup(app, {
+      email: "routine-clin@example.com",
+      password: "hunter22222",
+      displayName: "C",
+      role: "clinician"
+    });
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/me/routine",
+      headers: authHeader(auth.token),
+      payload: { exerciseIds: ["sit-to-stand"] }
+    });
+    expect(res.statusCode).toBe(403);
+  });
+});

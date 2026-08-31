@@ -103,6 +103,11 @@ export function joinWithCode(code: string): Promise<AuthResponse> {
   return request("/me/join", { method: "POST", body: JSON.stringify({ code }) }, true);
 }
 
+/** The patient's own exercise selection, stored server-side so it follows them between devices. */
+export function updateRoutine(exerciseIds: readonly string[]): Promise<User> {
+  return request("/me/routine", { method: "PUT", body: JSON.stringify({ exerciseIds }) }, true);
+}
+
 export function updateDataSharing(enabled: boolean): Promise<User> {
   return request(
     "/me/data-sharing",

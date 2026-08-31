@@ -15,7 +15,14 @@ import { BottomNav, type NavTab } from "./components/BottomNav.js";
 import { SharingScreen } from "./screens/SharingScreen.js";
 import { ProgramScreen } from "./screens/ProgramScreen.js";
 import { RoutineSetupScreen } from "./screens/RoutineSetupScreen.js";
-import { hasChosenRoutine, loadRoutine, routineExercises, saveRoutine } from "./lib/routine.js";
+import {
+  hasChosenRoutine,
+  loadRoutine,
+  pushRoutine,
+  reconcileRoutine,
+  routineExercises,
+  saveRoutine
+} from "./lib/routine.js";
 import { appendEvent } from "./lib/db.js";
 import { completedExercisesToday } from "./lib/localHistory.js";
 import { syncPendingSessions, syncSession } from "./lib/sync.js";
@@ -91,6 +98,9 @@ export default function App() {
     // E5 contraindication check before it was assigned. Failing to load it
     // falls back to the routine rather than to an empty screen.
     if (!isApiConfigured() || !currentUser) return;
+    // A returning session: the server copy may have moved on while this
+    // device was closed.
+    if (reconcileRoutine(currentUser)) setRoutineVersion((v) => v + 1);
     fetchMyProgram()
       .then(setProgram)
       .catch(() => setProgram(null));
@@ -242,6 +252,9 @@ export default function App() {
 
   function handleSignedIn(user: User) {
     setCurrentUser(user);
+    // Bring the routine across from whatever device chose it. Signing in is
+    // the only moment the two copies can be reconciled without guessing.
+    if (reconcileRoutine(user)) setRoutineVersion((v) => v + 1);
     setScreen(user.role === "clinician" ? "welcome" : "today");
   }
 
@@ -284,6 +297,7 @@ export default function App() {
           <RoutineSetupScreen
             onDone={(ids) => {
               saveRoutine(ids);
+              pushRoutine(ids);
               setRoutineVersion((v) => v + 1);
               setScreen("today");
             }}

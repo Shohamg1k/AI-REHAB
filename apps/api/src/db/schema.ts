@@ -45,6 +45,9 @@ export const users = pgTable(
     // Patient-only consent flag; always true for a clinician. See
     // identity.ts's doc comment on the contracts side.
     dataSharingEnabled: boolean("data_sharing_enabled").notNull().default(true),
+    // Patient-only; always [] for a clinician. A preference, not a
+    // prescription — see identity.ts on why the two are separate.
+    routine: text("routine").array().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
   },
   (t) => ({

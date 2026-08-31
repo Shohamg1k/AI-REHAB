@@ -38,6 +38,7 @@ function toUser(row: typeof schema.users.$inferSelect): User {
     role: row.role,
     contraindicatedRegions: (row.contraindicatedRegions ?? []) as BodyRegion[],
     dataSharingEnabled: row.dataSharingEnabled,
+    routine: row.routine ?? [],
     createdAt: row.createdAt.toISOString()
   };
 }
@@ -165,6 +166,18 @@ export class PostgresStore implements Store {
         .values({ tenantId: invite.tenantId, clinicianId: invite.createdBy, patientId: userId })
         .onConflictDoNothing();
 
+      return toUser(row);
+    });
+  }
+
+  async updateRoutine(tenantId: string, userId: string, exerciseIds: string[]): Promise<User> {
+    return withTenant(this.db, tenantId, async (tx) => {
+      const [row] = await tx
+        .update(schema.users)
+        .set({ routine: exerciseIds })
+        .where(and(eq(schema.users.id, userId), eq(schema.users.tenantId, tenantId)))
+        .returning();
+      if (!row) throw new NotFoundError(`user "${userId}" not found`);
       return toUser(row);
     });
   }
