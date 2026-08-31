@@ -96,6 +96,11 @@ export function updateContraindications(regions: BodyRegion[]): Promise<User> {
   );
 }
 
+/** Redeem a clinician's invite code after signup. Returns a fresh token: the caller's tenant has changed. */
+export function joinWithCode(code: string): Promise<AuthResponse> {
+  return request("/me/join", { method: "POST", body: JSON.stringify({ code }) }, true);
+}
+
 export function updateDataSharing(enabled: boolean): Promise<User> {
   return request(
     "/me/data-sharing",

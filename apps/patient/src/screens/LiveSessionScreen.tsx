@@ -66,7 +66,7 @@ export function LiveSessionScreen({
         topLeft={
           <div className="flex items-center gap-12">
             <button type="button" onClick={onEndExercise} aria-label="End set" className="text-white">
-              <Icon name="chevron" className="h-20 w-20 rotate-180" />
+              <Icon name="chevron" size={20} className="rotate-180" />
             </button>
             <div className="flex flex-col">
               <span className="text-[16px] font-semibold text-white">{spec.displayName}</span>
@@ -91,7 +91,7 @@ export function LiveSessionScreen({
                 className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
               >
                 <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
-                  <Icon name="warning" className="h-15 w-15" />
+                  <Icon name="warning" size={15} />
                 </span>
                 <span className="text-[13.5px] font-medium text-ink">
                   {primaryGuidance(captureQuality, signalStatus)}
@@ -103,7 +103,7 @@ export function LiveSessionScreen({
                 className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
               >
                 <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
-                  <Icon name="sound" className="h-15 w-15" />
+                  <Icon name="sound" size={15} />
                 </span>
                 <span className="flex flex-col">
                   <span className="text-[13.5px] font-medium text-ink">{activeCue.text}</span>

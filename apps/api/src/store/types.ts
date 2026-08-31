@@ -53,6 +53,17 @@ export interface Store {
     regions: BodyRegion[]
   ): Promise<User>;
   updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User>;
+  /**
+   * Redeems an invite for a patient who already has an account, moving them
+   * out of their personal tenant-of-one and into the clinician's.
+   *
+   * This is a tenant *move*, not just a link, and it has to carry the
+   * patient's existing data with them: their sessions and program rows are
+   * tenant-scoped, so leaving those behind would strand the patient's own
+   * history behind an isolation boundary they can no longer cross. Returns
+   * null when the code is invalid, expired, or already used.
+   */
+  joinTenantByInvite(userId: string, code: string): Promise<User | null>;
 
   // --- invites ---
   createInvite(input: { tenantId: string; createdBy: string }): Promise<{

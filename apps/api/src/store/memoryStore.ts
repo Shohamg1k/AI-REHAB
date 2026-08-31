@@ -86,6 +86,30 @@ export class MemoryStore implements Store {
     return stripPasswordHash(user);
   }
 
+  async joinTenantByInvite(userId: string, code: string): Promise<User | null> {
+    const user = this.users.get(userId);
+    if (!user || user.role !== "patient") return null;
+
+    const invite = await this.consumeInvite(code);
+    if (!invite) return null;
+
+    // Sessions here are keyed by userId, so they follow the patient without
+    // rewriting. Programs carry an explicit tenantId and do not.
+    const previousProgramId = this.programsByPatient.get(userId);
+    if (previousProgramId) {
+      const program = this.programs.get(previousProgramId);
+      if (program) this.programs.set(previousProgramId, { ...program, tenantId: invite.tenantId });
+    }
+
+    user.tenantId = invite.tenantId;
+    await this.linkPatient({
+      tenantId: invite.tenantId,
+      clinicianId: invite.createdBy,
+      patientId: userId
+    });
+    return stripPasswordHash(user);
+  }
+
   async updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User> {
     const user = this.users.get(userId);
     if (!user || user.tenantId !== tenantId) throw new NotFoundError(`user "${userId}" not found`);

@@ -2,7 +2,19 @@
 
 **Last updated:** 2026-08-31
 **Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
-**Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design. What is left is the features the mock depicts but the system does not have, listed below — not styling. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+**Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design, and the first round of real-use feedback on them is fixed. What is left is the features the mock depicts but the system does not have, listed below — not styling.
+
+---
+
+## Fixes from first real use
+
+- **Icons rendered enormously** — a 19px lock drew ~600px wide. `Icon` sized itself with `className="h-19 w-19"`, but this app replaces Tailwind's spacing scale with its own px scale, and a value missing from that scale produces *no class at all* rather than an error, so the SVG got no size and filled its container. Size is now a width/height attribute, which cannot fail that way, and the spacing scale covers 0–80px so the same silent failure cannot hit other utilities.
+- **Refresh always returned to the welcome screen.** The four tab screens now persist to `sessionStorage`. Deliberately only those four: a refresh mid-set cannot resume it — camera, worker and rep state are all gone — so returning to Today is honest where silently re-entering a "live" session that is not running would not be.
+- **Guests never saw their own history.** Every session has always been written to IndexedDB (G1), but nothing read it back: Progress fetched from `apps/api`, so a patient with no account — the default, and the entire point of H7 — saw an empty screen no matter how much work they had done. `lib/localHistory.ts` is the missing reader.
+- **Today never marked anything done.** It now reads the local log for exercises completed today and dims them with a check, and the counter reflects real progress.
+- **Program and Today were the same list.** Today answers "what next, and why"; Program answers "what has my clinician actually asked of me, at what dose". With no clinician, Program says so and shows the exercise library labelled as a library, not a plan pretending to be one.
+- **A patient could only enter an invite code at signup.** `POST /me/join` redeems one afterwards, from Sharing. This is a tenant *move*, not just a link, and it carries the patient's existing sessions and program with them — tenant-scoped data left behind would strand their own history on the far side of an isolation boundary they can no longer cross. Four tests cover exactly that, plus single-use enforcement and that a clinician cannot use it.
+- **No way to sign out.** Now on Sharing, with the signed-in account named. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
 
 ---
 
@@ -34,6 +46,7 @@ Each of these is a case where reproducing the mock would have meant the app asse
 - **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
 - **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
 - **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
+- **Clinician reports (F1) and messaging (F9) are not built.** The Sharing screen says so on the screen itself rather than implying they exist — nothing there sends or receives a message, and no report is generated.
 - **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.
 
 All five are gaps to build, not decisions to keep — see "What's still a gap".

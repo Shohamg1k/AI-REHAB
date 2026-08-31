@@ -131,6 +131,41 @@ export class PostgresStore implements Store {
     });
   }
 
+  async joinTenantByInvite(userId: string, code: string): Promise<User | null> {
+    const invite = await this.consumeInvite(code);
+    if (!invite) return null;
+
+    // Runs against the *new* tenant: every row being written now belongs to
+    // it, and the RLS policies are evaluated per statement.
+    return withTenant(this.db, invite.tenantId, async (tx) => {
+      const [row] = await tx
+        .update(schema.users)
+        .set({ tenantId: invite.tenantId })
+        .where(and(eq(schema.users.id, userId), eq(schema.users.role, "patient")))
+        .returning();
+      if (!row) return null;
+
+      // The patient's own history has to move with them — it is tenant-scoped,
+      // so left behind it would sit on the far side of an isolation boundary
+      // the patient can no longer cross.
+      await tx
+        .update(schema.sessionEvents)
+        .set({ tenantId: invite.tenantId })
+        .where(eq(schema.sessionEvents.userId, userId));
+      await tx
+        .update(schema.programs)
+        .set({ tenantId: invite.tenantId })
+        .where(eq(schema.programs.patientId, userId));
+
+      await tx
+        .insert(schema.clinicianPatientLinks)
+        .values({ tenantId: invite.tenantId, clinicianId: invite.createdBy, patientId: userId })
+        .onConflictDoNothing();
+
+      return toUser(row);
+    });
+  }
+
   async updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User> {
     return withTenant(this.db, tenantId, async (tx) => {
       const [row] = await tx

@@ -24,7 +24,7 @@ export function Disclaimer({
 }) {
   return (
     <p className={`flex items-start gap-8 text-[11.5px] leading-[1.4] text-ink-3 ${className}`}>
-      <Icon name={icon} className="mt-1 h-13 w-13 flex-none" />
+      <Icon name={icon} size={13} className="mt-1 flex-none" />
       <span>{children}</span>
     </p>
   );

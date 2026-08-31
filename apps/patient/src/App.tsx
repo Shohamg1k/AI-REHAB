@@ -12,7 +12,9 @@ import { HistoryScreen } from "./screens/HistoryScreen.js";
 import { ClinicianApp } from "./clinician/ClinicianApp.js";
 import { BottomNav, type NavTab } from "./components/BottomNav.js";
 import { SharingScreen } from "./screens/SharingScreen.js";
+import { ProgramScreen } from "./screens/ProgramScreen.js";
 import { appendEvent } from "./lib/db.js";
+import { completedExercisesToday } from "./lib/localHistory.js";
 import { syncPendingSessions, syncSession } from "./lib/sync.js";
 import { clearSession, getSession } from "./lib/authStore.js";
 import { isApiConfigured } from "./lib/api.js";
@@ -25,7 +27,28 @@ type Screen =
   | "pain-check-in"
   | "summary"
   | "history"
-  | "sharing";
+  | "sharing"
+  | "program";
+
+/**
+ * Which screen to restore on reload.
+ *
+ * Only the four tab screens are remembered. A refresh in the middle of a set
+ * cannot resume it — the camera, the worker and the rep state are all gone —
+ * so returning to Today is honest, where silently re-entering a "live"
+ * session that is not running would not be.
+ */
+const RESTORABLE: readonly Screen[] = ["today", "history", "sharing", "program"];
+const SCREEN_KEY = "ai-rehab:screen";
+
+function restoreScreen(): Screen | null {
+  try {
+    const saved = sessionStorage.getItem(SCREEN_KEY) as Screen | null;
+    return saved && RESTORABLE.includes(saved) ? saved : null;
+  } catch {
+    return null; // private mode, or storage disabled
+  }
+}
 
 /**
  * Which screens carry the bottom nav, and which tab it highlights. The whole
@@ -35,6 +58,14 @@ type Screen =
 const NAV_TAB: Partial<Record<Screen, NavTab>> = {
   today: "today",
   history: "progress",
+  program: "program",
+  sharing: "sharing"
+};
+
+const TAB_SCREEN: Record<NavTab, Screen> = {
+  today: "today",
+  progress: "history",
+  program: "program",
   sharing: "sharing"
 };
 
@@ -54,12 +85,30 @@ function newSessionId(): string {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("welcome");
+  // A signed-in or returning patient lands where they left off; a first
+  // visit still starts at the welcome screen.
+  const [screen, setScreen] = useState<Screen>(() => restoreScreen() ?? "welcome");
   const [exerciseId, setExerciseId] = useState<string | null>(null);
   const [completedSet, setCompletedSet] = useState<CompletedSet | null>(null);
   const [painReport, setPainReport] = useState<{ region: BodyRegion | null; severity: number } | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(() => getSession()?.user ?? null);
+  const [completedToday, setCompletedToday] = useState<string[]>([]);
   const sessionRef = useRef<ActiveSession | null>(null);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SCREEN_KEY, screen);
+    } catch {
+      /* storage disabled — the app still works, it just forgets on reload */
+    }
+  }, [screen]);
+
+  // Which exercises are already done today, so Today can mark them. Read from
+  // the local log rather than tracked in memory, so it survives a reload.
+  const refreshCompleted = () => {
+    void completedExercisesToday().then(setCompletedToday);
+  };
+  useEffect(refreshCompleted, []);
 
   useEffect(() => {
     // G6 — flush anything a previous visit didn't manage to sync. A no-op
@@ -135,6 +184,7 @@ export default function App() {
     setExerciseId(null);
     setCompletedSet(null);
     setPainReport(null);
+    refreshCompleted();
     setScreen("today");
   }
 
@@ -142,6 +192,11 @@ export default function App() {
     clearSession();
     setCurrentUser(null);
     setScreen("welcome");
+  }
+
+  function handleSignedIn(user: User) {
+    setCurrentUser(user);
+    setScreen(user.role === "clinician" ? "welcome" : "today");
   }
 
   // ADR-0005 — a clinician gets an entirely different app shell, not a
@@ -167,17 +222,23 @@ export default function App() {
         {screen === "welcome" && <WelcomeScreen onStart={handleStart} onSignIn={() => setScreen("auth")} />}
         {screen === "auth" && (
           <AuthScreen
-            onDone={(user) => {
-              setCurrentUser(user);
-              setScreen(user.role === "clinician" ? "welcome" : "today");
-            }}
+            onDone={handleSignedIn}
             onBack={() => setScreen("welcome")}
           />
         )}
-        {screen === "today" && <TodayScreen onPick={handlePickExercise} />}
+        {screen === "today" && (
+          <TodayScreen onPick={handlePickExercise} completedExerciseIds={completedToday} />
+        )}
+        {screen === "program" && <ProgramScreen onPick={handlePickExercise} />}
         {screen === "history" && <HistoryScreen />}
         {screen === "sharing" && (
-          <SharingScreen signedIn={isApiConfigured() && currentUser !== null} onSignIn={() => setScreen("auth")} />
+          <SharingScreen
+            user={currentUser}
+            signedIn={isApiConfigured() && currentUser !== null}
+            onSignIn={() => setScreen("auth")}
+            onSignOut={handleSignOut}
+            onUserChanged={setCurrentUser}
+          />
         )}
         {screen === "session" && exerciseId && (
           <CoachedSession
@@ -211,11 +272,7 @@ export default function App() {
       {navTab && (
         <BottomNav
           active={navTab}
-          onNavigate={(tab) => {
-            // `Program` has no screen of its own yet — today's list is the
-            // program for now, so it routes there rather than to a stub.
-            setScreen(tab === "progress" ? "history" : tab === "sharing" ? "sharing" : "today");
-          }}
+          onNavigate={(tab) => setScreen(TAB_SCREEN[tab])}
         />
       )}
     </div>
