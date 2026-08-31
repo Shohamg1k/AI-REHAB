@@ -1,8 +1,14 @@
 import { defineConfig } from "vitest/config";
+// @ts-expect-error — plain-JS build helper, shared with apps/patient/vite.config.ts.
+import { poseModelTierPlugin } from "./scripts/vite-plugin-pose-tier.mjs";
 
 // Root config so `pnpm test` from the repo root discovers every package's
 // tests in one run. Individual packages may still run `vitest` locally.
 export default defineConfig({
+  // A test run resolves modules through its own plugin set, so apps/patient's
+  // virtual pose-tier module has to be registered here too — otherwise every
+  // test that transitively imports the live-session hook fails to resolve it.
+  plugins: [poseModelTierPlugin()],
   test: {
     include: [
       "packages/*/test/**/*.test.ts",

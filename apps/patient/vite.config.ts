@@ -1,8 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+// @ts-expect-error — plain-JS build helper, shared with the root vitest config.
+import { poseModelTierPlugin } from "../../scripts/vite-plugin-pose-tier.mjs";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), poseModelTierPlugin()],
   worker: {
     format: "es"
   },

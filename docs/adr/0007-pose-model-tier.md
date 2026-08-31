@@ -1,6 +1,6 @@
 # ADR-0007 — Pose model tier and device floor
 
-**Status:** OPEN — interim default shipped, real measurement still pending · Raised 2026-08-27
+**Status:** OPEN — `heavy` measured on one desktop-class machine and clears the bar there; the multi-device spike (phones, dim room, real camera) is still outstanding · Raised 2026-08-27
 
 ## Interim decision (2026-08-29)
 
@@ -12,7 +12,29 @@ Switched to `pose_landmarker_heavy` — the most accurate tier — at the produc
 
 Verified (not assumed) in a real ES-module worker, served from local assets: `heavy` loads and `detectForVideo` is present, ~5s cold load on this machine's hardware — see the PR history on `feature/camera-framing-ui-research`. Per-frame inference latency and sustained fps at 24fps intake have **not** been measured; that still needs a real camera stream, which this environment cannot provide.
 
-If the demo hardware turns out to choke on `heavy`, drop to `full` first (README/UPSTREAM.md's middle tier) before falling back to `lite` — swap the tier by changing the model filename in three places: `scripts/fetch-pose-assets.mjs` (`MODEL_FILE` + `MODEL_URL`), `apps/patient/src/worker/poseWorker.ts` (`MODEL_URL`), and re-running `pnpm setup:pose`.
+If the demo hardware turns out to choke on `heavy`, drop to `full` first before falling back to `lite`. Swapping tiers is now one env var rather than three hand-synced constants:
+
+```
+POSE_TIER=full pnpm setup:pose
+```
+
+## First real inference measurements (2026-08-31)
+
+Partially answers the spike. **One machine only** — a Windows dev laptop, Chrome, WebGL/GPU delegate, `heavy` tier, 1280×720 synthetic frames driven straight into the worker. Not a real camera, not a real body, and not the range of devices the spike actually calls for. Treat as an upper bound from favourable hardware, not as the spike being done.
+
+| Measure | Result |
+|---|---|
+| Steady-state inference, median | **~29.5 ms** (~34fps headroom against the 24fps intake cap) |
+| Steady-state range | 18–46 ms typical, occasional ~110–145 ms outliers |
+| **First inference after load** | **~10,300 ms** |
+| First inference, after warm-up fix | **~60–75 ms** |
+
+Two things follow, both acted on in the same change:
+
+1. **`heavy` clears the ≥24fps criterion on this class of hardware**, with real margin. That is genuine evidence for the interim default rather than the "cheapest tier most likely to clear the floor" reasoning it replaced — but on one favourable device, which is exactly the machine the spike was least worried about.
+2. **The first inference costs ~10 seconds**, because MediaPipe compiles GPU shaders and sets up its graph lazily, *after* `createFromOptions` resolves. The app was reporting "ready" and dismissing its loading spinner before paying that cost, so the patient's first frame froze for ten seconds — indistinguishable from the app being broken. Fixed by running one throwaway inference during startup (`warmUp` in `poseWorker.ts`), which moves the cost inside the loading state the patient is already waiting through.
+
+The remaining spike question is unchanged and still open: **a three-year-old Android phone and an iPhone, in good light and a dim room, with a real camera and a real body.** The app now reports `fps`, median inference, and tier on the camera setup screen, so running the rest of the spike is a matter of opening the app on each device and reading the number off the screen — no instrumentation work required.
 
 ## Context
 

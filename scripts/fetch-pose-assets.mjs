@@ -22,26 +22,38 @@
  * Run automatically on `pnpm install`, or by hand: `pnpm setup:pose`
  */
 import { createRequire } from "node:module";
-import { cp, mkdir, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  MANIFEST_FILE,
+  POSE_TIERS,
+  STAGED_MODEL_FILE,
+  resolveTier
+} from "./pose-tiers.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, "..", "apps", "patient", "public");
 const WASM_DEST = join(PUBLIC_DIR, "mediapipe", "wasm");
 const MODEL_DEST_DIR = join(PUBLIC_DIR, "mediapipe", "models");
 
-// `heavy` — highest-accuracy tier, per docs/adr/0007-pose-model-tier.md.
-// Chosen for the hackathon demo posture: a controlled environment (known
-// hardware, good lighting, short session) where accuracy matters more than
-// the broad device floor `lite` was hedging for. Swapping tiers means
-// changing this URL, the filename below, and the worker's MODEL_URL.
-const MODEL_FILE = "pose_landmarker_heavy.task";
-const MODEL_DEST = join(MODEL_DEST_DIR, MODEL_FILE);
-const MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task";
+// Which tier to stage. Defaults to `heavy` per
+// docs/adr/0007-pose-model-tier.md — the highest-accuracy tier, chosen for a
+// controlled demo environment. Override to compare on real hardware:
+//   POSE_TIER=full pnpm setup:pose
+//
+// Resolved lazily so an unknown tier surfaces through the same friendly
+// error path as everything else here, rather than as a bare stack trace
+// thrown during module evaluation.
+let TIER;
+let TIER_INFO;
 
-const MIN_PLAUSIBLE_MODEL_BYTES = 5_000_000; // heavy is ~29MB; catches a truncated/intercepted download
+// Staged under one stable name regardless of tier, so the worker never has
+// to know which one it got.
+const MODEL_DEST = join(MODEL_DEST_DIR, STAGED_MODEL_FILE);
+const MANIFEST_DEST = join(MODEL_DEST_DIR, MANIFEST_FILE);
+
+const MIN_PLAUSIBLE_MODEL_BYTES = 4_000_000; // lite, the smallest tier, is ~5.5MB
 
 async function exists(path) {
   try {
@@ -82,16 +94,25 @@ async function copyWasm() {
   console.log(`✓ wasm runtime copied from ${wasmSrc}`);
 }
 
+/** The tier already staged, or null if nothing is staged yet. */
+async function stagedTier() {
+  try {
+    return JSON.parse(await readFile(MANIFEST_DEST, "utf8")).tier ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchModel() {
-  if (await exists(MODEL_DEST)) {
-    console.log("✓ pose model already present, skipping download");
+  if ((await exists(MODEL_DEST)) && (await stagedTier()) === TIER) {
+    console.log(`✓ pose model already present (${TIER} tier), skipping download`);
     return;
   }
 
-  console.log(`  downloading pose model (~29 MB, heavy tier)…`);
-  const response = await fetch(MODEL_URL);
+  console.log(`  downloading pose model (~${TIER_INFO.approxMB} MB, ${TIER} tier)…`);
+  const response = await fetch(TIER_INFO.url);
   if (!response.ok) {
-    throw new Error(`model download failed: HTTP ${response.status} from ${MODEL_URL}`);
+    throw new Error(`model download failed: HTTP ${response.status} from ${TIER_INFO.url}`);
   }
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length < MIN_PLAUSIBLE_MODEL_BYTES) {
@@ -99,26 +120,34 @@ async function fetchModel() {
     // with a 200. Writing that as a .task file produces a baffling failure
     // much later, so reject anything too small to be the real model.
     throw new Error(
-      `model download returned ${bytes.length} bytes, far below the expected ~5.8 MB — ` +
-        `a proxy or captive portal probably intercepted it.`
+      `model download returned ${bytes.length} bytes, far below the expected ` +
+        `~${TIER_INFO.approxMB} MB — a proxy or captive portal probably intercepted it.`
     );
   }
 
   await mkdir(MODEL_DEST_DIR, { recursive: true });
   await writeFile(MODEL_DEST, bytes);
-  console.log(`✓ pose model saved (${(bytes.length / 1e6).toFixed(1)} MB)`);
+  await writeFile(
+    MANIFEST_DEST,
+    `${JSON.stringify({ tier: TIER, sourceFile: TIER_INFO.file, bytes: bytes.length }, null, 2)}\n`
+  );
+  console.log(`✓ pose model saved (${(bytes.length / 1e6).toFixed(1)} MB, ${TIER} tier)`);
 }
 
 try {
+  TIER = resolveTier(process.env.POSE_TIER);
+  TIER_INFO = POSE_TIERS[TIER];
   await copyWasm();
   await fetchModel();
   console.log("Pose assets ready — served locally, no CDN at runtime.");
 } catch (err) {
   console.error(`\n✖ ${err instanceof Error ? err.message : err}`);
-  console.error(
-    "\nThe app cannot start pose tracking without these. If you are behind a proxy that\n" +
-      "blocks storage.googleapis.com, download the model manually and place it at:\n" +
-      `  ${MODEL_DEST}\n  (source: ${MODEL_URL})\n`
-  );
+  if (TIER_INFO) {
+    console.error(
+      "\nThe app cannot start pose tracking without these. If you are behind a proxy that\n" +
+        "blocks storage.googleapis.com, download the model manually and place it at:\n" +
+        `  ${MODEL_DEST}\n  (source: ${TIER_INFO.url})\n`
+    );
+  }
   process.exit(1);
 }
