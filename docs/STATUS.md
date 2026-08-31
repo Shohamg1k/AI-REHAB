@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-31
 **Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
-**Phase:** the app now *looks like* the approved design rather than approximating it. Screens M1/M2/M10 are rebuilt; M3–M9 have the correct palette and type but not yet their artboard structure. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+**Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design. What is left is the features the mock depicts but the system does not have, listed below — not styling. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
 
 ---
 
@@ -18,7 +18,9 @@ The design source of truth is `figma-svg/_source/v2.html` (the artboards the SVG
 
 **Bottom navigation now exists** — Today / Progress / Program / Sharing, which the app simply did not have. It is deliberately hidden for the whole exercise flow (intro → camera → live → rest → summary): a way out of a running set should not sit next to the set.
 
-**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M3 Why this exercise (numbered technique steps, and the safety cap drawn from the exercise's *actual* thresholds rather than the artboard's named clinician), M8 Session summary (the design's 2×2 stat grid and observations list, fed by the set that was really performed), M9 Progress (seven-day streak strip from real adherence data), M7 Rest check-in (a tappable body map replacing the region pill list, and the design's five-step coloured pain scale), M10 Sharing & privacy (new screen).
+**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M3 Why this exercise (numbered technique steps, and the safety cap drawn from the exercise's *actual* thresholds rather than the artboard's named clinician), M8 Session summary (the design's 2×2 stat grid and observations list, fed by the set that was really performed), M9 Progress (seven-day streak strip from real adherence data), M4 Camera setup (dark full-bleed, capture-quality meter off the real framing score), M5 Live session (camera as the screen, per-rep tick strip coloured by real scores), M6 Safety block (bottom sheet, camera dimmed, skeleton suppressed), M7 Rest check-in (a tappable body map replacing the region pill list, and the design's five-step coloured pain scale), M8, M9, M10 Sharing & privacy (new screen).
+
+**The redesign is guarded where it matters.** CLAUDE.md invariant 3 — "nothing may soften a `block` or `escalate` verdict downstream" — is a claim about the UI, and a redesign is exactly the change that could reintroduce a "continue anyway" button while everything still typechecks. `SafetyBlockBanner.test.tsx` now asserts no button on that sheet says anything a patient could read as "keep going", that the copy never says "push through", and that the escalation path survives.
 
 **A duplication M3 exposed:** the reference-media card and the new numbered steps both render `keyPoints`, so every technique cue appeared twice. The card's existing `compact` flag now suppresses its copy on that screen.
 
@@ -98,7 +100,7 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 
 ## What's still a gap
 
-- **Screens M4–M6 are not yet rebuilt to their artboards** (camera setup, live session, safety block). They pick up the new palette, type and components automatically, so the app is visually coherent, but their structure and copy still differ from the designs. `docs/DESIGN-SCREENS.md` has the literal spec for each; this is continuation work, not a blocker. M5/M6 are the most involved: the design makes them full-bleed camera screens with everything absolutely positioned, unlike every other screen.
+- **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
 - **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.
 - **M9's form-score chart and left-vs-right symmetry card are not built.** Neither a cross-session score series nor a per-side comparison is computed anywhere yet, and drawing the artboard's sample curve would show the patient a trend that is not theirs.
 - **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.

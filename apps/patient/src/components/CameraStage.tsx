@@ -51,7 +51,8 @@ export function CameraStage({
   fullBleed = false,
   topLeft,
   topRight,
-  bottom
+  bottom,
+  children
 }: {
   liveState: LiveSessionState;
   signalStatus: SignalStatus;
@@ -62,6 +63,8 @@ export function CameraStage({
   topLeft?: ReactNode;
   topRight?: ReactNode;
   bottom?: ReactNode;
+  /** Free-positioned overlays (readouts, progress strips) that own their own placement. */
+  children?: ReactNode;
 }) {
   const { cameraStatus, workerStatus, landmarks, captureQuality, videoSize } = liveState;
   const style = STATUS_STYLE[signalStatus];
@@ -116,6 +119,8 @@ export function CameraStage({
           </span>
         </div>
       </div>
+
+      {children}
 
       {bottom && <div className="absolute inset-x-0 bottom-0 p-12">{bottom}</div>}
 
