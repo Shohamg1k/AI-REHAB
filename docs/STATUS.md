@@ -6,6 +6,20 @@
 
 ---
 
+## Patients choose their own routine
+
+A patient can now pick which exercises they do — during onboarding, and afterwards from the Program tab.
+
+**A routine is not a prescription, and never overrides one.** A clinician's `Program` passed the E5 contraindication check before it was assigned; letting a patient quietly delete a prescribed exercise from their own device would make the clinician's copy a lie. So Today follows the prescription when one exists and the patient's routine otherwise, and the Program screen says which of the two is in force. With a prescription present, the editor is framed as *extra* exercises rather than a way to edit the prescription.
+
+**Today now honours a prescription at all**, which it previously did not — it listed the whole catalogue regardless of what had been assigned. That was a pre-existing gap, visible only because the routine work made "what should Today show" an explicit question.
+
+**Onboarding starts with everything ticked.** That keeps the default byte-identical to the previous behaviour, makes it a subtractive choice (the easier one to make about your own body), and avoids the app implying a clinical recommendation — choosing a *smaller* starting set for someone would be one, and nothing here is qualified to make it.
+
+Stored locally, like the rest of a guest's data, so **it does not follow a signed-in patient between devices**. Syncing it needs a patient-owned routine on the server, which is new backend surface and a larger decision than a preference warrants today.
+
+---
+
 ## Upper body, and two real model defects
 
 **Three upper-body exercises added**, keeping all three existing ones: `standing-shoulder-flexion`, `seated-elbow-flexion`, `seated-neck-side-tilt`. Six in total, covering knee, hip, shoulder, elbow and neck. Every one is still `provisional` — ranges are reasoned from ordinary clinical norms, not signed off.
@@ -88,6 +102,7 @@ Each of these is a case where reproducing the mock would have meant the app asse
 - **The fake iOS status bar** (`9:41 · 5G ▮▮▮`) is an artboard convention for showing a phone screen. A web page drawing a counterfeit OS status bar would be lying about the time and the signal.
 - **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
 - **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
+- **A routine does not sync.** It is stored on the device, so a signed-in patient who switches phones picks their routine again. A preference, not clinical data — but still a gap.
 - **Messaging has no notifications, no read receipts, and no attachments.** A patient cannot tell whether their clinician has seen a message. That is a real gap, not a simplification.
 - **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
 - **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.
@@ -160,7 +175,6 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 - **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.
 - **M9's form-score chart and left-vs-right symmetry card are not built.** Neither a cross-session score series nor a per-side comparison is computed anywhere yet, and drawing the artboard's sample curve would show the patient a trend that is not theirs.
 - **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.
-- **`Program` in the bottom nav routes to Today.** There is no separate program screen yet; today's list is the program. Better than a stub, but it is not what the tab implies.
 - **No screen has been compared side by side against its artboard by eye.** The rebuild followed a written spec and was verified through the DOM (computed colours, fonts, type sizes, copy) because the Browser pane in this environment renders hidden. Spacing and optical alignment need a human to look at them.
 - **No frame of real video has ever gone through this pipeline.** Every measurement above used synthetic canvas frames, and the crude shapes drawn were never recognised as a person, so *landmark accuracy itself is still completely unverified* — only the plumbing and the timing around it. This remains the single highest-value unverified thing in the project.
 - **The perf readout has not been seen rendering.** The Browser pane in this environment is hidden to the renderer, so `requestAnimationFrame` never fires and the capture loop cannot run; the worker was driven directly instead. The pipeline, timings and worker protocol are verified; `CameraSetupScreen`'s readout markup and the backpressure loop itself are verified only by unit tests and reading.

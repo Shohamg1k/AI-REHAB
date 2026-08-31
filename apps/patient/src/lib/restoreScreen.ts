@@ -49,6 +49,9 @@ export type PersistedScreen = { screen: Screen; exerciseId: string | null };
 const RESTORE_MODE: Record<Screen, "exact" | "exercise" | "today"> = {
   welcome: "exact",
   auth: "exact",
+  // Restored exactly: it is a plain form with its own local state, and a
+  // patient interrupted mid-choice should land back in the choice.
+  "routine-setup": "exact",
   today: "exact",
   program: "exact",
   history: "exact",

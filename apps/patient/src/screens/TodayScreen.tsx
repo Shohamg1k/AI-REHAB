@@ -1,4 +1,3 @@
-import { EXERCISES } from "@ai-rehab/exercises";
 import type { ExerciseSpec } from "@ai-rehab/contracts";
 import { Button } from "../components/Button.js";
 import { Disclaimer } from "../components/Disclaimer.js";
@@ -89,10 +88,18 @@ function ExerciseRow({
 }
 
 export function TodayScreen({
+  exercises,
   onPick,
   completedExerciseIds = [],
   prescriptions
 }: {
+  /**
+   * What to show today: the clinician's prescription when there is one,
+   * otherwise the routine the patient chose. Passed in rather than read from
+   * the catalogue here, so this screen has no opinion about which of those
+   * two it is looking at.
+   */
+  exercises: readonly ExerciseSpec[];
   onPick: (exerciseId: string) => void;
   /** Exercises already finished in this sitting — drives the done/next split. */
   completedExerciseIds?: readonly string[];
@@ -100,8 +107,8 @@ export function TodayScreen({
   prescriptions?: Record<string, string>;
 }) {
   const done = new Set(completedExerciseIds);
-  const next = EXERCISES.find((e) => !done.has(e.id));
-  const remaining = EXERCISES.length - done.size;
+  const next = exercises.find((e) => !done.has(e.id));
+  const remaining = exercises.length - done.size;
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
@@ -118,12 +125,12 @@ export function TodayScreen({
         <div className="flex items-center">
           <span className="ds-label flex-1">Today's program</span>
           <span className="font-mono text-[11.5px] uppercase text-ink-3">
-            {done.size}/{EXERCISES.length} · {remaining} left
+            {done.size}/{exercises.length} · {remaining} left
           </span>
         </div>
 
         <div className="flex flex-col gap-8">
-          {EXERCISES.map((spec) => (
+          {exercises.map((spec) => (
             <ExerciseRow
               key={spec.id}
               spec={spec}

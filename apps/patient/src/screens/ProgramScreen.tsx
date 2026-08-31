@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import type { Program } from "@ai-rehab/contracts";
-import { EXERCISES, getExerciseSpec } from "@ai-rehab/exercises";
+import { getExerciseSpec } from "@ai-rehab/exercises";
 import { ApiError, fetchMyProgram, isApiConfigured } from "../lib/api.js";
 import { isSignedIn } from "../lib/authStore.js";
 import { Chip } from "../components/Chip.js";
+import { Button } from "../components/Button.js";
+import { ExercisePicker } from "../components/ExercisePicker.js";
+import { loadRoutine, routineExercises, saveRoutine } from "../lib/routine.js";
 import { Disclaimer } from "../components/Disclaimer.js";
 import { Icon } from "../components/Icon.js";
 
@@ -19,7 +22,18 @@ import { Icon } from "../components/Icon.js";
  * is shown is the exercise library, labelled as such, not a plan pretending
  * to be one.
  */
-export function ProgramScreen({ onPick }: { onPick: (exerciseId: string) => void }) {
+export function ProgramScreen({
+  onPick,
+  onRoutineChanged
+}: {
+  onPick: (exerciseId: string) => void;
+  /** So Today reflects an edit immediately, rather than on the next reload. */
+  onRoutineChanged: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string[]>(
+    () => loadRoutine() ?? routineExercises(null).map((e) => e.id)
+  );
   const [program, setProgram] = useState<Program | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,15 +103,15 @@ export function ProgramScreen({ onPick }: { onPick: (exerciseId: string) => void
         </>
       )}
 
-      {!loading && prescribed.length === 0 && (
+      {!loading && prescribed.length === 0 && !editing && (
         <>
           <p className="text-b2 text-ink-2">
-            No clinician has assigned you a program. These are the exercises this app can currently
-            coach — you can try any of them, but the sets and reps are up to you.
+            No clinician has assigned you a program, so this is the routine you chose. The sets and
+            reps are up to you.
           </p>
 
           <div className="flex flex-col gap-8">
-            {EXERCISES.map((spec) => (
+            {routineExercises(loadRoutine()).map((spec) => (
               <button
                 key={spec.id}
                 type="button"
@@ -115,7 +129,73 @@ export function ProgramScreen({ onPick }: { onPick: (exerciseId: string) => void
               </button>
             ))}
           </div>
+
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setDraft(loadRoutine() ?? routineExercises(null).map((e) => e.id));
+              setEditing(true);
+            }}
+          >
+            <Icon name="list" size={17} />
+            Edit my routine
+          </Button>
         </>
+      )}
+
+      {!loading && prescribed.length > 0 && !editing && (
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setDraft(loadRoutine() ?? routineExercises(null).map((e) => e.id));
+            setEditing(true);
+          }}
+        >
+          <Icon name="list" size={17} />
+          Choose extra exercises
+        </Button>
+      )}
+
+      {editing && (
+        <div className="flex flex-col gap-12">
+          <div className="flex flex-col gap-4">
+            <span className="ds-label">Your routine</span>
+            <p className="text-b2 text-ink-2">
+              {prescribed.length > 0
+                ? "Your clinician's program is what Today follows — this list does not change it. Anything you pick here is extra, for when you have finished what was prescribed."
+                : "Pick what you want in your routine. You can change it whenever you like."}
+            </p>
+          </div>
+
+          <ExercisePicker
+            selected={draft}
+            onToggle={(id) =>
+              setDraft((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+            }
+          />
+
+          <div className="flex flex-col gap-9">
+            <Button
+              disabled={draft.length === 0}
+              onClick={() => {
+                saveRoutine(draft);
+                onRoutineChanged();
+                setEditing(false);
+              }}
+            >
+              {draft.length === 0
+                ? "Pick at least one"
+                : `Save ${draft.length} exercise${draft.length === 1 ? "" : "s"}`}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="p-6 text-center text-[14.5px] font-medium text-ink-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="flex-1" />
