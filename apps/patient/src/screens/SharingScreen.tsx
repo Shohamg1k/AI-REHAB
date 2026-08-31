@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import type { AuditEntry } from "@ai-rehab/contracts";
-import { ApiError, fetchAuditLog, fetchMe, updateDataSharing } from "../lib/api.js";
+import type { AuditEntry, User } from "@ai-rehab/contracts";
+import { ApiError, fetchAuditLog, fetchMe, joinWithCode, updateDataSharing } from "../lib/api.js";
+import { setSession } from "../lib/authStore.js";
 import { Button } from "../components/Button.js";
 import { Icon } from "../components/Icon.js";
 
@@ -54,12 +55,22 @@ function Toggle({
 }
 
 export function SharingScreen({
+  user,
   signedIn,
-  onSignIn
+  onSignIn,
+  onSignOut,
+  onUserChanged
 }: {
+  user: User | null;
   signedIn: boolean;
   onSignIn: () => void;
+  onSignOut: () => void;
+  onUserChanged: (user: User) => void;
 }) {
+  const [code, setCode] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [linked, setLinked] = useState(false);
   const [sharing, setSharing] = useState<boolean | null>(null);
   const [auditLog, setAuditLog] = useState<AuditEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +87,26 @@ export function SharingScreen({
         setError(err instanceof ApiError ? err.message : "Couldn't load your sharing settings.")
       );
   }, [signedIn]);
+
+  async function handleJoin() {
+    setJoinError(null);
+    setJoining(true);
+    try {
+      const result = await joinWithCode(code.trim());
+      // The tenant changed, so the old token is stale — replace the whole
+      // session, not just the user.
+      setSession({ token: result.token, user: result.user });
+      onUserChanged(result.user);
+      setLinked(true);
+      setCode("");
+    } catch (err) {
+      setJoinError(
+        err instanceof ApiError ? err.message : "Couldn't use that code. Check it and try again."
+      );
+    } finally {
+      setJoining(false);
+    }
+  }
 
   async function toggleSharing() {
     if (sharing === null) return;
@@ -107,7 +138,7 @@ export function SharingScreen({
         {/* True of the architecture, not a promise about policy — see ADR-0002. */}
         <div className="flex flex-col gap-6 rounded-md bg-teal-wash p-14">
           <div className="flex items-center gap-6">
-            <Icon name="lock" className="h-15 w-15 text-teal-deep" />
+            <Icon name="lock" size={15} className="text-teal-deep" />
             <span className="ds-label text-teal-deep">Never shared, by design</span>
           </div>
           <p className="text-b2 text-teal-deep">
@@ -134,7 +165,7 @@ export function SharingScreen({
           <div className="ds-card-hair flex flex-col gap-9">
             <div className="flex items-center gap-11">
               <span className="flex h-36 w-36 flex-none items-center justify-center rounded-pill bg-teal-wash text-teal">
-                <Icon name="shield" className="h-18 w-18" />
+                <Icon name="shield" size={18} />
               </span>
               <span className="flex flex-1 flex-col gap-1">
                 <span className="text-b1 font-medium text-ink">Your clinician</span>
@@ -157,6 +188,38 @@ export function SharingScreen({
           </div>
         )}
 
+        {signedIn && !linked && (
+          <div className="ds-card-hair flex flex-col gap-9">
+            <span className="ds-label">Connect a clinician</span>
+            <p className="text-b2 text-ink-2">
+              If your physiotherapist gave you a code, enter it here. You can do this at any time —
+              you don't have to have used it when you signed up.
+            </p>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="Invite code"
+              aria-label="Invite code"
+              autoCapitalize="characters"
+              spellCheck={false}
+              className="min-h-touch rounded border-0 bg-sunk px-14 font-mono text-b1 uppercase tracking-[.08em] text-ink shadow-hair placeholder:tracking-normal placeholder:text-ink-3"
+            />
+            {joinError && <p className="text-b2 text-dang">{joinError}</p>}
+            <Button onClick={handleJoin} disabled={joining || code.trim().length === 0}>
+              {joining ? "Connecting…" : "Connect"}
+            </Button>
+          </div>
+        )}
+
+        {linked && (
+          <div className="flex flex-col gap-6 rounded-md bg-ok-wash p-14">
+            <span className="ds-label text-ok">Connected</span>
+            <p className="text-b2 text-ok">
+              Your clinician can now see your sessions. Turn that off above whenever you want.
+            </p>
+          </div>
+        )}
+
         {signedIn && auditLog && (
           <div className="ds-sunk flex flex-col gap-8">
             <span className="ds-label">Who opened your data</span>
@@ -175,9 +238,31 @@ export function SharingScreen({
             ))}
           </div>
         )}
+
+        {signedIn && (
+          <div className="ds-card-hair flex flex-col gap-9">
+            <span className="ds-label">Not built yet</span>
+            <p className="text-b2 text-ink-2">
+              Clinician reports and messaging are designed but not implemented. Nothing on this
+              screen sends or receives a message, and no report is generated — see
+              docs/STATUS.md.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex-1" />
+
+      {signedIn && (
+        <div className="flex flex-col gap-9 px-20 pb-12 pt-20">
+          <span className="text-cap text-ink-3">
+            Signed in as {user?.displayName ?? "your account"}.
+          </span>
+          <Button variant="secondary" onClick={onSignOut}>
+            Sign out
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

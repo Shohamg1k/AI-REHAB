@@ -1,7 +1,9 @@
 import type { FastifyPluginAsync } from "fastify";
+import { z } from "zod";
 import { UpdateContraindicationsRequestSchema, UpdateDataSharingRequestSchema } from "@ai-rehab/contracts";
 import { forbidden, parseBody, requireAuth } from "../http/errors.js";
 import type { Store } from "../store/types.js";
+import { signToken } from "../auth/jwt.js";
 
 /**
  * A patient's self-declared contraindicated regions — what E5 checks a
@@ -45,5 +47,35 @@ export function registerProfileRoutes(fastify: Parameters<FastifyPluginAsync>[0]
 
     const user = await store.updateDataSharing(auth.tenantId, auth.userId, body.dataSharingEnabled);
     reply.send(user);
+  });
+
+  /**
+   * Redeem a clinician's invite code after signup, for a patient who started
+   * without one — which is the default, since the whole flow is guest-first.
+   * Previously the only chance to enter a code was the signup form.
+   */
+  fastify.post("/me/join", { preHandler: fastify.authenticate }, async (request, reply) => {
+    const auth = requireAuth(request, reply);
+    if (!auth) return;
+    if (auth.role !== "patient") {
+      forbidden(reply, "Only a patient can join a clinician with an invite code.");
+      return;
+    }
+
+    const body = parseBody(z.object({ code: z.string().min(1) }), request.body, reply);
+    if (!body) return;
+
+    const user = await store.joinTenantByInvite(auth.userId, body.code);
+    if (!user) {
+      reply
+        .code(400)
+        .send({ error: "invalid_invite", message: "That invite code is invalid or has expired." });
+      return;
+    }
+
+    // The tenant in the caller's existing token is now stale, so a fresh one
+    // has to come back with the user or every subsequent request is scoped to
+    // the tenant they just left.
+    reply.send({ token: signToken({ sub: user.id, tenantId: user.tenantId, role: user.role }), user });
   });
 }

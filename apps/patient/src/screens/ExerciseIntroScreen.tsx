@@ -63,7 +63,7 @@ export function ExerciseIntroScreen({
           aria-label="Choose a different exercise"
           className="text-ink"
         >
-          <Icon name="chevron" className="h-20 w-20 rotate-180" />
+          <Icon name="chevron" size={20} className="rotate-180" />
         </button>
         {index >= 0 && (
           <span className="font-mono text-[11.5px] uppercase text-ink-3">
@@ -108,7 +108,7 @@ export function ExerciseIntroScreen({
         {limits && (
           <div className="flex flex-col gap-6 rounded-md bg-warn-wash p-14">
             <div className="flex items-center gap-6">
-              <Icon name="shield" className="h-14 w-14 text-warn" />
+              <Icon name="shield" size={14} className="text-warn" />
               <span className="ds-label text-warn">Your limit for this exercise</span>
             </div>
             <p className="text-b2 text-[#7A4208]">{limits}</p>
@@ -133,7 +133,7 @@ export function ExerciseIntroScreen({
 
       <div className="flex flex-col gap-9 px-20 pb-18 pt-20">
         <Button onClick={onStart}>
-          <Icon name="cam" className="h-18 w-18" />
+          <Icon name="cam" size={18} />
           Set up camera
         </Button>
         <button

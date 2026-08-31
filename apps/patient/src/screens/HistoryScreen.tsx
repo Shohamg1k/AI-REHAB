@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { AdherenceDay, RomTrendSeries, SessionSummary } from "@ai-rehab/contracts";
-import { ApiError, fetchAdherence, fetchRomTrend, fetchSessions } from "../lib/api.js";
+import { ApiError, fetchAdherence, fetchRomTrend, fetchSessions, isApiConfigured } from "../lib/api.js";
+import { adherenceFromSessions, loadLocalSessions } from "../lib/localHistory.js";
+import { isSignedIn } from "../lib/authStore.js";
 
 /**
  * M9 — Progress. G2 (session list + ROM trend) and H1/H2 (streak, week
@@ -107,6 +109,22 @@ export function HistoryScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Guests are the default (H7), and their sessions only ever existed in
+    // IndexedDB. Reading the server for a patient with no account produced
+    // an empty screen however much work they had actually done.
+    const signedIn = isApiConfigured() && isSignedIn();
+
+    if (!signedIn) {
+      loadLocalSessions()
+        .then((local) => {
+          setSessions(local);
+          setAdherence(adherenceFromSessions(local));
+          setRomTrend([]);
+        })
+        .catch(() => setError("Couldn't read your history from this device."));
+      return;
+    }
+
     Promise.all([fetchSessions(), fetchAdherence(), fetchRomTrend()])
       .then(([s, a, r]) => {
         setSessions(s);

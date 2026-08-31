@@ -43,7 +43,7 @@ function mockEndpoints(auditLog: unknown[] = [], me = ME) {
 describe("SharingScreen (G5)", () => {
   it("states the video-never-leaves guarantee regardless of sign-in state", () => {
     mockEndpoints();
-    render(<SharingScreen signedIn={false} onSignIn={vi.fn()} />);
+    render(<SharingScreen user={null} signedIn={false} onSignIn={vi.fn()} onSignOut={vi.fn()} onUserChanged={vi.fn()} />);
     expect(screen.getByText(/never shared, by design/i)).toBeInTheDocument();
     expect(screen.getByText(/each frame is dropped as it is read/i)).toBeInTheDocument();
   });
@@ -53,7 +53,7 @@ describe("SharingScreen (G5)", () => {
     const onSignIn = vi.fn();
     const user = userEvent.setup();
 
-    render(<SharingScreen signedIn={false} onSignIn={onSignIn} />);
+    render(<SharingScreen user={null} signedIn={false} onSignIn={onSignIn} onSignOut={vi.fn()} onUserChanged={vi.fn()} />);
 
     // The important half: no consent switch is shown, because a guest has no
     // clinician and a switch controlling nothing would misrepresent that.
@@ -66,7 +66,7 @@ describe("SharingScreen (G5)", () => {
     mockEndpoints();
     const user = userEvent.setup();
 
-    render(<SharingScreen signedIn onSignIn={vi.fn()} />);
+    render(<SharingScreen user={ME} signedIn onSignIn={vi.fn()} onSignOut={vi.fn()} onUserChanged={vi.fn()} />);
 
     const toggle = await screen.findByRole("switch");
     expect(toggle).toHaveAttribute("aria-checked", "true");
@@ -91,14 +91,14 @@ describe("SharingScreen (G5)", () => {
       }
     ]);
 
-    render(<SharingScreen signedIn onSignIn={vi.fn()} />);
+    render(<SharingScreen user={ME} signedIn onSignIn={vi.fn()} onSignOut={vi.fn()} onUserChanged={vi.fn()} />);
 
     expect(await screen.findByText(/Dr. Test — view sessions/)).toBeInTheDocument();
   });
 
   it("says so plainly when nobody has opened the data", async () => {
     mockEndpoints([]);
-    render(<SharingScreen signedIn onSignIn={vi.fn()} />);
+    render(<SharingScreen user={ME} signedIn onSignIn={vi.fn()} onSignOut={vi.fn()} onUserChanged={vi.fn()} />);
     expect(await screen.findByText(/no clinician has opened your data/i)).toBeInTheDocument();
   });
 });

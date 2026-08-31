@@ -57,7 +57,7 @@ export function WelcomeScreen({ onStart, onSignIn }: { onStart: () => void; onSi
         <div className="flex flex-col gap-13 pt-2">
           {PROMISES.map((p) => (
             <div key={p.title} className="flex items-start gap-11">
-              <Icon name={p.icon} className="mt-1 h-19 w-19 flex-none text-teal" />
+              <Icon name={p.icon} size={19} className="mt-1 flex-none text-teal" />
               <div className="flex flex-col">
                 <span className="text-[14px] font-medium text-ink">{p.title}</span>
                 <span className="text-b2 text-ink-2">{p.body}</span>

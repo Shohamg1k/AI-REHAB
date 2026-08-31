@@ -66,24 +66,39 @@ const PATHS: Record<IconName, JSX.Element> = {
   )
 };
 
+/**
+ * Size is an explicit pixel attribute, not a utility class.
+ *
+ * It was `className="h-19 w-19"` and similar, which silently did nothing:
+ * this app replaces Tailwind's spacing scale with its own px scale, and any
+ * value missing from that scale produces no class at all — so the SVG got
+ * no size and expanded to fill its container. A 19px lock icon rendered
+ * 600px wide. Width/height attributes cannot fail that way, and the size no
+ * longer depends on a config list staying in sync with the call sites.
+ */
 export function Icon({
   name,
-  className = "h-16 w-16",
+  size = 16,
+  className = "",
   strokeWidth = 1.7
 }: {
   name: IconName;
+  /** Pixels. Matches the design source's per-use icon sizes. */
+  size?: number;
   className?: string;
   strokeWidth?: number;
 }) {
   return (
     <svg
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      className={`flex-none ${className}`}
       aria-hidden
       focusable="false"
     >

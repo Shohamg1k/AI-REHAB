@@ -42,7 +42,7 @@ function ExerciseRow({
       >
         <div className="flex items-center gap-11">
           <span className="flex h-38 w-38 flex-none items-center justify-center rounded bg-teal-wash text-teal">
-            <Icon name="chart" className="h-20 w-20" />
+            <Icon name="chart" size={20} />
           </span>
           <span className="flex flex-1 flex-col">
             <span className="text-b1 font-semibold text-ink">{spec.displayName}</span>
@@ -50,7 +50,7 @@ function ExerciseRow({
               {meta} · up next
             </span>
           </span>
-          <Icon name="chevron" className="h-18 w-18 flex-none text-ink-3" />
+          <Icon name="chevron" size={18} className="flex-none text-ink-3" />
         </div>
         <span className="h-1 bg-line" />
         <span className="text-b2 text-ink-2">
@@ -75,7 +75,7 @@ function ExerciseRow({
           done ? "bg-ok-wash text-ok" : "bg-sunk text-ink-2"
         }`}
       >
-        <Icon name={done ? "check" : "chart"} className="h-20 w-20" />
+        <Icon name={done ? "check" : "chart"} size={20} />
       </span>
       <span className="flex flex-1 flex-col">
         <span className="text-b1 font-medium text-ink">{spec.displayName}</span>
@@ -83,7 +83,7 @@ function ExerciseRow({
           {meta}
         </span>
       </span>
-      {!done && <Icon name="chevron" className="h-18 w-18 flex-none text-ink-3" />}
+      {!done && <Icon name="chevron" size={18} className="flex-none text-ink-3" />}
     </button>
   );
 }
@@ -140,7 +140,7 @@ export function TodayScreen({
       <div className="flex flex-col gap-9 px-20 pb-12 pt-20">
         {next && (
           <Button onClick={() => onPick(next.id)}>
-            <Icon name="cam" className="h-18 w-18" />
+            <Icon name="cam" size={18} />
             Start {next.displayName.toLowerCase()}
           </Button>
         )}

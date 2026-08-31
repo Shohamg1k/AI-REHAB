@@ -45,7 +45,7 @@ export function BottomNav({
               on ? "text-teal" : "text-ink-3"
             }`}
           >
-            <Icon name={tab.icon} className="h-20 w-20" />
+            <Icon name={tab.icon} size={20} />
             {tab.label}
           </button>
         );

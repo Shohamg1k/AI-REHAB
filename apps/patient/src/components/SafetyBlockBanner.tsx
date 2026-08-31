@@ -35,7 +35,7 @@ export function SafetyBlockBanner({
     >
       <div className="flex items-start gap-11">
         <span className="flex h-34 w-34 flex-none items-center justify-center rounded bg-dang-wash text-dang">
-          <Icon name="shield" className="h-19 w-19" />
+          <Icon name="shield" size={19} />
         </span>
         <div className="flex flex-col gap-3">
           <h2 className="text-h1 text-dang">
