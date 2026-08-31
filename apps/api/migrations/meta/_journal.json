@@ -43,6 +43,13 @@
       "when": 1788177247784,
       "tag": "0005_kind_black_bolt",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788195055738,
+      "tag": "0006_outstanding_kylun",
+      "breakpoints": true
     }
   ]
 }

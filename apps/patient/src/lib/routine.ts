@@ -1,4 +1,7 @@
 import { EXERCISES, getExerciseSpec } from "@ai-rehab/exercises";
+import type { User } from "@ai-rehab/contracts";
+import { isApiConfigured, updateRoutine } from "./api.js";
+import { getSession, isSignedIn } from "./authStore.js";
 
 /**
  * The exercises a patient has chosen for themselves.
@@ -11,11 +14,17 @@ import { EXERCISES, getExerciseSpec } from "@ai-rehab/exercises";
  * is what a patient follows when nobody has prescribed anything, which is
  * the default and the whole point of the guest-first flow (H7).
  *
- * Stored locally, like the rest of a guest's data. That means it does not
- * follow a signed-in patient between devices — a real gap, recorded in
- * docs/STATUS.md rather than papered over. Syncing it needs a
- * patient-owned routine on the server, which is new backend surface and a
- * larger decision than a preference warrants today.
+ * Stored locally always, and mirrored to the server for a signed-in
+ * patient so the choice follows them between devices. Local is what the UI
+ * reads: it is the only copy a guest has, it works offline, and it means an
+ * unreachable server degrades the feature to where it already was rather
+ * than breaking it.
+ *
+ * Conflict policy is deliberately blunt: **the server wins on sign-in, the
+ * last save wins after that.** There is no merge and no vector clock. Two
+ * devices editing the same routine days apart is not a scenario worth a
+ * synchronisation algorithm — the loser is one tap to fix, and the
+ * machinery to do better would outlive its usefulness.
  */
 
 const ROUTINE_KEY = "ai-rehab:routine";
@@ -66,4 +75,48 @@ export function routineExercises(routine: readonly string[] | null) {
   // A routine that somehow matches nothing falls back to the full catalogue
   // rather than showing a patient an empty Today with no way out.
   return filtered.length > 0 ? filtered : EXERCISES;
+}
+
+
+/**
+ * Push the local routine to the server. Fire-and-forget on purpose: the
+ * local copy is already saved and is what the UI reads, so a failed sync
+ * costs cross-device consistency, not the patient's choice.
+ */
+export function pushRoutine(exerciseIds: readonly string[]): void {
+  if (!isApiConfigured() || !isSignedIn()) return;
+  if (getSession()?.user.role !== "patient") return;
+  void updateRoutine(exerciseIds).catch(() => {
+    /* offline or server down — the local routine still applies */
+  });
+}
+
+/**
+ * Reconcile local and server copies at sign-in.
+ *
+ * - Server has a routine → it wins, and replaces local. It is the copy that
+ *   followed the patient here, which is the entire point of syncing.
+ * - Server has none but local does → push local up. This is the first sync
+ *   after signing up on a device that was already in use, and the patient's
+ *   existing choice should survive it.
+ * - Neither → nothing to do; onboarding will ask.
+ *
+ * Returns true when the local copy changed, so the caller can re-render
+ * rather than wait for a reload.
+ */
+export function reconcileRoutine(user: User): boolean {
+  if (user.role !== "patient") return false;
+
+  const remote = user.routine.filter((id) => getExerciseSpec(id) !== undefined);
+  if (remote.length > 0) {
+    const local = loadRoutine();
+    const same = local !== null && local.length === remote.length && local.every((id, i) => id === remote[i]);
+    if (same) return false;
+    saveRoutine(remote);
+    return true;
+  }
+
+  const local = loadRoutine();
+  if (local) pushRoutine(local);
+  return false;
 }

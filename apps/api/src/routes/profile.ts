@@ -1,6 +1,10 @@
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
-import { UpdateContraindicationsRequestSchema, UpdateDataSharingRequestSchema } from "@ai-rehab/contracts";
+import {
+  UpdateContraindicationsRequestSchema,
+  UpdateDataSharingRequestSchema,
+  UpdateRoutineRequestSchema
+} from "@ai-rehab/contracts";
 import { forbidden, parseBody, requireAuth } from "../http/errors.js";
 import type { Store } from "../store/types.js";
 import { signToken } from "../auth/jwt.js";
@@ -46,6 +50,27 @@ export function registerProfileRoutes(fastify: Parameters<FastifyPluginAsync>[0]
     if (!body) return;
 
     const user = await store.updateDataSharing(auth.tenantId, auth.userId, body.dataSharingEnabled);
+    reply.send(user);
+  });
+
+  /**
+   * The patient's own exercise selection, stored server-side so it follows
+   * them between devices. Patient-only: a routine is something a patient
+   * chooses for themselves, and a clinician expressing what a patient should
+   * do is a Program, which goes through the E5 check first.
+   */
+  fastify.put("/me/routine", { preHandler: fastify.authenticate }, async (request, reply) => {
+    const auth = requireAuth(request, reply);
+    if (!auth) return;
+    if (auth.role !== "patient") {
+      forbidden(reply, "Only a patient has a routine of their own.");
+      return;
+    }
+
+    const body = parseBody(UpdateRoutineRequestSchema, request.body, reply);
+    if (!body) return;
+
+    const user = await store.updateRoutine(auth.tenantId, auth.userId, body.exerciseIds);
     reply.send(user);
   });
 

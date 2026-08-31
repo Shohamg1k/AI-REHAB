@@ -35,7 +35,20 @@ export const UserSchema = z.object({
    * deliberate act — it blocks `GET /patients/:id/sessions` for that
    * patient until turned back on. Always `true` for a clinician account.
    */
-  dataSharingEnabled: z.boolean()
+  dataSharingEnabled: z.boolean(),
+  /**
+   * The exercises this patient chose for themselves, so the choice follows
+   * them between devices.
+   *
+   * A routine is a *preference*, not a prescription: it is what a patient
+   * follows when no clinician has assigned them a program, and it never
+   * overrides one. Empty means "not chosen yet", which is deliberately
+   * distinct from "chose nothing" — the latter is impossible, since the
+   * editor requires at least one.
+   *
+   * Always `[]` for a clinician account.
+   */
+  routine: z.array(z.string())
 });
 export type User = z.infer<typeof UserSchema>;
 
@@ -48,6 +61,11 @@ export const UpdateDataSharingRequestSchema = z.object({
   dataSharingEnabled: z.boolean()
 });
 export type UpdateDataSharingRequest = z.infer<typeof UpdateDataSharingRequestSchema>;
+
+export const UpdateRoutineRequestSchema = z.object({
+  exerciseIds: z.array(z.string().min(1))
+});
+export type UpdateRoutineRequest = z.infer<typeof UpdateRoutineRequestSchema>;
 
 export const TenantSchema = z.object({
   id: z.string(),

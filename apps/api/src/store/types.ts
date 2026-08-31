@@ -55,6 +55,8 @@ export interface Store {
     regions: BodyRegion[]
   ): Promise<User>;
   updateDataSharing(tenantId: string, userId: string, enabled: boolean): Promise<User>;
+  /** The patient's self-chosen routine, so it follows them between devices. */
+  updateRoutine(tenantId: string, userId: string, exerciseIds: string[]): Promise<User>;
   /**
    * Redeems an invite for a patient who already has an account, moving them
    * out of their personal tenant-of-one and into the clinician's.

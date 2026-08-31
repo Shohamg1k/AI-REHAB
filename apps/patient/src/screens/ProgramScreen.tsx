@@ -6,7 +6,7 @@ import { isSignedIn } from "../lib/authStore.js";
 import { Chip } from "../components/Chip.js";
 import { Button } from "../components/Button.js";
 import { ExercisePicker } from "../components/ExercisePicker.js";
-import { loadRoutine, routineExercises, saveRoutine } from "../lib/routine.js";
+import { loadRoutine, pushRoutine, routineExercises, saveRoutine } from "../lib/routine.js";
 import { Disclaimer } from "../components/Disclaimer.js";
 import { Icon } from "../components/Icon.js";
 
@@ -179,6 +179,7 @@ export function ProgramScreen({
               disabled={draft.length === 0}
               onClick={() => {
                 saveRoutine(draft);
+                pushRoutine(draft);
                 onRoutineChanged();
                 setEditing(false);
               }}
