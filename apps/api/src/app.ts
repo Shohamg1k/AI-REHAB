@@ -10,6 +10,8 @@ import { registerProgramRoutes } from "./routes/programs.js";
 import { registerEventRoutes } from "./routes/events.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
 import { registerProjectionRoutes } from "./routes/projections.js";
+import { registerMessageRoutes } from "./routes/messages.js";
+import { registerReportRoutes } from "./routes/reports.js";
 import { registerAuditRoutes } from "./routes/audit.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerProfileRoutes } from "./routes/profile.js";
@@ -47,6 +49,8 @@ export async function buildApp(opts: { store: Store; corsOrigin?: string | strin
   registerProjectionRoutes(fastify, opts.store);
   registerAuditRoutes(fastify, opts.store);
   registerProfileRoutes(fastify, opts.store);
+  registerMessageRoutes(fastify, opts.store);
+  registerReportRoutes(fastify, opts.store);
 
   return fastify;
 }

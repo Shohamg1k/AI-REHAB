@@ -4,6 +4,8 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  Message,
+  ProgressReport,
   BodyRegion,
   Program,
   ProgramExercise,
@@ -16,6 +18,7 @@ import type {
 import {
   computeAdherence,
   computeBaseline,
+  computeReport,
   computeRomTrend,
   summariseSessions,
   type StoredSession
@@ -402,6 +405,82 @@ export class PostgresStore implements Store {
 
   async getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]> {
     return computeRomTrend(await this.fetchAllSessions(tenantId, userId));
+  }
+
+  async getReport(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport> {
+    const [patient, sessions] = await Promise.all([
+      this.findUserById(tenantId, patientId),
+      this.fetchAllSessions(tenantId, patientId)
+    ]);
+    return computeReport(sessions, {
+      patientId,
+      patientDisplayName: patient?.displayName ?? "Unknown patient",
+      periodStart: period.start,
+      periodEnd: period.end
+    });
+  }
+
+  async sendMessage(input: {
+    tenantId: string;
+    patientId: string;
+    senderId: string;
+    body: string;
+  }): Promise<Message> {
+    return withTenant(this.db, input.tenantId, async (tx) => {
+      const [row] = await tx
+        .insert(schema.messages)
+        .values({
+          tenantId: input.tenantId,
+          patientId: input.patientId,
+          senderId: input.senderId,
+          body: input.body
+        })
+        .returning();
+      if (!row) throw new Error("message insert returned no row");
+
+      const [sender] = await tx
+        .select({ displayName: schema.users.displayName, role: schema.users.role })
+        .from(schema.users)
+        .where(eq(schema.users.id, input.senderId))
+        .limit(1);
+
+      return {
+        id: row.id,
+        patientId: row.patientId,
+        senderId: row.senderId,
+        senderDisplayName: sender?.displayName ?? "Unknown",
+        senderRole: sender?.role ?? "patient",
+        body: row.body,
+        createdAt: row.createdAt.toISOString()
+      };
+    });
+  }
+
+  async listMessages(tenantId: string, patientId: string): Promise<Message[]> {
+    return withTenant(this.db, tenantId, async (tx) => {
+      const rows = await tx
+        .select({ message: schema.messages, senderName: schema.users.displayName, senderRole: schema.users.role })
+        .from(schema.messages)
+        .innerJoin(schema.users, eq(schema.users.id, schema.messages.senderId))
+        .where(
+          and(eq(schema.messages.tenantId, tenantId), eq(schema.messages.patientId, patientId))
+        )
+        .orderBy(asc(schema.messages.createdAt));
+
+      return rows.map((r) => ({
+        id: r.message.id,
+        patientId: r.message.patientId,
+        senderId: r.message.senderId,
+        senderDisplayName: r.senderName,
+        senderRole: r.senderRole,
+        body: r.message.body,
+        createdAt: r.message.createdAt.toISOString()
+      }));
+    });
   }
 
   async recordAccess(input: {

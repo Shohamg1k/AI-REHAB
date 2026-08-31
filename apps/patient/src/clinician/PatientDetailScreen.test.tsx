@@ -36,11 +36,59 @@ function checkboxFor(exerciseName: string): HTMLInputElement {
   return checkbox as HTMLInputElement;
 }
 
+/**
+ * Dispatches on URL rather than call order: this screen now loads a report
+ * and a message thread alongside the session list, and a `mockResolvedValueOnce`
+ * chain silently hands the wrong payload to whichever request happens to fire
+ * first.
+ */
+function mockApi(overrides: {
+  sessions?: unknown;
+  sessionsFail?: boolean;
+  onProgram?: () => { ok: boolean; status?: number; json: () => Promise<unknown> };
+} = {}) {
+  const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+    if (url.includes("/report")) return Promise.resolve({ ok: true, json: async () => EMPTY_REPORT });
+    if (url.includes("/messages")) return Promise.resolve({ ok: true, json: async () => [] });
+    if (url.endsWith("/programs") && init?.method === "POST") {
+      return Promise.resolve(
+        overrides.onProgram?.() ?? { ok: true, json: async () => ({ id: "prog-1" }) }
+      );
+    }
+    if (overrides.sessionsFail) {
+      return Promise.resolve({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: "internal", message: "boom" })
+      });
+    }
+    return Promise.resolve({ ok: true, json: async () => overrides.sessions ?? [] });
+  });
+  global.fetch = fetchMock as unknown as typeof fetch;
+  return fetchMock;
+}
+
+const EMPTY_REPORT = {
+  patientId: "pat-1",
+  patientDisplayName: "Pat",
+  periodStart: "2026-08-24T00:00:00.000Z",
+  periodEnd: "2026-08-31T00:00:00.000Z",
+  sessionCount: 0,
+  activeDays: 0,
+  totalReps: 0,
+  scoredReps: 0,
+  avgFormScore: null,
+  exercisesPerformed: [],
+  adherence: [],
+  pain: [],
+  safetyEvents: [],
+  observations: [{ text: "No sessions were recorded in this period.", basis: "No session events." }]
+};
+
 describe("PatientDetailScreen", () => {
   it("renders a patient's session history", async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [
+    mockApi({
+      sessions: [
         {
           sessionId: "s1",
           wallClock: "2026-08-30T10:00:00.000Z",
@@ -50,54 +98,35 @@ describe("PatientDetailScreen", () => {
           endedReason: "completed"
         }
       ]
-    }) as unknown as typeof fetch;
+    });
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
 
     expect(await screen.findByText(/sit-to-stand/)).toBeInTheDocument();
     expect(screen.getByText(/6 reps/)).toBeInTheDocument();
   });
 
   it("shows an empty state when the patient has no sessions", async () => {
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] }) as unknown as typeof fetch;
+    mockApi();
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
 
     expect(await screen.findByText(/no sessions synced yet/i)).toBeInTheDocument();
   });
 
   it("shows an error if the session history fails to load", async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: async () => ({ error: "internal", message: "boom" })
-    }) as unknown as typeof fetch;
+    mockApi({ sessionsFail: true });
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
 
     expect(await screen.findByText("boom")).toBeInTheDocument();
   });
 
   it("assigns a program with the selected exercise and shows confirmation", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => [] }) // sessions load
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          id: "prog-1",
-          tenantId: "tenant-1",
-          patientId: "pat-1",
-          createdBy: "clin-1",
-          notes: null,
-          exercises: [],
-          createdAt: "2026-08-30T00:00:00.000Z"
-        })
-      });
-    global.fetch = fetchMock as unknown as typeof fetch;
+    const fetchMock = mockApi();
     const user = userEvent.setup();
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
     await screen.findByText(/no sessions synced yet/i);
 
     await user.click(checkboxFor("Sit to Stand"));
@@ -105,7 +134,9 @@ describe("PatientDetailScreen", () => {
 
     await waitFor(() => expect(screen.getByText("Program assigned.")).toBeInTheDocument());
 
-    const [, programCall] = fetchMock.mock.calls;
+    const programCall = fetchMock.mock.calls.find(
+      (c) => String(c[0]).endsWith("/programs") && c[1]?.method === "POST"
+    );
     const body = JSON.parse(programCall![1].body);
     expect(body.patientId).toBe("pat-1");
     expect(body.exercises).toHaveLength(1);
@@ -113,10 +144,10 @@ describe("PatientDetailScreen", () => {
   });
 
   it("requires at least one exercise before assigning", async () => {
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] }) as unknown as typeof fetch;
+    mockApi();
     const user = userEvent.setup();
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
     await screen.findByText(/no sessions synced yet/i);
 
     await user.click(screen.getByText("Assign program"));
@@ -125,10 +156,8 @@ describe("PatientDetailScreen", () => {
   });
 
   it("surfaces an E5 rejection with the specific reason from the server", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => [] }) // sessions load
-      .mockResolvedValueOnce({
+    mockApi({
+      onProgram: () => ({
         ok: false,
         status: 422,
         json: async () => ({
@@ -137,11 +166,11 @@ describe("PatientDetailScreen", () => {
           exerciseId: "sit-to-stand",
           riskLevel: "high"
         })
-      });
-    global.fetch = fetchMock as unknown as typeof fetch;
+      })
+    });
     const user = userEvent.setup();
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={vi.fn()} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={vi.fn()} />);
     await screen.findByText(/no sessions synced yet/i);
 
     await user.click(checkboxFor("Sit to Stand"));
@@ -151,11 +180,11 @@ describe("PatientDetailScreen", () => {
   });
 
   it("calls onBack when the back link is clicked", async () => {
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] }) as unknown as typeof fetch;
+    mockApi();
     const onBack = vi.fn();
     const user = userEvent.setup();
 
-    render(<PatientDetailScreen patientId="pat-1" onBack={onBack} />);
+    render(<PatientDetailScreen patientId="pat-1" clinicianId="clin-1" onBack={onBack} />);
     await screen.findByText(/no sessions synced yet/i);
 
     await user.click(screen.getByText(/back to roster/i));

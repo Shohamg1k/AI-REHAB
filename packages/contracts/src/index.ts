@@ -15,3 +15,5 @@ export * from "./event.js";
 export * from "./identity.js";
 export * from "./program.js";
 export * from "./sync.js";
+export * from "./message.js";
+export * from "./report.js";

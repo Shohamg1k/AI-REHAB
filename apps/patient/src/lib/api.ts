@@ -5,7 +5,9 @@ import type {
   BaselineEntry,
   BodyRegion,
   CreateProgramRequest,
+  Message,
   Program,
+  ProgressReport,
   Role,
   RomTrendSeries,
   SessionSummary,
@@ -140,6 +142,26 @@ export function fetchAuditLog(): Promise<AuditEntry[]> {
 
 export function fetchMyProgram(): Promise<Program | null> {
   return request("/programs/mine", {}, true);
+}
+
+// --- reports (F1) + messages (F9) ---
+
+export function fetchMyReport(days = 7): Promise<ProgressReport> {
+  return request(`/me/report?days=${days}`, {}, true);
+}
+
+/** Clinician-side. Gated by the patient's data-sharing consent, and audit-logged. */
+export function fetchPatientReport(patientId: string, days = 7): Promise<ProgressReport> {
+  return request(`/patients/${patientId}/report?days=${days}`, {}, true);
+}
+
+/** Omit `patientId` as a patient — the server always uses your own thread. */
+export function fetchMessages(patientId?: string): Promise<Message[]> {
+  return request(patientId ? `/messages?patientId=${patientId}` : "/messages", {}, true);
+}
+
+export function sendMessage(body: string, patientId?: string): Promise<Message> {
+  return request("/messages", { method: "POST", body: JSON.stringify({ body, patientId }) }, true);
 }
 
 // --- clinician (F6) ---

@@ -36,6 +36,13 @@
       "when": 1788118571290,
       "tag": "0004_short_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788177247784,
+      "tag": "0005_kind_black_bolt",
+      "breakpoints": true
     }
   ]
 }

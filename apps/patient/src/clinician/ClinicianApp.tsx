@@ -26,7 +26,11 @@ export function ClinicianApp({ user, onSignOut }: { user: User; onSignOut: () =>
       </header>
 
       {selectedPatientId ? (
-        <PatientDetailScreen patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} />
+        <PatientDetailScreen
+          patientId={selectedPatientId}
+          clinicianId={user.id}
+          onBack={() => setSelectedPatientId(null)}
+        />
       ) : (
         <RosterScreen onSelectPatient={setSelectedPatientId} />
       )}

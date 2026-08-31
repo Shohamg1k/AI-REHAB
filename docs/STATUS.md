@@ -6,6 +6,26 @@
 
 ---
 
+## Reports (F1) and messaging (F9)
+
+Both were designed but unbuilt; the Sharing screen used to say so. They exist now.
+
+**The report is computed on read, never stored.** A stored report is a second source of truth that can disagree with the events it came from, and there is no reason to carry that risk for something this cheap to derive. `computeReport` sits alongside the other projections.
+
+**The patient reads the same report their clinician does** — one component renders both. G5 already lets a patient see *who* opened their data; this lets them see *what was said about them*. If the two views diverged, the patient could no longer check what was written about them, which is the exact asymmetry the audit log exists to prevent.
+
+**Every observation carries its `basis`** (invariant 4), so "average form 88" is always accompanied by "mean of per-rep scores that cleared the tracking-confidence floor" rather than standing as a bare judgement. The report reports counts and averages and stops — it does not say whether the patient is improving clinically, because nothing here is competent to judge that.
+
+**A near-miss worth recording.** The first version read `PainSignal.recordedSeverity` for the report's pain entries. `PainSignalSchema` carries an explicit rule against exactly that: when a signal is inferred rather than self-reported, `recordedSeverity` must never be shown to anyone as a pain value — its only legitimate use is choosing which question to ask. Inference (B1) is out of scope today, so nothing would have broken *yet*; it would have started silently reporting inferred numbers as the patient's own the moment B1 landed. The report now reads `selfReported.severity` and skips anything the patient did not answer, and a test pins it.
+
+**Messaging is deliberately not gated by `dataSharingEnabled`.** That flag governs whether a clinician may read *session data*; a message is not session data. A patient who paused sharing — quite possibly because something is wrong — is the last person who should also lose the ability to say so. Verified end to end: with sharing off, the clinician gets 403 on the report and 200 on the thread.
+
+**Reading a thread is not audit-logged**, unlike reading a report. That log answers "who looked at my data"; a clinician reading a message the patient sent *them* is not an access the patient needs warning about, and logging it would bury the accesses that matter in conversational noise.
+
+**Not real-time.** No websocket, no polling. This is asynchronous advice between sessions, and the UI says so — a patient must not believe an urgent message here will be seen quickly.
+
+---
+
 ## Fixes from first real use
 
 - **Icons rendered enormously** — a 19px lock drew ~600px wide. `Icon` sized itself with `className="h-19 w-19"`, but this app replaces Tailwind's spacing scale with its own px scale, and a value missing from that scale produces *no class at all* rather than an error, so the SVG got no size and filled its container. Size is now a width/height attribute, which cannot fail that way, and the spacing scale covers 0–80px so the same silent failure cannot hit other utilities.
@@ -45,8 +65,8 @@ Each of these is a case where reproducing the mock would have meant the app asse
 - **The fake iOS status bar** (`9:41 · 5G ▮▮▮`) is an artboard convention for showing a phone screen. A web page drawing a counterfeit OS status bar would be lying about the time and the signal.
 - **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
 - **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
+- **Messaging has no notifications, no read receipts, and no attachments.** A patient cannot tell whether their clinician has seen a message. That is a real gap, not a simplification.
 - **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
-- **Clinician reports (F1) and messaging (F9) are not built.** The Sharing screen says so on the screen itself rather than implying they exist — nothing there sends or receives a message, and no report is generated.
 - **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.
 
 All five are gaps to build, not decisions to keep — see "What's still a gap".

@@ -50,6 +50,8 @@ describe("ClinicianApp", () => {
   it("selecting a patient switches to their detail screen, and back returns to the roster", async () => {
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url.endsWith("/patients")) return Promise.resolve({ ok: true, json: async () => [PATIENT] });
+      if (url.includes("/report")) return Promise.resolve({ ok: true, json: async () => null });
+      if (url.includes("/messages")) return Promise.resolve({ ok: true, json: async () => [] });
       if (url.includes("/sessions")) return Promise.resolve({ ok: true, json: async () => [] });
       return Promise.reject(new Error(`unexpected fetch: ${url}`));
     }) as unknown as typeof fetch;

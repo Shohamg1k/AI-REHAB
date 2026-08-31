@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import type { AdherenceDay, RomTrendSeries, SessionSummary } from "@ai-rehab/contracts";
+import type { AdherenceDay, ProgressReport, RomTrendSeries, SessionSummary } from "@ai-rehab/contracts";
 import { ApiError, fetchAdherence, fetchRomTrend, fetchSessions, isApiConfigured } from "../lib/api.js";
 import { adherenceFromSessions, loadLocalSessions } from "../lib/localHistory.js";
 import { isSignedIn } from "../lib/authStore.js";
+import { fetchMyReport } from "../lib/api.js";
+import { ReportCard } from "../components/ReportCard.js";
 
 /**
  * M9 — Progress. G2 (session list + ROM trend) and H1/H2 (streak, week
@@ -107,6 +109,7 @@ export function HistoryScreen() {
   const [adherence, setAdherence] = useState<AdherenceDay[] | null>(null);
   const [romTrend, setRomTrend] = useState<RomTrendSeries[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [report, setReport] = useState<ProgressReport | null>(null);
 
   useEffect(() => {
     // Guests are the default (H7), and their sessions only ever existed in
@@ -124,6 +127,9 @@ export function HistoryScreen() {
         .catch(() => setError("Couldn't read your history from this device."));
       return;
     }
+
+    // The patient's own copy of exactly what their clinician reads (F1).
+    fetchMyReport().then(setReport).catch(() => setReport(null));
 
     Promise.all([fetchSessions(), fetchAdherence(), fetchRomTrend()])
       .then(([s, a, r]) => {
@@ -173,6 +179,12 @@ export function HistoryScreen() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {report && report.sessionCount > 0 && (
+        <div className="ds-card-hair">
+          <ReportCard report={report} />
         </div>
       )}
 
