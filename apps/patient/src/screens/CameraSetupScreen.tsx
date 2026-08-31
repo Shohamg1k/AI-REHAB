@@ -1,9 +1,8 @@
-import type { ExerciseSpec } from "@ai-rehab/contracts";
 import { signalStatusOf, type LiveSessionState } from "../hooks/useLiveSession.js";
 import { CameraStage, primaryGuidance } from "../components/CameraStage.js";
 import { FramingChecklist } from "../components/FramingChecklist.js";
-import { ReferenceMediaDisclosure } from "../components/ReferenceMediaCard.js";
 import { Button } from "../components/Button.js";
+import { Disclaimer } from "../components/Disclaimer.js";
 
 /**
  * A7 — camera setup coach (steps 3–5 of the flow). The patient sees their
@@ -11,13 +10,11 @@ import { Button } from "../components/Button.js";
  * landmarks, and can only start once those are actually visible.
  */
 export function CameraSetupScreen({
-  spec,
   liveState,
   attachVideo,
   onContinue,
   onBack
 }: {
-  spec: ExerciseSpec;
   liveState: LiveSessionState;
   attachVideo: (el: HTMLVideoElement | null) => void;
   onContinue: () => void;
@@ -61,61 +58,101 @@ export function CameraSetupScreen({
   const ready = signalStatus === "ok";
   const guidance = primaryGuidance(captureQuality, signalStatus);
 
-  return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-16 px-16 py-16">
-      <div className="flex flex-col gap-4">
-        <span className="text-b2 font-medium uppercase tracking-wide text-teal">Camera setup</span>
-        <h1 className="text-h1 text-ink">{spec.displayName}</h1>
-      </div>
+  // The capture-quality meter: five ticks off the real 0-1 framing score,
+  // so it moves for the same reason the checklist rows do.
+  const filledTicks = captureQuality ? Math.max(1, Math.round(captureQuality.score * 5)) : 0;
+  const meterTone = ready ? "#4ED6A8" : "#F0B44C";
 
+  return (
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col bg-night">
       <CameraStage
         liveState={liveState}
         signalStatus={signalStatus}
         attachVideo={attachVideo}
+        fullBleed
+        topLeft={
+          <div className="flex flex-col gap-4 pr-24">
+            <h1 className="text-h1 text-white">Set up your camera</h1>
+            <p className="text-b2 text-white/70">
+              Fifteen seconds. Every score today inherits this setup.
+            </p>
+          </div>
+        }
         bottom={
-          <div
-            className={`rounded-md px-12 py-8 text-b2 shadow-lg backdrop-blur-sm transition-colors ${
-              ready ? "bg-emerald-600/95 text-white" : "bg-slate-900/85 text-white"
-            }`}
-            role="status"
-          >
-            {ready ? "✓ Great positioning. You're ready." : guidance}
+          <div className="flex justify-center">
+            <span
+              className="inline-flex items-center gap-6 rounded-xs bg-white/95 px-9 py-5 font-mono text-[11px] uppercase tracking-[.06em] shadow-lift"
+              style={{ color: ready ? "#1F7A4D" : "#A75A0B" }}
+              role="status"
+            >
+              <span
+                className="h-7 w-7 rounded-pill"
+                style={{ background: ready ? "#1F7A4D" : "#A75A0B" }}
+              />
+              {ready ? "Ready when you are" : guidance}
+            </span>
           </div>
         }
       />
 
-      {captureQuality && (
-        <div className="rounded-lg border border-line bg-surf p-16">
-          <FramingChecklist captureQuality={captureQuality} />
+      <div className="flex flex-col gap-12 px-20 pt-16">
+        {captureQuality && <FramingChecklist captureQuality={captureQuality} dark />}
+      </div>
+
+      <div className="flex flex-col gap-10 px-20 pb-18 pt-16">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center">
+            <span className="flex-1 font-mono text-[11px] uppercase tracking-[.1em] text-white/55">
+              Capture quality
+            </span>
+            <span className="font-mono text-[11px] uppercase" style={{ color: meterTone }}>
+              {!captureQuality
+                ? "Measuring"
+                : ready
+                  ? "Good"
+                  : `Fair — ${guidance.toLowerCase()}`}
+            </span>
+          </div>
+          <div className="flex gap-4">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span
+                key={i}
+                className="h-4 flex-1 rounded-xs"
+                style={{ background: i < filledTicks ? meterTone : "rgba(255,255,255,.18)" }}
+              />
+            ))}
+          </div>
         </div>
-      )}
 
-      {/*
-        The tracking-rate readout. Deliberately on the setup screen only and
-        not during the exercise itself, where a patient should be watching
-        their form rather than a number. It exists because ADR-0007 and the
-        M0 exit criterion both hang on a figure nobody has ever measured on
-        real hardware — now anyone who opens this screen has it.
-      */}
-      {liveState.perf && (
-        <p className="text-cap text-ink-3">
-          Tracking at {liveState.perf.fps} fps · {liveState.perf.inferenceMsP50} ms per frame ·{" "}
-          {liveState.perf.tier} model
-          {liveState.videoSize
-            ? ` · ${liveState.videoSize.width}×${liveState.videoSize.height} camera`
-            : ""}
-        </p>
-      )}
-
-      {spec.referenceMedia && <ReferenceMediaDisclosure media={spec.referenceMedia} />}
-
-      <div className="mt-auto flex flex-col gap-8 pt-8">
-        <Button onClick={onContinue} disabled={!captureQuality}>
-          {ready ? "Start exercise" : "Start anyway"}
+        <Button
+          onClick={onContinue}
+          disabled={!captureQuality}
+          variant={ready ? "primary" : "dark"}
+          className={ready ? "" : "text-white/45"}
+        >
+          {ready ? "Start exercise" : "Start when this turns green"}
         </Button>
-        {!ready && captureQuality && (
-          <p className="text-cap text-ink-3">
-            You can start now, but reps won't be scored while a required body part is out of view.
+
+        <Disclaimer icon="shield" className="text-white/50">
+          {ready
+            ? "Coaching aid — not a medical device."
+            : "You can start anyway — the session is then marked low-confidence."}
+        </Disclaimer>
+
+        {/*
+          The tracking-rate readout. Deliberately on the setup screen only and
+          not during the exercise itself, where a patient should be watching
+          their form rather than a number. It exists because ADR-0007 and the
+          M0 exit criterion both hang on a figure nobody has ever measured on
+          real hardware — now anyone who opens this screen has it.
+        */}
+        {liveState.perf && (
+          <p className="font-mono text-[10.5px] uppercase text-white/40">
+            {liveState.perf.fps} fps · {liveState.perf.inferenceMsP50} ms/frame ·{" "}
+            {liveState.perf.tier}
+            {liveState.videoSize
+              ? ` · ${liveState.videoSize.width}×${liveState.videoSize.height}`
+              : ""}
           </p>
         )}
       </div>

@@ -21,14 +21,20 @@ const STATUS_ORDER: Record<LandmarkStatus, number> = {
   ok: 3
 };
 
+/**
+ * Two palettes rather than one: on the setup screen this list sits over the
+ * camera on a near-black background, where the page's ink colours are
+ * unreadable. The status *words* are identical in both — only the colour
+ * that carries them changes.
+ */
 const STATUS_PRESENTATION: Record<
   LandmarkStatus,
-  { icon: string; className: string; note: string }
+  { icon: string; light: string; dark: string; note: string }
 > = {
-  ok: { icon: "✓", className: "text-emerald-600", note: "visible" },
-  low_confidence: { icon: "!", className: "text-amber-600", note: "hard to see" },
-  out_of_frame: { icon: "✕", className: "text-amber-600", note: "outside the frame" },
-  not_detected: { icon: "✕", className: "text-slate-400", note: "not visible" }
+  ok: { icon: "✓", light: "text-ok", dark: "text-[#4ED6A8]", note: "Good" },
+  low_confidence: { icon: "!", light: "text-warn", dark: "text-[#F0B44C]", note: "Hard to see" },
+  out_of_frame: { icon: "✕", light: "text-warn", dark: "text-[#F0B44C]", note: "Out of frame" },
+  not_detected: { icon: "✕", light: "text-ink-3", dark: "text-white/45", note: "Not visible" }
 };
 
 /** One row per phrase-group, taking the worst status within the group. */
@@ -66,34 +72,38 @@ function groupRows(checks: readonly LandmarkCheck[]) {
   return rows.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 }
 
-export function FramingChecklist({ captureQuality }: { captureQuality: CaptureQuality }) {
+export function FramingChecklist({
+  captureQuality,
+  dark = false
+}: {
+  captureQuality: CaptureQuality;
+  /** Over the camera viewport, where the page palette is unreadable. */
+  dark?: boolean;
+}) {
   const rows = groupRows(captureQuality.landmarkChecks);
   if (rows.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-8">
-      <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
-        This exercise needs
-      </span>
-      <ul className="flex flex-col gap-4">
+      <span className={dark ? "ds-label text-white/55" : "ds-label"}>This exercise needs</span>
+      <ul className="flex flex-col gap-10">
         {rows.map((row) => {
           const p = STATUS_PRESENTATION[row.status];
+          const tone = dark ? p.dark : p.light;
           return (
-            <li key={row.label} className="flex items-center gap-8 text-b2">
-              <span
-                className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-cap font-bold ${
-                  row.status === "ok" ? "bg-emerald-50" : "bg-amber-50"
-                } ${p.className}`}
-              >
+            <li key={row.label} className="flex items-center gap-10">
+              <span className={`w-17 shrink-0 text-center text-b2 font-semibold ${tone}`}>
                 {p.icon}
               </span>
-              <span className="text-ink">{row.label}</span>
-              <span className="ml-auto text-cap text-ink-3">{p.note}</span>
+              <span className={`flex-1 text-[14px] ${dark ? "text-white" : "text-ink"}`}>
+                {row.label}
+              </span>
+              <span className={`font-mono text-[11px] uppercase ${tone}`}>{p.note}</span>
             </li>
           );
         })}
       </ul>
-      <p className="text-cap text-ink-3">
+      <p className={`text-cap ${dark ? "text-white/45" : "text-ink-3"}`}>
         Anything not listed here can stay out of frame.
       </p>
     </div>

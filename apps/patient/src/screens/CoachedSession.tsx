@@ -119,7 +119,6 @@ export function CoachedSession({
   if (phase === "setup") {
     return (
       <CameraSetupScreen
-        spec={spec}
         liveState={state}
         attachVideo={attachVideo}
         onContinue={handleSetupContinue}

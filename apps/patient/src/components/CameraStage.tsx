@@ -48,6 +48,7 @@ export function CameraStage({
   signalStatus,
   attachVideo,
   showSkeleton = true,
+  fullBleed = false,
   topLeft,
   topRight,
   bottom
@@ -56,6 +57,8 @@ export function CameraStage({
   signalStatus: SignalStatus;
   attachVideo: (el: HTMLVideoElement | null) => void;
   showSkeleton?: boolean;
+  /** M4/M5: edge-to-edge and square-cornered, the camera as the screen rather than a card on it. */
+  fullBleed?: boolean;
   topLeft?: ReactNode;
   topRight?: ReactNode;
   bottom?: ReactNode;
@@ -68,8 +71,10 @@ export function CameraStage({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl bg-slate-900 shadow-xl transition-shadow ${style.ring}`}
-      style={{ aspectRatio: "4 / 3" }}
+      className={`relative w-full overflow-hidden bg-night transition-shadow ${
+        fullBleed ? "" : `rounded-xl shadow-lift ${style.ring}`
+      }`}
+      style={fullBleed ? { flex: "1 1 auto", minHeight: 0 } : { aspectRatio: "4 / 3" }}
     >
       {/*
         Mirrored for a natural selfie view. This is a CSS transform on
@@ -115,7 +120,7 @@ export function CameraStage({
       {bottom && <div className="absolute inset-x-0 bottom-0 p-12">{bottom}</div>}
 
       {isBooting && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 bg-slate-900/85 backdrop-blur-sm">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 bg-night/85 backdrop-blur-sm">
           <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-white" />
           <span className="text-b2 text-white/90">
             {cameraStatus === "requesting"
