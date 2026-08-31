@@ -37,6 +37,38 @@ const CONNECTIONS: Array<[number, number]> = [
 
 const MIN_DRAW_VISIBILITY = 0.4;
 
+/**
+ * Maps a normalised landmark onto the canvas, accounting for the `object-cover`
+ * crop the video is subject to.
+ *
+ * Landmarks are normalised against the *whole* camera frame, but the video is
+ * drawn with `object-cover` — if the stream's aspect ratio doesn't match the
+ * stage's, the browser crops the overflowing axis and the visible image is a
+ * sub-rectangle of the frame. Mapping straight onto the canvas ignores that
+ * crop and lands every joint slightly off, worst at the edges. The stream is
+ * whatever the camera decided to hand us, not what we asked for, so this
+ * can't be assumed away by picking a capture resolution.
+ */
+export function coverMapper(
+  canvasWidth: number,
+  canvasHeight: number,
+  sourceWidth: number,
+  sourceHeight: number
+): (l: Landmark) => [number, number] {
+  const scale =
+    sourceWidth > 0 && sourceHeight > 0
+      ? Math.max(canvasWidth / sourceWidth, canvasHeight / sourceHeight)
+      : 1;
+  const drawnWidth = sourceWidth * scale;
+  const drawnHeight = sourceHeight * scale;
+  const offsetX = (canvasWidth - drawnWidth) / 2;
+  const offsetY = (canvasHeight - drawnHeight) / 2;
+
+  // x is flipped because the video is mirrored for a natural selfie view.
+  // Angle maths upstream uses the unmirrored coordinates.
+  return (l: Landmark) => [offsetX + (1 - l.x) * drawnWidth, offsetY + l.y * drawnHeight];
+}
+
 const COLOR = {
   requiredOk: "#14E3C8",
   requiredBad: "#FBBF24",
@@ -48,11 +80,14 @@ const COLOR = {
 export function SkeletonOverlay({
   landmarks,
   landmarkChecks,
+  videoSize,
   className = ""
 }: {
   landmarks: Landmark[] | null;
   /** Per-required-landmark status from framing. Drives emphasis. */
   landmarkChecks?: readonly LandmarkCheck[];
+  /** The stream's real dimensions, for the cover-crop mapping. */
+  videoSize?: { width: number; height: number } | null;
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -63,7 +98,18 @@ export function SkeletonOverlay({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const { width, height } = canvas;
+    // Match the backing store to the element's real size so the skeleton
+    // stays aligned (and sharp) whatever the stage's laid-out dimensions are,
+    // instead of being drawn at a fixed size and stretched by CSS.
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(1, Math.round(rect.width * dpr));
+    const height = Math.max(1, Math.round(rect.height * dpr));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
     ctx.clearRect(0, 0, width, height);
     if (!landmarks || landmarks.length === 0) return;
 
@@ -72,10 +118,14 @@ export function SkeletonOverlay({
       requiredIndices.set(POSE_LANDMARK_INDEX[check.landmark], check.status === "ok");
     }
 
-    // The video is mirrored for a natural selfie view, so x is flipped here
-    // to match. Angle maths upstream uses the unmirrored coordinates.
-    const toScreen = (l: Landmark): [number, number] => [(1 - l.x) * width, l.y * height];
+    const toScreen = coverMapper(
+      width,
+      height,
+      videoSize?.width ?? width,
+      videoSize?.height ?? height
+    );
 
+    const s = dpr; // scale line weights and radii with the backing store
     ctx.lineCap = "round";
     for (const [a, b] of CONNECTIONS) {
       const la = landmarks[a];
@@ -90,12 +140,12 @@ export function SkeletonOverlay({
 
       if (isRequiredEdge) {
         ctx.strokeStyle = edgeOk ? COLOR.requiredOk : COLOR.requiredBad;
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 5 * s;
         ctx.shadowColor = edgeOk ? COLOR.requiredOk : COLOR.requiredBad;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 12 * s;
       } else {
         ctx.strokeStyle = COLOR.incidental;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3 * s;
         ctx.shadowBlur = 0;
       }
 
@@ -117,23 +167,21 @@ export function SkeletonOverlay({
 
       ctx.fillStyle = ok ? COLOR.jointOk : COLOR.jointBad;
       ctx.shadowColor = ok ? COLOR.jointOk : COLOR.jointBad;
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 10 * s;
       ctx.beginPath();
-      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.arc(x, y, 6 * s, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.shadowBlur = 0;
       ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2 * s;
       ctx.stroke();
     }
-  }, [landmarks, landmarkChecks]);
+  }, [landmarks, landmarkChecks, videoSize]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={640}
-      height={480}
       className={`absolute inset-0 h-full w-full ${className}`}
       aria-hidden
     />

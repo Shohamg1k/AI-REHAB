@@ -1,8 +1,8 @@
 # Status
 
 **Last updated:** 2026-08-31
-**Milestone:** M0 + M1 + M2 merged to `main`, plus the clinician-UI/E5-wiring branch that followed it. This branch (`feature/history-consent-and-tests`) closes out the punch list that branch left behind: component tests for the two untested clinician screens, a real G2 ROM trend, H1/H2 milestones, and G5's other half — a data-sharing toggle that actually gates clinician access, not just an access log.
-**Phase:** every patient- and clinician-facing screen the backend supports now exists and is tested. Live Postgres and a real camera remain the two things this environment cannot verify — everything else that was "backend only" or "verified once by hand" at the last update now has both a UI and a regression test.
+**Milestone:** M0 + M1 + M2 merged to `main`, plus the clinician-UI/E5-wiring and history/consent branches. This branch (`feature/pose-latency-and-accuracy`) is the first pass at pose latency and accuracy: it fixes the accumulating skeleton lag, the ten-second freeze at session start, and a landmark-alignment bug — and finally puts real inference numbers against ADR-0007.
+**Phase:** the pose pipeline has been measured for the first time, not just reasoned about. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
 
 ---
 
@@ -10,7 +10,37 @@
 
 A patient can do a full coached session guest-first, no account. Optionally, they can sign in; a clinician can invite them, assign a program (checked against E5), and see their history; the patient can see their own history, a real ROM trend, streak milestones, and exactly who's viewed their data — and can now turn that access off.
 
-**This branch's work, all four items from the previous update's "still a gap" list:**
+## This branch: pose latency and accuracy
+
+**The lag had four separate causes.** Found by reading the pipeline end to end and then measuring it in a browser, not by guessing:
+
+1. **No backpressure — the dominant cause.** The capture loop posted a frame every 41.6ms regardless of whether the worker had finished the previous one. Inference is slower than that, so the worker's message queue grew without bound and the skeleton fell *further* behind the video the longer a session ran. It now sends a frame only when the worker is idle: lower frame rate, but pinned to the present.
+2. **A ten-second freeze on the first frame.** MediaPipe compiles GPU shaders lazily on the first `detectForVideo`, *after* `createFromOptions` resolves — measured at **~10,300ms**, against ~30ms for every frame after. The app dismissed its "Loading on-device pose model…" spinner and *then* paid that cost, so the patient's first frame froze for ten seconds. One throwaway inference during startup moves it inside the loading state: **first real frame went from ~10,300ms to ~60–75ms.**
+3. **A GPU→CPU stall every frame.** The A7 lighting check ran `getImageData` on every single frame to answer a question whose answer changes over seconds. Now sampled every 15th frame.
+4. **The drawn skeleton was the only unsmoothed thing in the pipeline.** Raw landmarks went straight to the canvas, which reads as bad tracking. Now smoothed with a second One Euro filter tuned for lag rather than jitter — display and analysis genuinely want different trade-offs.
+
+**A latent alignment bug, fixed.** The overlay mapped normalised landmarks onto the full canvas while the video is drawn with `object-cover`. Any camera whose aspect ratio didn't match the 4:3 stage — which `getUserMedia` constraints cannot guarantee, since they are a request, not a promise — had its video cropped but its skeleton not, landing every joint off the body. This would have looked exactly like bad tracking. The mapping now accounts for the crop, and the canvas sizes itself to its real box and device pixel ratio instead of a hardcoded 640×480.
+
+**Accuracy changes.** Capture bumped from 480p to 720p (the landmark model works from a crop around the detected person, so a sharper source helps most in the full-body framing where 480p had least to work with). MediaPipe's presence and tracking confidences are now set explicitly at 0.65 rather than inherited from undocumented per-version defaults — a rehab patient is deliberately positioned, so a weak pose is more likely a mis-detection than the patient, and losing tracking is honestly reported while scoring a phantom pose is not.
+
+**Model tier is now one env var.** It was hardcoded in three places that had to be hand-synced — which made comparing tiers on a real device, the thing ADR-0007 is waiting on, needlessly error-prone. Now `POSE_TIER=full pnpm setup:pose`.
+
+## Measured, for the first time
+
+One desktop-class Windows machine, Chrome, GPU delegate, `heavy` tier, 720p synthetic frames driven straight into the worker. **Not a real camera and not a real body** — see the gap list.
+
+| Measure | Result |
+|---|---|
+| Steady-state inference, median | ~29.5 ms (~34fps of headroom against a 24fps intake cap) |
+| Steady-state range | 18–46 ms, occasional 110–145 ms outliers |
+| First inference, before the fix | ~10,300 ms |
+| First inference, after the fix | ~60–75 ms |
+
+`heavy` clears the ≥24fps criterion **on this class of hardware**, which is real evidence for the interim tier choice rather than the "cheapest tier most likely to clear the floor" reasoning it replaced. It says nothing yet about the phones the M0 spike actually cares about. The app now shows fps, median inference and tier on the camera setup screen, so the rest of the spike is "open the app on each device and read the number" rather than an instrumentation task.
+
+## Earlier this session (already merged)
+
+**Clinician UI + E5 wiring**, then **history/consent/tests**, all four items from that branch's gap list:
 
 - **`PatientDetailScreen` and `ClinicianApp` now have component tests** (7 and 3 tests respectively) — the previous branch shipped them verified only by one manual browser walkthrough. That gap is closed: both are now regression-tested the same way `RosterScreen` and `HistoryScreen` already were.
 - **G2's ROM trend is real**, not a placeholder. `computeRomTrend` (`apps/api/src/projections.ts`) is a genuine time series — one point per session, that session's best peak angle per (exercise, joint) — unlike `BaselineEntry`, which only ever kept a single first-ever reference point. `HistoryScreen` renders it as an inline SVG sparkline per joint with a "+N° since first session" delta. No charting dependency added.
@@ -23,7 +53,10 @@ pnpm install && pnpm --filter @ai-rehab/patient run dev   # guest-first, no serv
 cp .env.example .env && docker compose up                  # full stack, Postgres-backed
 ```
 
-## What's built and tested (169 TS/JS tests + 12 Python tests + 11 eval fixtures, all passing; `pnpm run ci` green from a clean checkout)
+## What's built and tested (178 TS/JS tests + 12 Python tests + 11 eval fixtures, all passing; `pnpm run ci` green from a clean checkout)
+
+- **`coverMapper`** (4 tests) — the object-cover landmark mapping, including the 16:9-into-4:3 case that was silently wrong, a portrait source, and the pre-metadata fallback that must not divide by zero.
+- **`computePerf`** (5 tests) — fps from intervals rather than sample count, median-not-mean so one GC pause doesn't read as a slow device, and the same-timestamp case.
 
 - **`computeRomTrend`** — covered by a real integration test (`sync.test.ts`) that syncs two sessions with multiple reps each and asserts the trend picks each session's *best* rep, not its last or its average, and orders points by session time. `getRomTrend` added to both `MemoryStore` and `PostgresStore`, mirroring the existing `getBaseline` pattern exactly (same pure function shared by both, same "not run against live Postgres" caveat as everything else in that store).
 - **`dataSharingEnabled`** — a new `boolean` on `User` (Drizzle migration `0004`), defaulting to `true`, patient-only, always `true` for a clinician. `consent.test.ts` (4 tests): default-enabled visibility, turning it off actually blocks the read (403, not just a client-side hide), turning it back on restores access, a clinician can't touch the flag (it isn't theirs), and — the one easy-to-get-wrong case — a *blocked* read does not get logged as a *view* in the patient's audit log.
@@ -33,6 +66,10 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 
 ## What's still a gap
 
+- **No frame of real video has ever gone through this pipeline.** Every measurement above used synthetic canvas frames, and the crude shapes drawn were never recognised as a person, so *landmark accuracy itself is still completely unverified* — only the plumbing and the timing around it. This remains the single highest-value unverified thing in the project.
+- **The perf readout has not been seen rendering.** The Browser pane in this environment is hidden to the renderer, so `requestAnimationFrame` never fires and the capture loop cannot run; the worker was driven directly instead. The pipeline, timings and worker protocol are verified; `CameraSetupScreen`'s readout markup and the backpressure loop itself are verified only by unit tests and reading.
+- **The display-smoothing constants are reasoned, not tuned.** `minCutoff: 1.7, beta: 0.9` is a defensible starting point for "prioritise lag over jitter", not a measured optimum. The instrumentation added here is what would let someone tune it against a real body.
+- **720p capture is an inference from how MediaPipe works, not a measured accuracy win.** The mechanism is sound (sharper ROI crop) but nobody has compared landmark error at 480p vs 720p.
 - **Milestone thresholds are arbitrary and unvalidated** — nobody with product or clinical context has confirmed 3/7/30-day streaks or 10/25 sessions are the right cadence to encourage adherence rather than discourage it after a missed day. Flagged, not decided.
 - **`contraindicatedRegions` is still unverified self-/clinician-declared data** — unchanged; E5 checking it is better than checking nothing, but it is not clinical-grade contraindication management.
 - **Still no live Postgres, still no real camera** — unchanged; see the M0/M2 history below. `getRomTrend` and `updateDataSharing`'s Postgres implementations follow the exact pattern already used elsewhere in `postgresStore.ts` but share that file's blanket caveat: reviewed, not run against a real database.
@@ -75,11 +112,12 @@ STGCN-rehab and avakanski's framework: structurally incompatible with ADR-0001 a
 
 In order.
 
-1. **Run it with a real camera.** Still unchanged, still top priority — nothing else matters until a real skeleton tracks a real body.
+1. **Run it with a real camera and a real body.** Unchanged and now more pointed than ever: this branch made the pipeline measurably faster and fixed a mapping bug that would have looked like bad tracking, but *landmark accuracy itself has still never been observed*. Open the app, stand in front of it, and read the fps/latency line on the setup screen — that single act both validates the tracking and finishes most of the M0 spike.
 2. **Merge this branch** once reviewed. CI-green; gaps documented above, none of them regressions.
-3. **Get milestone thresholds and `contraindicatedRegions` verification reviewed by someone with clinical/product context** — both are currently engineering guesses.
-4. **Set up a real Postgres role split**, **run the M0 device spike**, **get a physiotherapist's sign-off**, **answer the regulatory posture question** — all unchanged; see the blocked table below.
-5. **Model accuracy and the voice assistant** — explicitly deferred to a later phase per the user's own sequencing; not started.
+3. **Tune the display-smoothing constants and confirm the 720p bump** against that real body — both are currently reasoned rather than measured.
+4. **Get milestone thresholds and `contraindicatedRegions` verification reviewed by someone with clinical/product context** — both are engineering guesses.
+5. **Set up a real Postgres role split**, **finish the M0 device spike on phones**, **get a physiotherapist's sign-off**, **answer the regulatory posture question** — see the blocked table below.
+6. **The voice assistant** — still deferred per the stated sequencing; not started. (Model accuracy work has now begun, this branch being the first pass.)
 
 ## Blocked
 
@@ -97,6 +135,9 @@ See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default (`h
 
 ## Recently decided
 
+- **Backpressure over a fixed send rate.** When inference can't keep up, dropping frames is strictly better than queueing them: a queue converts a fixed cost into an unbounded, growing one, and the patient experiences that as the overlay drifting away from their body. Frame rate is the right thing to sacrifice.
+- **The pose worker stays network-free, even for a cosmetic label.** Reading the model tier from a manifest at runtime would have been the obvious implementation, and ADR-0002's mechanical guard correctly refused it. The tier is passed in as data instead. The allowlist was not widened — that guard exists precisely to make this kind of casual addition fail review.
+- **Build-time config reaches the worker as a message, not a bundler constant.** Vite's two mechanisms each work in only one mode — `define` is skipped for workers in dev, and workers are bundled in a separate Rollup pass that can't see a custom virtual module in production. Both failure modes were hit and observed here. Passing the value from the main thread sidesteps the split entirely.
 - **A "trend" has to actually be a time series.** `BaselineEntry` (a single first-ever point) was explicitly not reused or relabeled as a trend — `computeRomTrend` was written as new, separate logic rather than stretching an existing type to look like something it isn't.
 - **Milestones are client-side only.** Thresholds are gamification, not a clinical claim, so `apps/api` was deliberately not given a new endpoint or table for them — computed from data already fetched for other reasons.
 - **Being refused data does not count as viewing it.** The data-sharing enforcement in `routes/patients.ts` checks consent *before* calling `recordAccess` — a blocked attempt is not logged as a view, which would have been misleading in the patient's own audit log.
@@ -104,7 +145,8 @@ See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default (`h
 
 ## Known risks being carried
 
-- **The M0 spike still hasn't run** — unconfirmed on real hardware, more demanding now with `heavy` than `lite` was.
+- **The M0 spike is only part-run** — `heavy` now has real numbers on one desktop-class machine and clears the bar there, but nothing has been measured on a phone, in a dim room, or against a real body.
+- **Pose accuracy is still entirely unobserved.** The pipeline has been timed, not validated. No real person has ever been tracked by this app.
 - **Every exercise spec is provisional** — unchanged since M1.
 - **The Postgres role in `docker-compose.yml` bypasses its own RLS policies** — do not treat the local dev setup as a security reference for a real deployment.
 - **`contraindicatedRegions` is unverified self-report data** — E5 checking it is real but its inputs are not clinically validated.

@@ -90,6 +90,23 @@ export function CameraSetupScreen({
         </div>
       )}
 
+      {/*
+        The tracking-rate readout. Deliberately on the setup screen only and
+        not during the exercise itself, where a patient should be watching
+        their form rather than a number. It exists because ADR-0007 and the
+        M0 exit criterion both hang on a figure nobody has ever measured on
+        real hardware — now anyone who opens this screen has it.
+      */}
+      {liveState.perf && (
+        <p className="text-caption text-text-muted">
+          Tracking at {liveState.perf.fps} fps · {liveState.perf.inferenceMsP50} ms per frame ·{" "}
+          {liveState.perf.tier} model
+          {liveState.videoSize
+            ? ` · ${liveState.videoSize.width}×${liveState.videoSize.height} camera`
+            : ""}
+        </p>
+      )}
+
       {spec.referenceMedia && <ReferenceMediaDisclosure media={spec.referenceMedia} />}
 
       <div className="mt-auto flex flex-col gap-8 pt-8">

@@ -96,9 +96,13 @@ camera frame
                           └─▶ verdict → may pre-empt any cue
 ```
 
-Everything after the landmarker is single-digit microseconds of arithmetic. **The entire budget is the model.** That is what the M0 spike measures, and it is why model tier is the one stack choice left open.
+Everything after the landmarker is single-digit microseconds of arithmetic. **The entire budget is the model.** That is what the M0 spike measures, and it is why model tier is the one stack choice left open. First real measurement (one desktop-class machine, `heavy` tier): ~29.5ms median — see ADR-0007.
 
-**Smoothing matters more than it sounds.** Raw MediaPipe output jitters enough to produce false rep boundaries and phantom asymmetry. A One Euro filter (low latency at low speed, low lag at high speed) is the right default; a plain moving average adds lag that shows up as late cues.
+**The capture loop applies backpressure.** The main thread sends a frame only when the worker is idle, never on a fixed interval. Posting on a timer regardless of whether the previous frame had finished let the worker's message queue grow without bound whenever inference was slower than the send interval, so the skeleton fell further behind the video the longer a session ran. Dropping frames while busy trades frame rate for staying in the present, which is the right trade for an overlay a patient is watching themselves in.
+
+**The model is warmed up before the session reports ready.** MediaPipe compiles GPU shaders lazily on first inference, not during `createFromOptions` — measured at ~10s against ~30ms for every frame after. One throwaway inference during startup keeps that cost inside the loading state instead of freezing the patient's first frame.
+
+**Smoothing matters more than it sounds.** Raw MediaPipe output jitters enough to produce false rep boundaries and phantom asymmetry. A One Euro filter (low latency at low speed, low lag at high speed) is the right default; a plain moving average adds lag that shows up as late cues. Display and analysis run separate filters at different settings: for the drawn skeleton, lag is what a patient notices; for joint angles, jitter is what corrupts the measurement.
 
 ---
 

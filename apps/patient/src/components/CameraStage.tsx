@@ -60,7 +60,7 @@ export function CameraStage({
   topRight?: ReactNode;
   bottom?: ReactNode;
 }) {
-  const { cameraStatus, workerStatus, landmarks, captureQuality } = liveState;
+  const { cameraStatus, workerStatus, landmarks, captureQuality, videoSize } = liveState;
   const style = STATUS_STYLE[signalStatus];
 
   const isBooting =
@@ -86,7 +86,11 @@ export function CameraStage({
       />
 
       {showSkeleton && (
-        <SkeletonOverlay landmarks={landmarks} landmarkChecks={captureQuality?.landmarkChecks} />
+        <SkeletonOverlay
+          landmarks={landmarks}
+          landmarkChecks={captureQuality?.landmarkChecks}
+          videoSize={videoSize}
+        />
       )}
 
       {/* Legibility scrim behind the overlay chrome, top and bottom only. */}
