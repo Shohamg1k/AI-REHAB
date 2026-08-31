@@ -96,17 +96,17 @@ export function SessionSummaryScreen({
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-16 px-16 py-24">
-      <div className="flex flex-col items-center gap-8 rounded-xl border border-border bg-surface p-24 text-center">
-        <span aria-hidden className="text-heading-24">
+      <div className="flex flex-col items-center gap-8 rounded-xl border border-line bg-surf p-24 text-center">
+        <span aria-hidden className="text-h1">
           {tone === "good" ? "🎉" : "✅"}
         </span>
-        <h1 className="text-heading-20 text-text-primary">Set complete</h1>
-        <p className="text-body-sm text-text-secondary">{exerciseName}</p>
+        <h1 className="text-h1 text-ink">Set complete</h1>
+        <p className="text-b2 text-ink-2">{exerciseName}</p>
 
         <div className="mt-8 flex items-end gap-24">
           <div className="flex flex-col items-center">
-            <span className="text-metric tabular-nums text-text-primary">{reps.length}</span>
-            <span className="text-label uppercase tracking-wide text-text-secondary">Reps</span>
+            <span className="text-metric tabular-nums text-ink">{reps.length}</span>
+            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Reps</span>
           </div>
           <div className="flex flex-col items-center">
             <span
@@ -115,17 +115,17 @@ export function SessionSummaryScreen({
                   ? "text-emerald-600"
                   : tone === "work"
                     ? "text-amber-600"
-                    : "text-text-primary"
+                    : "text-ink"
               }`}
             >
               {avgScore ?? "—"}
             </span>
-            <span className="text-label uppercase tracking-wide text-text-secondary">Form</span>
+            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Form</span>
           </div>
           {consistency !== null && (
             <div className="flex flex-col items-center">
-              <span className="text-metric tabular-nums text-text-primary">{consistency}</span>
-              <span className="text-label uppercase tracking-wide text-text-secondary">
+              <span className="text-metric tabular-nums text-ink">{consistency}</span>
+              <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
                 Consistency
               </span>
             </div>
@@ -134,19 +134,19 @@ export function SessionSummaryScreen({
       </div>
 
       {romPerRep.length >= 2 && (
-        <div className="flex flex-col gap-8 rounded-lg border border-border bg-surface p-16">
+        <div className="flex flex-col gap-8 rounded-lg border border-line bg-surf p-16">
           <div className="flex items-baseline justify-between">
-            <span className="text-label uppercase tracking-wide text-text-secondary">
+            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
               Range across the set
             </span>
-            <span className="text-caption text-text-muted">
+            <span className="text-cap text-ink-3">
               rep 1 → rep {romPerRep.length}
             </span>
           </div>
-          <div className="text-brand">
+          <div className="text-teal">
             <Sparkline values={romPerRep} />
           </div>
-          <p className="text-caption text-text-muted">
+          <p className="text-cap text-ink-3">
             {consistency !== null && consistency >= 85
               ? "Your range held steady from first rep to last."
               : "Your range drifted across the set — often a sign of fatigue."}
@@ -155,20 +155,20 @@ export function SessionSummaryScreen({
       )}
 
       {best && (
-        <div className="rounded-lg border border-border bg-surface p-16">
-          <span className="text-label uppercase tracking-wide text-text-secondary">Best rep</span>
-          <p className="mt-4 text-body text-text-primary">
+        <div className="rounded-lg border border-line bg-surf p-16">
+          <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Best rep</span>
+          <p className="mt-4 text-b1 text-ink">
             Rep {best.rep.repIndex + 1} — {Math.round(best.score.score)} / 100
           </p>
-          <p className="text-caption text-text-muted">{best.score.reason}</p>
+          <p className="text-cap text-ink-3">{best.score.reason}</p>
         </div>
       )}
 
       {topShortfall && (
-        <div className="rounded-lg border border-brand-border bg-brand-soft p-16">
-          <span className="text-label uppercase tracking-wide text-brand">Work on next time</span>
-          <p className="mt-4 text-body text-text-primary">{topShortfall[0]}</p>
-          <p className="text-caption text-text-muted">
+        <div className="rounded-lg border border-teal-wash bg-teal-wash p-16">
+          <span className="text-b2 font-medium uppercase tracking-wide text-teal">Work on next time</span>
+          <p className="mt-4 text-b1 text-ink">{topShortfall[0]}</p>
+          <p className="text-cap text-ink-3">
             Came up short on {topShortfall[1]} of {confident.length} scored{" "}
             {confident.length === 1 ? "rep" : "reps"}.
           </p>
@@ -176,27 +176,27 @@ export function SessionSummaryScreen({
       )}
 
       {lowConfidenceCount > 0 && (
-        <p className="text-caption text-text-muted">
+        <p className="text-cap text-ink-3">
           {lowConfidenceCount} rep{lowConfidenceCount === 1 ? "" : "s"} had low tracking confidence
           and {lowConfidenceCount === 1 ? "is" : "are"} not included above.
         </p>
       )}
 
-      <div className="rounded-lg border border-border bg-surface p-16">
-        <span className="text-label uppercase tracking-wide text-text-secondary">
+      <div className="rounded-lg border border-line bg-surf p-16">
+        <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
           Pain this session
         </span>
         {painReport ? (
-          <p className="mt-4 text-body text-text-primary">
+          <p className="mt-4 text-b1 text-ink">
             You said {painReport.severity} out of 5
             {painReport.region ? ` — ${painReport.region.replace("_", " ")}` : ""}.
           </p>
         ) : (
-          <p className="mt-4 text-body text-text-primary">No pain reported.</p>
+          <p className="mt-4 text-b1 text-ink">No pain reported.</p>
         )}
       </div>
 
-      <p className="text-caption text-text-muted">
+      <p className="text-cap text-ink-3">
         These numbers describe what the camera could see. They are not a clinical assessment.
       </p>
 

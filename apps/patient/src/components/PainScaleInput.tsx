@@ -26,18 +26,18 @@ export function PainScaleInput({
             key={n}
             type="button"
             onClick={() => onChange(n)}
-            className={`flex-1 min-h-touch rounded-md border text-body-md flex flex-col items-center justify-center gap-2 transition-colors ${
+            className={`flex-1 min-h-touch rounded-md border text-b1 font-medium flex flex-col items-center justify-center gap-2 transition-colors ${
               value === n
                 ? "bg-pain text-white border-pain"
-                : "bg-surface text-text-primary border-border hover:bg-subtle"
+                : "bg-surf text-ink border-line hover:bg-sunk"
             }`}
           >
-            <span className="text-title">{n}</span>
-            <span className="text-caption">{SCALE_WORDS[n]}</span>
+            <span className="text-h2">{n}</span>
+            <span className="text-cap">{SCALE_WORDS[n]}</span>
           </button>
         ))}
       </div>
-      <p className="text-caption text-text-muted">
+      <p className="text-cap text-ink-3">
         This is what gets recorded — not a guess based on your movement.
       </p>
     </div>

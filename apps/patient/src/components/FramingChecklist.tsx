@@ -72,28 +72,28 @@ export function FramingChecklist({ captureQuality }: { captureQuality: CaptureQu
 
   return (
     <div className="flex flex-col gap-8">
-      <span className="text-label uppercase tracking-wide text-text-secondary">
+      <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
         This exercise needs
       </span>
       <ul className="flex flex-col gap-4">
         {rows.map((row) => {
           const p = STATUS_PRESENTATION[row.status];
           return (
-            <li key={row.label} className="flex items-center gap-8 text-body-sm">
+            <li key={row.label} className="flex items-center gap-8 text-b2">
               <span
-                className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-caption font-bold ${
+                className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-cap font-bold ${
                   row.status === "ok" ? "bg-emerald-50" : "bg-amber-50"
                 } ${p.className}`}
               >
                 {p.icon}
               </span>
-              <span className="text-text-primary">{row.label}</span>
-              <span className="ml-auto text-caption text-text-muted">{p.note}</span>
+              <span className="text-ink">{row.label}</span>
+              <span className="ml-auto text-cap text-ink-3">{p.note}</span>
             </li>
           );
         })}
       </ul>
-      <p className="text-caption text-text-muted">
+      <p className="text-cap text-ink-3">
         Anything not listed here can stay out of frame.
       </p>
     </div>

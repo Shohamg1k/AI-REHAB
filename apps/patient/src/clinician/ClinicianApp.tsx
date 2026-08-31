@@ -15,12 +15,12 @@ export function ClinicianApp({ user, onSignOut }: { user: User; onSignOut: () =>
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-16 px-16 py-16">
-      <header className="flex items-center justify-between border-b border-border pb-12">
+      <header className="flex items-center justify-between border-b border-line pb-12">
         <div>
-          <div className="text-title text-text-primary">{user.displayName}</div>
-          <div className="text-caption text-text-muted">Clinician</div>
+          <div className="text-h2 text-ink">{user.displayName}</div>
+          <div className="text-cap text-ink-3">Clinician</div>
         </div>
-        <button type="button" className="text-body-sm text-brand underline" onClick={onSignOut}>
+        <button type="button" className="text-b2 text-teal underline" onClick={onSignOut}>
           Sign out
         </button>
       </header>

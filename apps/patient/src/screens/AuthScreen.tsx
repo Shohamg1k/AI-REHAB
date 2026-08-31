@@ -44,8 +44,8 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
   return (
     <div className="flex flex-col gap-20 px-16 py-24 max-w-lg mx-auto w-full">
       <div>
-        <h1 className="text-heading-20 text-text-primary">{mode === "signin" ? "Sign in" : "Create an account"}</h1>
-        <p className="text-body-sm text-text-secondary mt-4">
+        <h1 className="text-h1 text-ink">{mode === "signin" ? "Sign in" : "Create an account"}</h1>
+        <p className="text-b2 text-ink-2 mt-4">
           Optional — syncs your sessions across devices. You never need this to use the app.
         </p>
       </div>
@@ -54,9 +54,9 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
         {mode === "signup" && (
           <>
             <label className="flex flex-col gap-4">
-              <span className="text-label text-text-secondary">Name</span>
+              <span className="text-b2 font-medium text-ink-2">Name</span>
               <input
-                className="min-h-touch rounded-md border border-border px-16"
+                className="min-h-touch rounded-md border border-line px-16"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
@@ -69,7 +69,7 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
                   type="button"
                   onClick={() => setRole(r)}
                   className={`flex-1 min-h-touch rounded-md border capitalize ${
-                    role === r ? "bg-brand text-white border-brand" : "bg-surface border-border"
+                    role === r ? "bg-teal text-white border-teal" : "bg-surf border-line"
                   }`}
                 >
                   {r}
@@ -78,9 +78,9 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
             </div>
             {role === "patient" && (
               <label className="flex flex-col gap-4">
-                <span className="text-label text-text-secondary">Clinician invite code (optional)</span>
+                <span className="text-b2 font-medium text-ink-2">Clinician invite code (optional)</span>
                 <input
-                  className="min-h-touch rounded-md border border-border px-16"
+                  className="min-h-touch rounded-md border border-line px-16"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   placeholder="Leave blank for a personal account"
@@ -91,10 +91,10 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
         )}
 
         <label className="flex flex-col gap-4">
-          <span className="text-label text-text-secondary">Email</span>
+          <span className="text-b2 font-medium text-ink-2">Email</span>
           <input
             type="email"
-            className="min-h-touch rounded-md border border-border px-16"
+            className="min-h-touch rounded-md border border-line px-16"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -102,10 +102,10 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
         </label>
 
         <label className="flex flex-col gap-4">
-          <span className="text-label text-text-secondary">Password</span>
+          <span className="text-b2 font-medium text-ink-2">Password</span>
           <input
             type="password"
-            className="min-h-touch rounded-md border border-border px-16"
+            className="min-h-touch rounded-md border border-line px-16"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={8}
@@ -113,7 +113,7 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
           />
         </label>
 
-        {error && <p className="text-body-sm text-danger">{error}</p>}
+        {error && <p className="text-b2 text-dang">{error}</p>}
 
         <Button type="submit" disabled={busy}>
           {mode === "signin" ? "Sign in" : "Create account"}
@@ -122,7 +122,7 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
 
       <button
         type="button"
-        className="text-body-sm text-brand underline"
+        className="text-b2 text-teal underline"
         onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
       >
         {mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}

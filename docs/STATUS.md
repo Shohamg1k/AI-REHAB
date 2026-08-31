@@ -1,8 +1,38 @@
 # Status
 
 **Last updated:** 2026-08-31
-**Milestone:** M0 + M1 + M2 merged to `main`, plus the clinician-UI/E5-wiring and history/consent branches. This branch (`feature/pose-latency-and-accuracy`) is the first pass at pose latency and accuracy: it fixes the accumulating skeleton lag, the ten-second freeze at session start, and a landmark-alignment bug — and finally puts real inference numbers against ADR-0007.
-**Phase:** the pose pipeline has been measured for the first time, not just reasoned about. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+**Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
+**Phase:** the app now *looks like* the approved design rather than approximating it. Screens M1/M2/M10 are rebuilt; M3–M9 have the correct palette and type but not yet their artboard structure. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+
+---
+
+## This branch: design system v2
+
+The design source of truth is `figma-svg/_source/v2.html` (the artboards the SVG exports were generated from) — richer than the SVGs, because it carries the actual CSS. `docs/DESIGN-SCREENS.md` is a new, literal spec of screens M1–M10 extracted from it: every string, gap, and component variant.
+
+**The old palette was a near-miss of the real one** — Inter instead of IBM Plex, `#0F766E` instead of `#0D6E68`, `#F6F8FB` instead of `#ECF0F1`. Close enough to look deliberate, far enough never to match. Tokens are now transcribed from the design source and named after it (`ink`/`ink-2`/`ink-3`, `teal`, `sunk`, `line`), so a screen can be checked against its artboard by reading class names instead of translating a second vocabulary in between. ~270 token usages migrated across 22 files.
+
+**IBM Plex is self-hosted** via `@fontsource`, not linked from Google Fonts as the design source does. A product whose pitch is "your video never leaves the device" should not announce every session start to `fonts.gstatic.com`, and the app has to keep working offline and behind a proxy that blocks it — the same reasoning that already applies to the pose assets.
+
+**Built:** `Icon` (11 inline line icons, no icon dependency), `Chip`, `Disclaimer` (the design's per-screen `.disc`), `BottomNav`, and `Button` rebuilt to the design's four variants with inset-shadow hairlines so secondary and primary buttons are the same height.
+
+**Bottom navigation now exists** — Today / Progress / Program / Sharing, which the app simply did not have. It is deliberately hidden for the whole exercise flow (intro → camera → live → rest → summary): a way out of a running set should not sit next to the set.
+
+**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M10 Sharing & privacy (new screen).
+
+**A duplication fixed on the way:** the data-sharing consent and access log lived at the bottom of Progress *and* now on Sharing. Progress rendered them even when signed out, showing a consent switch with nothing behind it. They now live only on Sharing, with their test coverage moved across rather than dropped.
+
+### Where the design was deliberately not followed
+
+Each of these is a case where reproducing the mock would have meant the app asserting something untrue:
+
+- **The fake iOS status bar** (`9:41 · 5G ▮▮▮`) is an artboard convention for showing a phone screen. A web page drawing a counterfeit OS status bar would be lying about the time and the signal.
+- **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
+- **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
+- **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
+- **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.
+
+All five are gaps to build, not decisions to keep — see "What's still a gap".
 
 ---
 
@@ -66,6 +96,10 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 
 ## What's still a gap
 
+- **Screens M3–M9 are not yet rebuilt to their artboards.** They pick up the new palette, type and components automatically, so the app is visually coherent, but their structure and copy still differ from the designs. `docs/DESIGN-SCREENS.md` has the literal spec for each; this is continuation work, not a blocker.
+- **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.
+- **`Program` in the bottom nav routes to Today.** There is no separate program screen yet; today's list is the program. Better than a stub, but it is not what the tab implies.
+- **No screen has been compared side by side against its artboard by eye.** The rebuild followed a written spec and was verified through the DOM (computed colours, fonts, type sizes, copy) because the Browser pane in this environment renders hidden. Spacing and optical alignment need a human to look at them.
 - **No frame of real video has ever gone through this pipeline.** Every measurement above used synthetic canvas frames, and the crude shapes drawn were never recognised as a person, so *landmark accuracy itself is still completely unverified* — only the plumbing and the timing around it. This remains the single highest-value unverified thing in the project.
 - **The perf readout has not been seen rendering.** The Browser pane in this environment is hidden to the renderer, so `requestAnimationFrame` never fires and the capture loop cannot run; the worker was driven directly instead. The pipeline, timings and worker protocol are verified; `CameraSetupScreen`'s readout markup and the backpressure loop itself are verified only by unit tests and reading.
 - **The display-smoothing constants are reasoned, not tuned.** `minCutoff: 1.7, beta: 0.9` is a defensible starting point for "prioritise lag over jitter", not a measured optimum. The instrumentation added here is what would let someone tune it against a real body.

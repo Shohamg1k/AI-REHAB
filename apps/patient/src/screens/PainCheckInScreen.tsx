@@ -21,24 +21,24 @@ export function PainCheckInScreen({
   return (
     <div className="flex flex-col gap-20 px-16 py-24 max-w-lg mx-auto w-full">
       <div>
-        <h1 className="text-heading-20 text-text-primary">How did that feel?</h1>
+        <h1 className="text-h1 text-ink">How did that feel?</h1>
         {bookmarked && (
-          <p className="text-body-sm text-pain mt-4">You flagged a rep during that set — tell us more.</p>
+          <p className="text-b2 text-pain mt-4">You flagged a rep during that set — tell us more.</p>
         )}
       </div>
 
       <div>
-        <span className="text-label text-text-secondary mb-8 block">Where, if anywhere?</span>
+        <span className="text-b2 font-medium text-ink-2 mb-8 block">Where, if anywhere?</span>
         <div className="flex flex-wrap gap-8">
           {REGIONS.map((r) => (
             <button
               key={r}
               type="button"
               onClick={() => setRegion(r)}
-              className={`px-16 min-h-touch rounded-pill border text-body-sm capitalize transition-colors ${
+              className={`px-16 min-h-touch rounded-pill border text-b2 capitalize transition-colors ${
                 region === r
-                  ? "bg-brand text-white border-brand"
-                  : "bg-surface text-text-primary border-border hover:bg-subtle"
+                  ? "bg-teal text-white border-teal"
+                  : "bg-surf text-ink border-line hover:bg-sunk"
               }`}
             >
               {r.replace("_", " ")}
@@ -48,7 +48,7 @@ export function PainCheckInScreen({
       </div>
 
       <div>
-        <span className="text-label text-text-secondary mb-8 block">How much did it hurt?</span>
+        <span className="text-b2 font-medium text-ink-2 mb-8 block">How much did it hurt?</span>
         <PainScaleInput value={severity} onChange={setSeverity} />
       </div>
 

@@ -30,31 +30,31 @@ export function ExerciseIntroScreen({
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-20 px-16 py-24">
       <div className="flex flex-col gap-4">
-        <span className="text-label uppercase tracking-wide text-brand">Before you start</span>
-        <h1 className="text-heading-24 text-text-primary">{spec.displayName}</h1>
-        <p className="text-body text-text-secondary">{spec.rationale}</p>
+        <span className="text-b2 font-medium uppercase tracking-wide text-teal">Before you start</span>
+        <h1 className="text-h1 text-ink">{spec.displayName}</h1>
+        <p className="text-b1 text-ink-2">{spec.rationale}</p>
       </div>
 
       {spec.referenceMedia && <ReferenceMediaCard media={spec.referenceMedia} />}
 
-      <div className="flex flex-col gap-8 rounded-lg border border-brand-border bg-brand-soft p-16">
-        <span className="text-label uppercase tracking-wide text-brand">Camera setup</span>
-        <p className="text-body-sm text-text-primary">
+      <div className="flex flex-col gap-8 rounded-lg border border-teal-wash bg-teal-wash p-16">
+        <span className="text-b2 font-medium uppercase tracking-wide text-teal">Camera setup</span>
+        <p className="text-b2 text-ink">
           {spec.setup.framingHint ??
             (needed ? `Keep ${needed} in view of the camera.` : "Position yourself in view of the camera.")}
         </p>
-        <p className="text-caption text-text-muted">
+        <p className="text-cap text-ink-3">
           You don't need your whole body in frame — only what this exercise measures.
         </p>
       </div>
 
-      <div className="flex items-start gap-12 rounded-lg border border-border bg-surface p-16">
-        <span aria-hidden className="text-title">
+      <div className="flex items-start gap-12 rounded-lg border border-line bg-surf p-16">
+        <span aria-hidden className="text-h2">
           🔒
         </span>
         <div className="flex flex-col gap-4">
-          <span className="text-body-md text-text-primary">Your camera stays private</span>
-          <p className="text-caption text-text-secondary">
+          <span className="text-b1 font-medium text-ink">Your camera stays private</span>
+          <p className="text-cap text-ink-2">
             Movement is analysed on your device. Your video is never recorded, uploaded, or sent
             anywhere — only counts, angles and scores are saved.
           </p>

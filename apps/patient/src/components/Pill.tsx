@@ -3,12 +3,12 @@ import type { ReactNode } from "react";
 type Tone = "neutral" | "success" | "warning" | "danger" | "pain" | "brand";
 
 const TONE_CLASSES: Record<Tone, string> = {
-  neutral: "bg-subtle text-text-secondary",
-  success: "bg-success-soft text-success",
-  warning: "bg-warning-soft text-warning",
-  danger: "bg-danger-soft text-danger",
-  pain: "bg-pain-soft text-pain",
-  brand: "bg-brand-soft text-brand"
+  neutral: "bg-sunk text-ink-2",
+  success: "bg-ok-wash text-ok",
+  warning: "bg-warn-wash text-warn",
+  danger: "bg-dang-wash text-dang",
+  pain: "bg-pain-wash text-pain",
+  brand: "bg-teal-wash text-teal"
 };
 
 /**
@@ -18,7 +18,7 @@ const TONE_CLASSES: Record<Tone, string> = {
 export function Pill({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center gap-4 px-12 py-4 rounded-pill text-label ${TONE_CLASSES[tone]}`}
+      className={`inline-flex items-center gap-4 px-12 py-4 rounded-pill text-b2 font-medium ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

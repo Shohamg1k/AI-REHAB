@@ -20,20 +20,20 @@ export function SafetyBlockBanner({
   const isEscalate = verdict.verdict === "escalate";
 
   return (
-    <div className="bg-danger-soft border-2 border-danger rounded-lg p-20 flex flex-col gap-12" role="alert">
+    <div className="bg-dang-wash border-2 border-dang rounded-lg p-20 flex flex-col gap-12" role="alert">
       <div className="flex items-center gap-8">
-        <span aria-hidden className="text-heading-24">
+        <span aria-hidden className="text-h1">
           ⚠️
         </span>
-        <span className="text-title text-danger">
+        <span className="text-h2 text-dang">
           {isEscalate ? "Stop and check in with your clinician" : "Let's pause this exercise"}
         </span>
       </div>
 
-      <p className="text-body text-text-primary">Reason: {verdict.reason}</p>
+      <p className="text-b1 text-ink">Reason: {verdict.reason}</p>
 
       {verdict.threshold && (
-        <p className="text-caption text-text-muted">
+        <p className="text-cap text-ink-3">
           {verdict.threshold.name}: observed {verdict.threshold.observed.toFixed(1)}, limit{" "}
           {verdict.threshold.limit.toFixed(1)}
         </p>
@@ -43,7 +43,7 @@ export function SafetyBlockBanner({
         <Button variant="danger" onClick={onEndExercise}>
           End this exercise
         </Button>
-        <p className="text-caption text-text-muted">
+        <p className="text-cap text-ink-3">
           {isEscalate
             ? "If this is a medical emergency, contact emergency services. Otherwise, message your clinician before your next session."
             : "You can try a different exercise, or come back to this one later."}

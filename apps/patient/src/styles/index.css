@@ -1,9 +1,52 @@
+/*
+ * IBM Plex, self-hosted via @fontsource rather than linked from Google
+ * Fonts. The design source links the CDN, but this app deliberately serves
+ * every asset from its own origin (see the pose-asset staging script): a
+ * product whose pitch is "your video never leaves the device" should not
+ * announce each session start to fonts.gstatic.com, and it has to keep
+ * working offline and behind a proxy that blocks that host.
+ *
+ * Only the weights the design system actually uses — 400/500/600 sans,
+ * 500 mono — rather than every weight in the family.
+ */
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-page text-text-primary font-sans antialiased;
+    @apply bg-page font-sans text-b1 text-ink antialiased;
+  }
+}
+
+@layer components {
+  /*
+   * The design system's own primitives, expressed once here rather than as
+   * a long class string repeated on every screen. Names match the design
+   * source (`figma-svg/_source/v2.html`) so a screen can be diffed against
+   * its artboard by reading class names.
+   */
+  .ds-card {
+    @apply rounded-md bg-surf p-14;
+  }
+  .ds-card-hair {
+    @apply rounded-md bg-surf p-14 shadow-hair;
+  }
+  .ds-card-lift {
+    @apply rounded-md bg-surf p-14 shadow-lift;
+  }
+  .ds-sunk {
+    @apply rounded-md bg-sunk p-14;
+  }
+  .ds-label {
+    @apply font-mono text-lb uppercase text-ink-3;
+  }
+  .ds-chip {
+    @apply inline-flex items-center gap-5 rounded-xs px-8 py-4 font-mono text-chip;
   }
 }

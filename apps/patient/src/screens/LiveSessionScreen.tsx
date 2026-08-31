@@ -43,13 +43,13 @@ export function LiveSessionScreen({
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-12 px-16 py-12">
       <div className="flex items-baseline justify-between gap-8">
-        <h1 className="truncate text-title text-text-primary">{spec.displayName}</h1>
-        <span className="shrink-0 text-caption text-text-muted">Set 1 of 1</span>
+        <h1 className="truncate text-h2 text-ink">{spec.displayName}</h1>
+        <span className="shrink-0 text-cap text-ink-3">Set 1 of 1</span>
       </div>
 
-      <div className="h-1.5 w-full overflow-hidden rounded-pill bg-subtle">
+      <div className="h-1.5 w-full overflow-hidden rounded-pill bg-sunk">
         <div
-          className="h-full rounded-pill bg-brand transition-[width] duration-500 ease-out"
+          className="h-full rounded-pill bg-teal transition-[width] duration-500 ease-out"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
@@ -59,7 +59,7 @@ export function LiveSessionScreen({
         signalStatus={signalStatus}
         attachVideo={attachVideo}
         topLeft={
-          <span className="rounded-pill bg-black/45 px-12 py-4 text-label text-white backdrop-blur-sm">
+          <span className="rounded-pill bg-black/45 px-12 py-4 text-b2 font-medium text-white backdrop-blur-sm">
             {reps.length} / {TARGET_REPS} reps
           </span>
         }
@@ -67,7 +67,7 @@ export function LiveSessionScreen({
           trackingLost && !isBlocked ? (
             <div
               role="status"
-              className="flex items-center gap-8 rounded-md bg-amber-500/95 px-12 py-8 text-body-sm text-white shadow-lg backdrop-blur-sm"
+              className="flex items-center gap-8 rounded-md bg-amber-500/95 px-12 py-8 text-b2 text-white shadow-lg backdrop-blur-sm"
             >
               <span aria-hidden>⚠</span>
               <span>{primaryGuidance(captureQuality, signalStatus)}</span>
@@ -75,7 +75,7 @@ export function LiveSessionScreen({
           ) : activeCue ? (
             <div
               role="status"
-              className="flex items-center gap-8 rounded-md bg-brand/95 px-12 py-8 text-body-md text-white shadow-lg backdrop-blur-sm"
+              className="flex items-center gap-8 rounded-md bg-teal/95 px-12 py-8 text-b1 font-medium text-white shadow-lg backdrop-blur-sm"
             >
               <span aria-hidden>💬</span>
               <span>{activeCue.text}</span>
@@ -90,35 +90,35 @@ export function LiveSessionScreen({
 
       {!isBlocked && (
         <div className="grid grid-cols-2 gap-12">
-          <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-16">
-            <span className="text-label uppercase tracking-wide text-text-secondary">Reps</span>
-            <span className="text-metric tabular-nums text-text-primary">
+          <div className="flex flex-col gap-2 rounded-lg border border-line bg-surf p-16">
+            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Reps</span>
+            <span className="text-metric tabular-nums text-ink">
               {reps.length}
-              <span className="text-body-sm text-text-muted"> / {TARGET_REPS}</span>
+              <span className="text-b2 text-ink-3"> / {TARGET_REPS}</span>
             </span>
           </div>
-          <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-16">
-            <span className="text-label uppercase tracking-wide text-text-secondary">
+          <div className="flex flex-col gap-2 rounded-lg border border-line bg-surf p-16">
+            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
               Last rep
             </span>
             {trackingLost ? (
-              <span className="text-body-md text-amber-600">Tracking paused</span>
+              <span className="text-b1 font-medium text-amber-600">Tracking paused</span>
             ) : !lastRep ? (
-              <span className="text-body-md text-text-muted">—</span>
+              <span className="text-b1 font-medium text-ink-3">—</span>
             ) : scored ? (
-              <span className="text-metric tabular-nums text-text-primary">
+              <span className="text-metric tabular-nums text-ink">
                 {Math.round(lastRep.score.score)}
-                <span className="text-body-sm text-text-muted"> / 100</span>
+                <span className="text-b2 text-ink-3"> / 100</span>
               </span>
             ) : (
-              <span className="text-body-sm text-text-muted">Not enough signal to score</span>
+              <span className="text-b2 text-ink-3">Not enough signal to score</span>
             )}
           </div>
         </div>
       )}
 
       {!isBlocked && !trackingLost && lastRep && scored && lastRep.score.reason && (
-        <p className="text-caption text-text-muted">{lastRep.score.reason}</p>
+        <p className="text-cap text-ink-3">{lastRep.score.reason}</p>
       )}
 
       <div className="mt-auto flex flex-col gap-8 pt-4">

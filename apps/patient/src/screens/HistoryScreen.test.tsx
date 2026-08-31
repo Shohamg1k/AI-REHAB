@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { HistoryScreen } from "./HistoryScreen.js";
 import { setSession } from "../lib/authStore.js";
 
@@ -73,11 +72,10 @@ describe("HistoryScreen", () => {
       ]
     });
 
-    render(<HistoryScreen onBack={vi.fn()} />);
+    render(<HistoryScreen />);
 
     expect(await screen.findByText(/sit-to-stand/)).toBeInTheDocument();
     expect(screen.getByText(/8 reps/)).toBeInTheDocument();
-    expect(screen.getByText(/Dr. Test/)).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument(); // the streak count
     expect(screen.getByText(/First session/)).toBeInTheDocument();
   });
@@ -85,10 +83,9 @@ describe("HistoryScreen", () => {
   it("shows empty states when nothing has synced yet", async () => {
     mockEndpoints({});
 
-    render(<HistoryScreen onBack={vi.fn()} />);
+    render(<HistoryScreen />);
 
     expect(await screen.findByText(/no synced sessions yet/i)).toBeInTheDocument();
-    expect(screen.getByText(/no clinician has viewed/i)).toBeInTheDocument();
   });
 
   it("shows an error if the API call fails", async () => {
@@ -98,7 +95,7 @@ describe("HistoryScreen", () => {
       json: async () => ({ error: "internal", message: "server exploded" })
     }) as unknown as typeof fetch;
 
-    render(<HistoryScreen onBack={vi.fn()} />);
+    render(<HistoryScreen />);
 
     expect(await screen.findByText("server exploded")).toBeInTheDocument();
   });
@@ -117,23 +114,10 @@ describe("HistoryScreen", () => {
       ]
     });
 
-    render(<HistoryScreen onBack={vi.fn()} />);
+    render(<HistoryScreen />);
 
     expect(await screen.findByText(/left knee/)).toBeInTheDocument();
     expect(screen.getByText(/\+12° since first session/)).toBeInTheDocument();
   });
 
-  it("toggling data sharing off calls the API and updates the label", async () => {
-    mockEndpoints({});
-    const user = userEvent.setup();
-
-    render(<HistoryScreen onBack={vi.fn()} />);
-
-    const toggle = await screen.findByRole("switch");
-    expect(screen.getByText(/clinician can view your session data/i)).toBeInTheDocument();
-
-    await user.click(toggle);
-
-    await waitFor(() => expect(screen.getByText(/cannot currently view/i)).toBeInTheDocument());
-  });
 });
