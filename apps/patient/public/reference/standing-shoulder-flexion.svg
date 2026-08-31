@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Standing shoulder flexion: arm raised straight forward to shoulder height, elbow kept straight">
+  <rect width="320" height="200" fill="#ECF0F1"/>
+  <!-- standing body, side view -->
+  <g stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none">
+    <circle cx="140" cy="46" r="12" fill="#0D6E68" stroke="none"/>
+    <path d="M140 58 L140 116"/>
+    <path d="M140 116 L134 172"/>
+    <path d="M140 116 L148 172"/>
+  </g>
+  <!-- start: arm hanging at the side -->
+  <path d="M140 72 L140 126" stroke="#C2CCCD" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- end: arm raised straight forward to shoulder height -->
+  <path d="M140 72 L212 72" stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <circle cx="140" cy="72" r="6" fill="#FFC24D"/>
+  <circle cx="212" cy="72" r="6" fill="#FFC24D"/>
+  <!-- motion arc, forward and up -->
+  <path d="M152 122 A 56 56 0 0 0 196 82" stroke="#0D6E68" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+  <path d="M190 88 L197 80 L203 88" stroke="#0D6E68" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- shoulder-height guide -->
+  <path d="M112 72 L232 72" stroke="#9CCFC8" stroke-width="2" stroke-dasharray="3 5"/>
+  <text x="228" y="62" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0D6E68">Shoulder height</text>
+  <text x="20" y="182" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="#47575A">Forward, not out to the side — elbow straight</text>
+</svg>

@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Standing shoulder abduction: arm lifted out to the side up to shoulder height">
-  <rect width="320" height="200" fill="#F6F8FB"/>
+  <rect width="320" height="200" fill="#ECF0F1"/>
   <!-- body -->
-  <g stroke="#0F766E" stroke-width="6" stroke-linecap="round" fill="none">
-    <circle cx="150" cy="46" r="12" fill="#0F766E" stroke="none"/>
+  <g stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none">
+    <circle cx="150" cy="46" r="12" fill="#0D6E68" stroke="none"/>
     <path d="M150 58 L150 116"/>
     <path d="M150 116 L134 172"/>
     <path d="M150 116 L166 172"/>
     <path d="M150 72 L124 110"/>
   </g>
   <!-- start arm, muted -->
-  <path d="M150 72 L176 110" stroke="#CBD5E1" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M150 72 L176 110" stroke="#C2CCCD" stroke-width="6" stroke-linecap="round" fill="none"/>
   <!-- raised arm, active -->
-  <path d="M150 72 L214 72" stroke="#0F766E" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <circle cx="150" cy="72" r="6" fill="#F59E0B"/>
-  <circle cx="214" cy="72" r="6" fill="#F59E0B"/>
+  <path d="M150 72 L214 72" stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <circle cx="150" cy="72" r="6" fill="#FFC24D"/>
+  <circle cx="214" cy="72" r="6" fill="#FFC24D"/>
   <!-- motion arc -->
-  <path d="M186 106 A 40 40 0 0 0 194 78" stroke="#0F766E" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
-  <path d="M188 84 L194 76 L200 84" stroke="#0F766E" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M186 106 A 40 40 0 0 0 194 78" stroke="#0D6E68" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+  <path d="M188 84 L194 76 L200 84" stroke="#0D6E68" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- shoulder-height guide -->
   <path d="M120 72 L232 72" stroke="#9CCFC8" stroke-width="2" stroke-dasharray="3 5"/>
-  <text x="228" y="60" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#0F766E">Shoulder</text>
-  <text x="228" y="76" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#0F766E">height</text>
-  <text x="228" y="94" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#64748B">no higher</text>
+  <text x="228" y="60" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0D6E68">Shoulder</text>
+  <text x="228" y="76" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0D6E68">height</text>
+  <text x="228" y="94" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="#64748B">no higher</text>
 </svg>

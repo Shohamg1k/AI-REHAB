@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Seated elbow flexion: upper arm stays at the side while the forearm bends up toward the shoulder">
+  <rect width="320" height="200" fill="#ECF0F1"/>
+  <!-- seated body, side view -->
+  <g stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none">
+    <circle cx="150" cy="44" r="12" fill="#0D6E68" stroke="none"/>
+    <path d="M150 56 L150 114"/>
+    <!-- thigh forward, shin down: seated -->
+    <path d="M150 114 L206 114"/>
+    <path d="M206 114 L206 168"/>
+    <!-- upper arm hangs at the side and stays there -->
+    <path d="M150 70 L150 112"/>
+  </g>
+  <!-- start: forearm hanging straight -->
+  <path d="M150 112 L150 156" stroke="#C2CCCD" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- end: forearm bent up toward the shoulder -->
+  <path d="M150 112 L182 80" stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- elbow (the measured joint) and wrist -->
+  <circle cx="150" cy="112" r="6" fill="#FFC24D"/>
+  <circle cx="182" cy="80" r="6" fill="#FFC24D"/>
+  <!-- motion arc, hand travelling up -->
+  <path d="M156 154 A 46 46 0 0 0 190 96" stroke="#0D6E68" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+  <path d="M184 102 L191 94 L197 102" stroke="#0D6E68" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="20" y="34" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0D6E68">Upper arm stays still</text>
+  <text x="20" y="182" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="#47575A">Bend up, then straighten fully</text>
+</svg>
