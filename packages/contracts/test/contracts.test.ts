@@ -56,8 +56,8 @@ describe("JointAngles", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("covers all 13 upstream-compatible joints plus trunk", () => {
-    expect(JOINT_NAMES).toHaveLength(13);
+  it("covers the 12 upstream-compatible joints plus trunk and neck", () => {
+    expect(JOINT_NAMES).toHaveLength(14);
     expect(JOINT_NAMES).toContain("trunk");
   });
 });

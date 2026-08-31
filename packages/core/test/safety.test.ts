@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { JointAngles, SafetyThresholds } from "@ai-rehab/contracts";
 import { evaluateSafety } from "../src/index.js";
 
-function angles(overrides: Partial<JointAngles["angles"]> = {}, trunkLean = 2): JointAngles {
+function angles(
+  overrides: Partial<JointAngles["angles"]> = {},
+  trunkLean: number | null = 2
+): JointAngles {
   // 120° sits comfortably outside both the min(60)/max(185) caution bands
   // (caution starts at 66° and 166.5° respectively) so the "allow" case is
   // unambiguous; tests that want to exercise a threshold override this.
@@ -121,5 +124,36 @@ describe("evaluateSafety — E1 real-time gate", () => {
       0
     );
     expect(verdict.verdict).toBe("allow");
+  });
+});
+
+
+/**
+ * Regression test for a fail-unsafe bug.
+ *
+ * `trunkLean` used to default to 0 when the torso landmarks were not
+ * usable, and 0 reads as "perfectly upright". The rule compares
+ * `observed > limit`, so losing sight of the hips mid-set silently disabled
+ * the trunk-lean block *and* reported ideal posture — the failure mode was
+ * invisible in exactly the situation it existed to catch. It is now null,
+ * and null is not a number that can quietly satisfy a comparison.
+ */
+describe("trunk lean that could not be measured", () => {
+  it("does not report an unmeasurable trunk as upright", () => {
+    const unknown = angles({}, null);
+    expect(unknown.trunkLean).toBeNull();
+    expect(unknown.trunkLean).not.toBe(0);
+  });
+
+  it("returns no trunk-lean verdict rather than an implicit pass", () => {
+    const verdict = evaluateSafety({ angles: angles({}, null), consecutiveFailedReps: 0 }, thresholds, null, 0);
+    expect(verdict.ruleId).not.toBe("max_trunk_lean");
+    expect(verdict.ruleId).not.toBe("approaching_max_trunk_lean");
+  });
+
+  it("still blocks once the trunk becomes measurable and is past the limit", () => {
+    const verdict = evaluateSafety({ angles: angles({}, 45), consecutiveFailedReps: 0 }, thresholds, null, 0);
+    expect(verdict.verdict).toBe("block");
+    expect(verdict.ruleId).toBe("max_trunk_lean");
   });
 });

@@ -6,9 +6,17 @@ import {
 } from "./landmarks.js";
 
 /**
- * The 12 joints upstream OpenRehabAgent's `JOINT_INDEX` covers, plus `trunk`.
- * Deliberately the same set so the MediaPipe → upstream adapter is a pure
- * lookup table rather than a translation layer. See docs/UPSTREAM.md §1.4.
+ * The 12 joints upstream OpenRehabAgent's `JOINT_INDEX` covers, plus `trunk`
+ * and `neck`. The first 12 are deliberately the same set so the MediaPipe →
+ * upstream adapter stays a pure lookup table (docs/UPSTREAM.md §1.4);
+ * `trunk` and `neck` are ours, because neither is a three-point joint and
+ * upstream has no equivalent.
+ *
+ * `neck` measures how far the head is off the torso axis, in 3D — see
+ * `computeJointAngles`. It is a *magnitude*, not a direction: a head tilted
+ * 20° sideways and a head poked 20° forward read the same. Exercises using
+ * it must therefore constrain direction through their setup and cues, not
+ * expect the angle to distinguish it.
  */
 export const JOINT_NAMES = [
   "left_shoulder",
@@ -23,7 +31,8 @@ export const JOINT_NAMES = [
   "right_ankle",
   "left_wrist",
   "right_wrist",
-  "trunk"
+  "trunk",
+  "neck"
 ] as const;
 
 export const JointNameSchema = z.enum(JOINT_NAMES);
@@ -59,7 +68,8 @@ export const JOINT_TO_LANDMARKS: Record<JointName, readonly PoseLandmarkName[]> 
   right_ankle: ["RIGHT_KNEE", "RIGHT_ANKLE", "RIGHT_FOOT_INDEX"],
   left_wrist: ["LEFT_ELBOW", "LEFT_WRIST", "LEFT_INDEX"],
   right_wrist: ["RIGHT_ELBOW", "RIGHT_WRIST", "RIGHT_INDEX"],
-  trunk: ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+  trunk: ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"],
+  neck: ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
 };
 
 /** Union of the landmarks every listed joint needs, de-duplicated, in MediaPipe index order. */
@@ -155,6 +165,15 @@ export const JointAnglesSchema = z.object({
   angles: partialMapOf(JOINT_NAMES, z.number()),
   confidence: partialMapOf(JOINT_NAMES, z.number().min(0).max(1)),
   symmetry: partialMapOf(SYMMETRY_KEYS, z.number()),
-  trunkLean: z.number()
+  /**
+   * Null when the torso landmarks were not usable this frame — *not* 0.
+   *
+   * It used to default to 0, which reads as "perfectly upright". The
+   * trunk-lean safety rule compares `observed > limit`, so an unmeasurable
+   * trunk silently could never trip it: losing sight of the hips mid-set
+   * disabled the rule and reported ideal posture. Unknown and upright are
+   * different facts and the type now says so.
+   */
+  trunkLean: z.number().nullable()
 });
 export type JointAngles = z.infer<typeof JointAnglesSchema>;

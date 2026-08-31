@@ -21,6 +21,19 @@ export default defineConfig({
     // just for the one app that renders React components.
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
+    /*
+     * Well above vitest's 5s default, because several apps/api tests create
+     * three or four accounts and bcrypt is *deliberately* slow — that cost is
+     * the security property, not waste.
+     *
+     * They passed at the default only while the rest of the suite was light
+     * enough to leave them a core. Adding upper-body exercises made the
+     * fixture replay heavier, and the same unchanged tests started timing out
+     * under contention while passing in isolation. Raising the budget fixes
+     * the actual problem; trimming real coverage to fit a default would not.
+     */
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     passWithNoTests: false
   }
 });
