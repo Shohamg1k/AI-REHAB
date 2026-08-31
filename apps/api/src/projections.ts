@@ -2,6 +2,10 @@ import type {
   AdherenceDay,
   BaselineEntry,
   JointName,
+  ProgressReport,
+  ReportObservation,
+  ReportPainEntry,
+  ReportSafetyEvent,
   RomTrendSeries,
   SessionEvent,
   SessionSummary
@@ -176,4 +180,163 @@ export function computeRomTrend(sessions: StoredSession[]): RomTrendSeries[] {
   }
 
   return [...seriesByExercise.values()].flatMap((byJoint) => [...byJoint.values()]);
+}
+
+
+/**
+ * F1 — the periodic report, derived from the same event log as everything
+ * else rather than stored. See the doc comment on `ProgressReport`.
+ *
+ * `periodStart`/`periodEnd` are passed in rather than computed from a clock:
+ * this file is a pure projection, and a function whose output depends on
+ * `Date.now()` cannot be tested against a fixture.
+ */
+export function computeReport(
+  sessions: StoredSession[],
+  input: { patientId: string; patientDisplayName: string; periodStart: string; periodEnd: string }
+): ProgressReport {
+  const inPeriod = sessions.filter((session) => {
+    const started = sortedEvents(session).find((e) => e.type === "session_started");
+    if (started?.type !== "session_started") return false;
+    return started.wallClock >= input.periodStart && started.wallClock <= input.periodEnd;
+  });
+
+  const exercises = new Set<string>();
+  const pain: ReportPainEntry[] = [];
+  const safetyEvents: ReportSafetyEvent[] = [];
+  let totalReps = 0;
+  let scoredReps = 0;
+  let scoreSum = 0;
+
+  for (const session of inPeriod) {
+    const events = sortedEvents(session);
+    const started = events.find((e) => e.type === "session_started");
+    const at = started?.type === "session_started" ? started.wallClock : input.periodStart;
+
+    for (const event of events) {
+      if (event.type === "exercise_started") exercises.add(event.exerciseId);
+      if (event.type === "rep_completed") {
+        totalReps += 1;
+        if (event.score.confidence >= FORM_SCORE_CONFIDENCE_FLOOR) {
+          scoredReps += 1;
+          scoreSum += event.score.score;
+        }
+      }
+      // B6, and the explicit rule on `PainSignalSchema`: an inferred signal
+      // must never be shown to anyone as a pain value — its only legitimate
+      // use is choosing which question to ask. So the report reads
+      // `selfReported.severity` and skips anything the patient did not
+      // answer, rather than reading `recordedSeverity`, which would silently
+      // start reporting inferred numbers the moment B1 lands.
+      if (event.type === "pain_reported" && event.signal.selfReported) {
+        pain.push({
+          at,
+          region: event.signal.region ?? null,
+          severity: event.signal.selfReported.severity
+        });
+      }
+      if (
+        event.type === "safety_verdict" &&
+        (event.verdict.verdict === "block" || event.verdict.verdict === "escalate")
+      ) {
+        safetyEvents.push({ at, verdict: event.verdict.verdict, reason: event.verdict.reason });
+      }
+    }
+  }
+
+  const adherence = computeAdherence(inPeriod);
+  const avgFormScore = scoredReps > 0 ? Math.round((scoreSum / scoredReps) * 10) / 10 : null;
+
+  return {
+    patientId: input.patientId,
+    patientDisplayName: input.patientDisplayName,
+    periodStart: input.periodStart,
+    periodEnd: input.periodEnd,
+    sessionCount: inPeriod.length,
+    activeDays: adherence.length,
+    totalReps,
+    scoredReps,
+    avgFormScore,
+    exercisesPerformed: [...exercises],
+    adherence,
+    pain,
+    safetyEvents,
+    observations: buildObservations({
+      sessionCount: inPeriod.length,
+      activeDays: adherence.length,
+      totalReps,
+      scoredReps,
+      avgFormScore,
+      pain,
+      safetyEvents
+    })
+  };
+}
+
+/**
+ * Plain-language observations. Each carries the `basis` it was drawn from,
+ * so a clinician reading "form is holding up" can see it means "average 84
+ * across 22 scored reps" and not a judgement the system formed on its own
+ * (CLAUDE.md invariant 4).
+ *
+ * Deliberately conservative: it reports counts and averages and stops. It
+ * does not say whether the patient is improving clinically, because nothing
+ * here is competent to judge that.
+ */
+function buildObservations(d: {
+  sessionCount: number;
+  activeDays: number;
+  totalReps: number;
+  scoredReps: number;
+  avgFormScore: number | null;
+  pain: ReportPainEntry[];
+  safetyEvents: ReportSafetyEvent[];
+}): ReportObservation[] {
+  const out: ReportObservation[] = [];
+
+  if (d.sessionCount === 0) {
+    return [
+      {
+        text: "No sessions were recorded in this period.",
+        basis: "No session_started events fell inside the reporting window."
+      }
+    ];
+  }
+
+  out.push({
+    text: `${d.sessionCount} session${d.sessionCount === 1 ? "" : "s"} across ${d.activeDays} day${d.activeDays === 1 ? "" : "s"}.`,
+    basis: "Counted from synced session events."
+  });
+
+  if (d.avgFormScore !== null) {
+    out.push({
+      text: `Average form score ${d.avgFormScore} across ${d.scoredReps} scored rep${d.scoredReps === 1 ? "" : "s"}.`,
+      basis: "Mean of per-rep scores that cleared the tracking-confidence floor."
+    });
+  }
+
+  const unscored = d.totalReps - d.scoredReps;
+  if (unscored > 0) {
+    out.push({
+      text: `${unscored} of ${d.totalReps} reps could not be scored reliably.`,
+      basis: "Tracking confidence fell below the floor — usually framing or lighting, not performance."
+    });
+  }
+
+  if (d.pain.length > 0) {
+    const worst = d.pain.reduce((a, b) => (b.severity > a.severity ? b : a));
+    out.push({
+      text: `Pain was reported ${d.pain.length} time${d.pain.length === 1 ? "" : "s"}, highest ${worst.severity} of 5${worst.region ? ` in the ${worst.region.replace(/_/g, " ")}` : ""}.`,
+      basis: "Patient self-report. Never inferred from movement."
+    });
+  }
+
+  if (d.safetyEvents.length > 0) {
+    out.push({
+      text: `The safety gate stopped a set ${d.safetyEvents.length} time${d.safetyEvents.length === 1 ? "" : "s"}.`,
+      basis: d.safetyEvents.map((e) => e.reason).join(" · ")
+    });
+  }
+
+  return out;
 }

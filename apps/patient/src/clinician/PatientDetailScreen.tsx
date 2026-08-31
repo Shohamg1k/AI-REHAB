@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import type { SessionSummary } from "@ai-rehab/contracts";
+import type { ProgressReport, SessionSummary } from "@ai-rehab/contracts";
 import { EXERCISES } from "@ai-rehab/exercises";
-import { ApiError, createProgram, fetchPatientSessions } from "../lib/api.js";
+import { ApiError, createProgram, fetchPatientReport, fetchPatientSessions } from "../lib/api.js";
+import { ReportCard } from "../components/ReportCard.js";
+import { MessageThread } from "../components/MessageThread.js";
 import { Button } from "../components/Button.js";
 
 type Selection = Record<string, { selected: boolean; sets: number; reps: number }>;
@@ -18,7 +20,18 @@ function initialSelection(): Selection {
  * blocked exercise surfaces here as a specific, named rejection, not a
  * generic failure.
  */
-export function PatientDetailScreen({ patientId, onBack }: { patientId: string; onBack: () => void }) {
+export function PatientDetailScreen({
+  patientId,
+  clinicianId,
+  onBack
+}: {
+  patientId: string;
+  /** Needed to tell the clinician's own messages apart from the patient's. */
+  clinicianId: string;
+  onBack: () => void;
+}) {
+  const [report, setReport] = useState<ProgressReport | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selection, setSelection] = useState<Selection>(initialSelection);
@@ -27,6 +40,17 @@ export function PatientDetailScreen({ patientId, onBack }: { patientId: string; 
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    // A 403 here is expected and meaningful: the patient has paused sharing.
+    // It is surfaced as their choice, not as a failure.
+    fetchPatientReport(patientId)
+      .then((r) => {
+        setReport(r);
+        setReportError(null);
+      })
+      .catch((err) =>
+        setReportError(err instanceof ApiError ? err.message : "Couldn't load this report.")
+      );
+
     fetchPatientSessions(patientId)
       .then(setSessions)
       .catch((err) => setError(err instanceof ApiError ? err.message : "Couldn't load this patient's sessions."));
@@ -94,6 +118,23 @@ export function PatientDetailScreen({ patientId, onBack }: { patientId: string; 
             ))}
           </ul>
         )}
+      </div>
+
+      <div className="ds-card-hair">
+        {report ? (
+          <ReportCard report={report} />
+        ) : (
+          <p className="text-b2 text-ink-2">{reportError ?? "Loading report…"}</p>
+        )}
+      </div>
+
+      <div className="ds-card-hair flex flex-col gap-10">
+        <span className="ds-label">Messages</span>
+        <MessageThread
+          currentUserId={clinicianId}
+          patientId={patientId}
+          emptyHint="No messages yet. Anything you send appears in the patient's app."
+        />
       </div>
 
       <div className="rounded-lg border border-line bg-surf p-16">

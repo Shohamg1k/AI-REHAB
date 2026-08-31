@@ -3,6 +3,8 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  Message,
+  ProgressReport,
   BodyRegion,
   Program,
   ProgramExercise,
@@ -15,6 +17,7 @@ import type {
 import {
   computeAdherence,
   computeBaseline,
+  computeReport,
   computeRomTrend,
   summariseSessions,
   type StoredSession
@@ -24,6 +27,8 @@ import { ConflictError, NotFoundError, type Store } from "./types.js";
 const INVITE_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 type StoredUser = User & { passwordHash: string };
+/** Messages carry their tenant internally; `Message` itself does not expose it. */
+type StoredMessage = Message & { tenantId: string };
 
 /**
  * A complete, correct implementation of `Store` — not a stub. See the
@@ -41,6 +46,7 @@ export class MemoryStore implements Store {
   /** userId -> sessionId -> StoredSession */
   private sessions = new Map<string, Map<string, StoredSession>>();
   private auditLog: AuditEntry[] = [];
+  private messages: StoredMessage[] = [];
 
   async createTenant(name: string): Promise<Tenant> {
     const tenant: Tenant = { id: randomUUID(), name, createdAt: new Date().toISOString() };
@@ -257,6 +263,48 @@ export class MemoryStore implements Store {
     void tenantId;
     const userSessions = this.sessions.get(userId);
     return computeRomTrend(userSessions ? [...userSessions.values()] : []);
+  }
+
+  async getReport(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport> {
+    const patient = await this.findUserById(tenantId, patientId);
+    const userSessions = this.sessions.get(patientId);
+    return computeReport(userSessions ? [...userSessions.values()] : [], {
+      patientId,
+      patientDisplayName: patient?.displayName ?? "Unknown patient",
+      periodStart: period.start,
+      periodEnd: period.end
+    });
+  }
+
+  async sendMessage(input: {
+    tenantId: string;
+    patientId: string;
+    senderId: string;
+    body: string;
+  }): Promise<Message> {
+    const sender = this.users.get(input.senderId);
+    const message: Message = {
+      id: randomUUID(),
+      patientId: input.patientId,
+      senderId: input.senderId,
+      senderDisplayName: sender?.displayName ?? "Unknown",
+      senderRole: sender?.role ?? "patient",
+      body: input.body,
+      createdAt: new Date().toISOString()
+    };
+    this.messages.push({ ...message, tenantId: input.tenantId });
+    return message;
+  }
+
+  async listMessages(tenantId: string, patientId: string): Promise<Message[]> {
+    return this.messages
+      .filter((m) => m.tenantId === tenantId && m.patientId === patientId)
+      .map(({ tenantId: _tenantId, ...m }) => m)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
   async recordAccess(input: {

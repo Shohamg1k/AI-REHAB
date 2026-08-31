@@ -2,6 +2,8 @@ import type {
   AdherenceDay,
   AuditEntry,
   BaselineEntry,
+  Message,
+  ProgressReport,
   BodyRegion,
   Program,
   ProgramExercise,
@@ -103,6 +105,22 @@ export interface Store {
   getAdherence(tenantId: string, userId: string): Promise<AdherenceDay[]>;
   getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]>;
   getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]>;
+  /** F1 — computed on read, never stored. See the doc comment on `ProgressReport`. */
+  getReport(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport>;
+
+  // --- messages (F9) ---
+  /** A thread belongs to one patient; `senderId` may be that patient or their clinician. */
+  sendMessage(input: {
+    tenantId: string;
+    patientId: string;
+    senderId: string;
+    body: string;
+  }): Promise<Message>;
+  listMessages(tenantId: string, patientId: string): Promise<Message[]>;
 
   // --- audit (G5 / F5) ---
   recordAccess(input: {

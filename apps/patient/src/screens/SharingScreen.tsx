@@ -4,6 +4,7 @@ import { ApiError, fetchAuditLog, fetchMe, joinWithCode, updateDataSharing } fro
 import { setSession } from "../lib/authStore.js";
 import { Button } from "../components/Button.js";
 import { Icon } from "../components/Icon.js";
+import { MessageThread } from "../components/MessageThread.js";
 
 /**
  * M10 — Sharing & privacy. G5's consent half and access log, on their own
@@ -239,14 +240,13 @@ export function SharingScreen({
           </div>
         )}
 
-        {signedIn && (
-          <div className="ds-card-hair flex flex-col gap-9">
-            <span className="ds-label">Not built yet</span>
-            <p className="text-b2 text-ink-2">
-              Clinician reports and messaging are designed but not implemented. Nothing on this
-              screen sends or receives a message, and no report is generated — see
-              docs/STATUS.md.
-            </p>
+        {signedIn && user && (
+          <div className="ds-card-hair flex flex-col gap-10">
+            <span className="ds-label">Messages with your clinician</span>
+            <MessageThread
+              currentUserId={user.id}
+              emptyHint="No messages yet. You can ask your clinician about an exercise, or tell them how something felt."
+            />
           </div>
         )}
       </div>

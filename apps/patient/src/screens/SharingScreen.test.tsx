@@ -35,6 +35,7 @@ function mockEndpoints(auditLog: unknown[] = [], me = ME) {
         json: async () => ({ ...me, dataSharingEnabled: body.dataSharingEnabled })
       });
     }
+    if (url.includes("/messages")) return Promise.resolve({ ok: true, json: async () => [] });
     if (url.endsWith("/auth/me")) return Promise.resolve({ ok: true, json: async () => me });
     return Promise.reject(new Error(`unexpected fetch: ${url}`));
   }) as unknown as typeof fetch;

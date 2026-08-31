@@ -202,3 +202,29 @@ export const TENANT_SCOPED_TABLES = [
 ] as const;
 
 export type TenantScopedTable = (typeof TENANT_SCOPED_TABLES)[number];
+
+/**
+ * F9 — patient/clinician messages. A thread belongs to one patient; a
+ * clinician posts into it. Tenant-scoped like everything else, with its own
+ * RLS policy in the migration.
+ */
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    senderId: uuid("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (t) => ({
+    threadIdx: index("messages_thread_idx").on(t.tenantId, t.patientId, t.createdAt)
+  })
+);
