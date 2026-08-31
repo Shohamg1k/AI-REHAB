@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import type { BodyRegion, FormScore, RepEvent, User } from "@ai-rehab/contracts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { BodyRegion, FormScore, Program, RepEvent, User } from "@ai-rehab/contracts";
 import { getExerciseSpec } from "@ai-rehab/exercises";
 import { readRestoredScreen, writeRestoredScreen, type PersistedScreen } from "./lib/restoreScreen.js";
 import { DisclaimerBar } from "./components/DisclaimerBar.js";
@@ -14,16 +14,19 @@ import { ClinicianApp } from "./clinician/ClinicianApp.js";
 import { BottomNav, type NavTab } from "./components/BottomNav.js";
 import { SharingScreen } from "./screens/SharingScreen.js";
 import { ProgramScreen } from "./screens/ProgramScreen.js";
+import { RoutineSetupScreen } from "./screens/RoutineSetupScreen.js";
+import { hasChosenRoutine, loadRoutine, routineExercises, saveRoutine } from "./lib/routine.js";
 import { appendEvent } from "./lib/db.js";
 import { completedExercisesToday } from "./lib/localHistory.js";
 import { syncPendingSessions, syncSession } from "./lib/sync.js";
 import { clearSession, getSession } from "./lib/authStore.js";
-import { isApiConfigured } from "./lib/api.js";
+import { fetchMyProgram, isApiConfigured } from "./lib/api.js";
 
 export type Screen =
   | "welcome"
   | "auth"
   | "today"
+  | "routine-setup"
   | "session"
   | "pain-check-in"
   | "summary"
@@ -78,6 +81,46 @@ export default function App() {
   const [painReport, setPainReport] = useState<{ region: BodyRegion | null; severity: number } | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(() => getSession()?.user ?? null);
   const [completedToday, setCompletedToday] = useState<string[]>([]);
+  // Bumped when the routine is edited, so Today re-reads it without a reload.
+  const [routineVersion, setRoutineVersion] = useState(0);
+  const [program, setProgram] = useState<Program | null>(null);
+
+  useEffect(() => {
+    // A clinician's prescription outranks the patient's own routine for what
+    // Today asks them to do — it is a clinical instruction that passed the
+    // E5 contraindication check before it was assigned. Failing to load it
+    // falls back to the routine rather than to an empty screen.
+    if (!isApiConfigured() || !currentUser) return;
+    fetchMyProgram()
+      .then(setProgram)
+      .catch(() => setProgram(null));
+  }, [currentUser]);
+
+  /**
+   * What Today actually lists. The prescription when there is one, the
+   * patient's chosen routine otherwise.
+   */
+  const todaysExercises = useMemo(() => {
+    const prescribed = program?.exercises ?? [];
+    if (prescribed.length > 0) {
+      const specs = [...prescribed]
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((item) => getExerciseSpec(item.exerciseId))
+        .filter((spec): spec is NonNullable<typeof spec> => spec !== undefined);
+      if (specs.length > 0) return specs;
+    }
+    return routineExercises(loadRoutine());
+    // routineVersion is the dependency that matters: the routine lives in
+    // localStorage, so nothing else here changes when it is edited.
+  }, [program, routineVersion]);
+
+  const prescriptions = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const item of program?.exercises ?? []) {
+      out[item.exerciseId] = `${item.sets} × ${item.reps}`;
+    }
+    return out;
+  }, [program]);
   const sessionRef = useRef<ActiveSession | null>(null);
 
   useEffect(() => {
@@ -128,7 +171,9 @@ export default function App() {
 
   function handleStart() {
     beginSession();
-    setScreen("today");
+    // First run: ask what they want to work on before handing them a list
+    // somebody else picked. Once chosen, this never interrupts again.
+    setScreen(hasChosenRoutine() ? "today" : "routine-setup");
   }
 
   function handlePickExercise(id: string) {
@@ -228,9 +273,28 @@ export default function App() {
           />
         )}
         {screen === "today" && (
-          <TodayScreen onPick={handlePickExercise} completedExerciseIds={completedToday} />
+          <TodayScreen
+            exercises={todaysExercises}
+            onPick={handlePickExercise}
+            completedExerciseIds={completedToday}
+            prescriptions={prescriptions}
+          />
         )}
-        {screen === "program" && <ProgramScreen onPick={handlePickExercise} />}
+        {screen === "routine-setup" && (
+          <RoutineSetupScreen
+            onDone={(ids) => {
+              saveRoutine(ids);
+              setRoutineVersion((v) => v + 1);
+              setScreen("today");
+            }}
+          />
+        )}
+        {screen === "program" && (
+          <ProgramScreen
+            onPick={handlePickExercise}
+            onRoutineChanged={() => setRoutineVersion((v) => v + 1)}
+          />
+        )}
         {screen === "history" && <HistoryScreen />}
         {screen === "sharing" && (
           <SharingScreen
