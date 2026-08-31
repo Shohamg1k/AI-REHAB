@@ -1,8 +1,42 @@
 # Status
 
 **Last updated:** 2026-08-31
-**Milestone:** M0 + M1 + M2 merged to `main`, plus the clinician-UI/E5-wiring and history/consent branches. This branch (`feature/pose-latency-and-accuracy`) is the first pass at pose latency and accuracy: it fixes the accumulating skeleton lag, the ten-second freeze at session start, and a landmark-alignment bug — and finally puts real inference numbers against ADR-0007.
-**Phase:** the pose pipeline has been measured for the first time, not just reasoned about. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+**Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
+**Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design. What is left is the features the mock depicts but the system does not have, listed below — not styling. Live Postgres and a *real camera with a real body* remain the two things this environment cannot verify.
+
+---
+
+## This branch: design system v2
+
+The design source of truth is `figma-svg/_source/v2.html` (the artboards the SVG exports were generated from) — richer than the SVGs, because it carries the actual CSS. `docs/DESIGN-SCREENS.md` is a new, literal spec of screens M1–M10 extracted from it: every string, gap, and component variant.
+
+**The old palette was a near-miss of the real one** — Inter instead of IBM Plex, `#0F766E` instead of `#0D6E68`, `#F6F8FB` instead of `#ECF0F1`. Close enough to look deliberate, far enough never to match. Tokens are now transcribed from the design source and named after it (`ink`/`ink-2`/`ink-3`, `teal`, `sunk`, `line`), so a screen can be checked against its artboard by reading class names instead of translating a second vocabulary in between. ~270 token usages migrated across 22 files.
+
+**IBM Plex is self-hosted** via `@fontsource`, not linked from Google Fonts as the design source does. A product whose pitch is "your video never leaves the device" should not announce every session start to `fonts.gstatic.com`, and the app has to keep working offline and behind a proxy that blocks it — the same reasoning that already applies to the pose assets.
+
+**Built:** `Icon` (11 inline line icons, no icon dependency), `Chip`, `Disclaimer` (the design's per-screen `.disc`), `BottomNav`, and `Button` rebuilt to the design's four variants with inset-shadow hairlines so secondary and primary buttons are the same height.
+
+**Bottom navigation now exists** — Today / Progress / Program / Sharing, which the app simply did not have. It is deliberately hidden for the whole exercise flow (intro → camera → live → rest → summary): a way out of a running set should not sit next to the set.
+
+**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M3 Why this exercise (numbered technique steps, and the safety cap drawn from the exercise's *actual* thresholds rather than the artboard's named clinician), M8 Session summary (the design's 2×2 stat grid and observations list, fed by the set that was really performed), M9 Progress (seven-day streak strip from real adherence data), M4 Camera setup (dark full-bleed, capture-quality meter off the real framing score), M5 Live session (camera as the screen, per-rep tick strip coloured by real scores), M6 Safety block (bottom sheet, camera dimmed, skeleton suppressed), M7 Rest check-in (a tappable body map replacing the region pill list, and the design's five-step coloured pain scale), M8, M9, M10 Sharing & privacy (new screen).
+
+**The redesign is guarded where it matters.** CLAUDE.md invariant 3 — "nothing may soften a `block` or `escalate` verdict downstream" — is a claim about the UI, and a redesign is exactly the change that could reintroduce a "continue anyway" button while everything still typechecks. `SafetyBlockBanner.test.tsx` now asserts no button on that sheet says anything a patient could read as "keep going", that the copy never says "push through", and that the escalation path survives.
+
+**A duplication M3 exposed:** the reference-media card and the new numbered steps both render `keyPoints`, so every technique cue appeared twice. The card's existing `compact` flag now suppresses its copy on that screen.
+
+**A duplication fixed on the way:** the data-sharing consent and access log lived at the bottom of Progress *and* now on Sharing. Progress rendered them even when signed out, showing a consent switch with nothing behind it. They now live only on Sharing, with their test coverage moved across rather than dropped.
+
+### Where the design was deliberately not followed
+
+Each of these is a case where reproducing the mock would have meant the app asserting something untrue:
+
+- **The fake iOS status bar** (`9:41 · 5G ▮▮▮`) is an artboard convention for showing a phone screen. A web page drawing a counterfeit OS status bar would be lying about the time and the signal.
+- **M1's hero** is a mocked camera view with a skeleton drawn on it. Shown before any camera is running, that is a picture of a result the app has not produced.
+- **M2's daily check-in and streak chip** imply stored state with nowhere to go. A control that silently discards a patient's answer about their knee is worse than no control.
+- **M10's caregiver and research-study consents** do not exist in this system. A consent toggle that controls nothing tells the patient their data is restricted when nothing is restricting it.
+- **M10's "Download or delete everything"** has no endpoint behind it. Export and erasure are real obligations, not decoration.
+
+All five are gaps to build, not decisions to keep — see "What's still a gap".
 
 ---
 
@@ -66,6 +100,12 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 
 ## What's still a gap
 
+- **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
+- **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.
+- **M9's form-score chart and left-vs-right symmetry card are not built.** Neither a cross-session score series nor a per-side comparison is computed anywhere yet, and drawing the artboard's sample curve would show the patient a trend that is not theirs.
+- **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.
+- **`Program` in the bottom nav routes to Today.** There is no separate program screen yet; today's list is the program. Better than a stub, but it is not what the tab implies.
+- **No screen has been compared side by side against its artboard by eye.** The rebuild followed a written spec and was verified through the DOM (computed colours, fonts, type sizes, copy) because the Browser pane in this environment renders hidden. Spacing and optical alignment need a human to look at them.
 - **No frame of real video has ever gone through this pipeline.** Every measurement above used synthetic canvas frames, and the crude shapes drawn were never recognised as a person, so *landmark accuracy itself is still completely unverified* — only the plumbing and the timing around it. This remains the single highest-value unverified thing in the project.
 - **The perf readout has not been seen rendering.** The Browser pane in this environment is hidden to the renderer, so `requestAnimationFrame` never fires and the capture loop cannot run; the worker was driven directly instead. The pipeline, timings and worker protocol are verified; `CameraSetupScreen`'s readout markup and the backpressure loop itself are verified only by unit tests and reading.
 - **The display-smoothing constants are reasoned, not tuned.** `minCutoff: 1.7, beta: 0.9` is a defensible starting point for "prioritise lag over jitter", not a measured optimum. The instrumentation added here is what would let someone tune it against a real body.

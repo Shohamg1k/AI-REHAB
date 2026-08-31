@@ -9,7 +9,7 @@
  */
 export function DisclaimerBar() {
   return (
-    <div className="bg-subtle border-b border-border px-16 py-8 text-caption text-text-secondary text-center">
+    <div className="bg-sunk border-b border-line px-16 py-8 text-cap text-ink-2 text-center">
       A coaching and monitoring aid, not a medical device. It does not diagnose or replace your
       clinician.
     </div>

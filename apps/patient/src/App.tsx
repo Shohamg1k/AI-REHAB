@@ -10,12 +10,33 @@ import { SessionSummaryScreen } from "./screens/SessionSummaryScreen.js";
 import { AuthScreen } from "./screens/AuthScreen.js";
 import { HistoryScreen } from "./screens/HistoryScreen.js";
 import { ClinicianApp } from "./clinician/ClinicianApp.js";
+import { BottomNav, type NavTab } from "./components/BottomNav.js";
+import { SharingScreen } from "./screens/SharingScreen.js";
 import { appendEvent } from "./lib/db.js";
 import { syncPendingSessions, syncSession } from "./lib/sync.js";
 import { clearSession, getSession } from "./lib/authStore.js";
 import { isApiConfigured } from "./lib/api.js";
 
-type Screen = "welcome" | "auth" | "today" | "session" | "pain-check-in" | "summary" | "history";
+type Screen =
+  | "welcome"
+  | "auth"
+  | "today"
+  | "session"
+  | "pain-check-in"
+  | "summary"
+  | "history"
+  | "sharing";
+
+/**
+ * Which screens carry the bottom nav, and which tab it highlights. The whole
+ * exercise flow (session -> rest -> summary) is deliberately absent: a way
+ * out of a running set should not sit next to the set itself.
+ */
+const NAV_TAB: Partial<Record<Screen, NavTab>> = {
+  today: "today",
+  history: "progress",
+  sharing: "sharing"
+};
 
 type ActiveSession = {
   sessionId: string;
@@ -137,6 +158,8 @@ export default function App() {
     );
   }
 
+  const navTab = NAV_TAB[screen];
+
   return (
     <div className="min-h-screen flex flex-col bg-page">
       <DisclaimerBar />
@@ -151,13 +174,11 @@ export default function App() {
             onBack={() => setScreen("welcome")}
           />
         )}
-        {screen === "today" && (
-          <TodayScreen
-            onPick={handlePickExercise}
-            onViewHistory={isApiConfigured() && currentUser ? () => setScreen("history") : undefined}
-          />
+        {screen === "today" && <TodayScreen onPick={handlePickExercise} />}
+        {screen === "history" && <HistoryScreen />}
+        {screen === "sharing" && (
+          <SharingScreen signedIn={isApiConfigured() && currentUser !== null} onSignIn={() => setScreen("auth")} />
         )}
-        {screen === "history" && <HistoryScreen onBack={() => setScreen("today")} />}
         {screen === "session" && exerciseId && (
           <CoachedSession
             exerciseId={exerciseId}
@@ -186,6 +207,17 @@ export default function App() {
           />
         )}
       </main>
+
+      {navTab && (
+        <BottomNav
+          active={navTab}
+          onNavigate={(tab) => {
+            // `Program` has no screen of its own yet — today's list is the
+            // program for now, so it routes there rather than to a stub.
+            setScreen(tab === "progress" ? "history" : tab === "sharing" ? "sharing" : "today");
+          }}
+        />
+      )}
     </div>
   );
 }

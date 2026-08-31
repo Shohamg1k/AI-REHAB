@@ -48,17 +48,23 @@ export function CameraStage({
   signalStatus,
   attachVideo,
   showSkeleton = true,
+  fullBleed = false,
   topLeft,
   topRight,
-  bottom
+  bottom,
+  children
 }: {
   liveState: LiveSessionState;
   signalStatus: SignalStatus;
   attachVideo: (el: HTMLVideoElement | null) => void;
   showSkeleton?: boolean;
+  /** M4/M5: edge-to-edge and square-cornered, the camera as the screen rather than a card on it. */
+  fullBleed?: boolean;
   topLeft?: ReactNode;
   topRight?: ReactNode;
   bottom?: ReactNode;
+  /** Free-positioned overlays (readouts, progress strips) that own their own placement. */
+  children?: ReactNode;
 }) {
   const { cameraStatus, workerStatus, landmarks, captureQuality, videoSize } = liveState;
   const style = STATUS_STYLE[signalStatus];
@@ -68,8 +74,10 @@ export function CameraStage({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl bg-slate-900 shadow-xl transition-shadow ${style.ring}`}
-      style={{ aspectRatio: "4 / 3" }}
+      className={`relative w-full overflow-hidden bg-night transition-shadow ${
+        fullBleed ? "" : `rounded-xl shadow-lift ${style.ring}`
+      }`}
+      style={fullBleed ? { flex: "1 1 auto", minHeight: 0 } : { aspectRatio: "4 / 3" }}
     >
       {/*
         Mirrored for a natural selfie view. This is a CSS transform on
@@ -102,7 +110,7 @@ export function CameraStage({
         <div className="flex shrink-0 items-center gap-8">
           {topRight}
           <span
-            className={`inline-flex items-center gap-4 rounded-pill px-12 py-4 text-label shadow-sm backdrop-blur-sm ${style.chip}`}
+            className={`inline-flex items-center gap-4 rounded-pill px-12 py-4 text-b2 font-medium shadow-sm backdrop-blur-sm ${style.chip}`}
           >
             <span
               className={`h-2 w-2 rounded-full ${style.dot} ${signalStatus === "ok" ? "animate-pulse" : ""}`}
@@ -112,19 +120,21 @@ export function CameraStage({
         </div>
       </div>
 
+      {children}
+
       {bottom && <div className="absolute inset-x-0 bottom-0 p-12">{bottom}</div>}
 
       {isBooting && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 bg-slate-900/85 backdrop-blur-sm">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 bg-night/85 backdrop-blur-sm">
           <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-white" />
-          <span className="text-body-sm text-white/90">
+          <span className="text-b2 text-white/90">
             {cameraStatus === "requesting"
               ? "Waiting for camera permission…"
               : workerStatus === "loading"
                 ? "Loading on-device pose model…"
                 : "Starting camera…"}
           </span>
-          <span className="px-24 text-center text-caption text-white/60">
+          <span className="px-24 text-center text-cap text-white/60">
             Everything runs on your device. Your video never leaves it.
           </span>
         </div>
