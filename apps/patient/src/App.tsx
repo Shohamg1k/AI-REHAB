@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { BodyRegion, FormScore, RepEvent, User } from "@ai-rehab/contracts";
 import { getExerciseSpec } from "@ai-rehab/exercises";
+import { readRestoredScreen, writeRestoredScreen, type PersistedScreen } from "./lib/restoreScreen.js";
 import { DisclaimerBar } from "./components/DisclaimerBar.js";
 import { WelcomeScreen } from "./screens/WelcomeScreen.js";
 import { TodayScreen } from "./screens/TodayScreen.js";
@@ -19,7 +20,7 @@ import { syncPendingSessions, syncSession } from "./lib/sync.js";
 import { clearSession, getSession } from "./lib/authStore.js";
 import { isApiConfigured } from "./lib/api.js";
 
-type Screen =
+export type Screen =
   | "welcome"
   | "auth"
   | "today"
@@ -29,26 +30,6 @@ type Screen =
   | "history"
   | "sharing"
   | "program";
-
-/**
- * Which screen to restore on reload.
- *
- * Only the four tab screens are remembered. A refresh in the middle of a set
- * cannot resume it — the camera, the worker and the rep state are all gone —
- * so returning to Today is honest, where silently re-entering a "live"
- * session that is not running would not be.
- */
-const RESTORABLE: readonly Screen[] = ["today", "history", "sharing", "program"];
-const SCREEN_KEY = "ai-rehab:screen";
-
-function restoreScreen(): Screen | null {
-  try {
-    const saved = sessionStorage.getItem(SCREEN_KEY) as Screen | null;
-    return saved && RESTORABLE.includes(saved) ? saved : null;
-  } catch {
-    return null; // private mode, or storage disabled
-  }
-}
 
 /**
  * Which screens carry the bottom nav, and which tab it highlights. The whole
@@ -87,8 +68,12 @@ function newSessionId(): string {
 export default function App() {
   // A signed-in or returning patient lands where they left off; a first
   // visit still starts at the welcome screen.
-  const [screen, setScreen] = useState<Screen>(() => restoreScreen() ?? "welcome");
-  const [exerciseId, setExerciseId] = useState<string | null>(null);
+  // Read once, so the screen and the exercise come from the same snapshot.
+  const restoredRef = useRef<PersistedScreen | null>(readRestoredScreen());
+  const [screen, setScreen] = useState<Screen>(() => restoredRef.current?.screen ?? "welcome");
+  const [exerciseId, setExerciseId] = useState<string | null>(
+    () => restoredRef.current?.exerciseId ?? null
+  );
   const [completedSet, setCompletedSet] = useState<CompletedSet | null>(null);
   const [painReport, setPainReport] = useState<{ region: BodyRegion | null; severity: number } | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(() => getSession()?.user ?? null);
@@ -96,12 +81,20 @@ export default function App() {
   const sessionRef = useRef<ActiveSession | null>(null);
 
   useEffect(() => {
-    try {
-      sessionStorage.setItem(SCREEN_KEY, screen);
-    } catch {
-      /* storage disabled — the app still works, it just forgets on reload */
+    writeRestoredScreen({ screen, exerciseId });
+  }, [screen, exerciseId]);
+
+  useEffect(() => {
+    // A restored session needs its own session record: the previous one's
+    // id and start time died with the reload, and appending reps to it would
+    // write events to a session that never started.
+    if (restoredRef.current?.screen === "session" && !sessionRef.current) {
+      beginSession();
     }
-  }, [screen]);
+    restoredRef.current = null;
+    // Empty deps on purpose: this is one-shot recovery from a reload, not a
+    // rule that should re-run when the screen changes.
+  }, []);
 
   // Which exercises are already done today, so Today can mark them. Read from
   // the local log rather than tracked in memory, so it survives a reload.
@@ -120,20 +113,28 @@ export default function App() {
     return sessionRef.current ? performance.now() - sessionRef.current.startPerf : 0;
   }
 
-  function handleStart() {
+  /** Opens a new session record. Shared by starting fresh and by recovering after a reload. */
+  function beginSession(): void {
     const sessionId = newSessionId();
     sessionRef.current = { sessionId, startPerf: performance.now() };
-    appendEvent(sessionId, {
+    void appendEvent(sessionId, {
       type: "session_started",
       t: 0,
       sessionId,
       programId: null,
       wallClock: new Date().toISOString()
     });
+  }
+
+  function handleStart() {
+    beginSession();
     setScreen("today");
   }
 
   function handlePickExercise(id: string) {
+    // Picking an exercise from a tab screen can happen without a session
+    // having been started — the nav lets you reach Today directly.
+    if (!sessionRef.current) beginSession();
     setExerciseId(id);
     setScreen("session");
   }
