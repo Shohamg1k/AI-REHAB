@@ -3,13 +3,41 @@ import { JOINT_TO_LANDMARKS } from "@ai-rehab/contracts";
 import { EXERCISES, EXERCISES_BY_ID, getExerciseSpec, validateExerciseSpec } from "../src/index.js";
 
 describe("exercise catalogue (A6)", () => {
-  it("ships exactly the three MVP exercises", () => {
-    expect(EXERCISES).toHaveLength(3);
+  it("ships the expected catalogue — three lower-body, three upper-body", () => {
+    expect(EXERCISES).toHaveLength(6);
     expect(EXERCISES.map((e) => e.id).sort()).toEqual([
+      "seated-elbow-flexion",
       "seated-knee-extension",
+      "seated-neck-side-tilt",
       "sit-to-stand",
-      "standing-shoulder-abduction"
+      "standing-shoulder-abduction",
+      "standing-shoulder-flexion"
     ]);
+  });
+
+  it("covers the upper body as well as the lower", () => {
+    const regions = new Set(EXERCISES.flatMap((e) => e.targetRegions));
+    for (const region of ["knee", "hip", "shoulder", "elbow", "neck"]) {
+      expect(regions).toContain(region);
+    }
+  });
+
+  /**
+   * A joint-angle cap above 180° can never fire: these are three-point
+   * interior angles, mathematically bounded at 180°. Configuring one implies
+   * a protection that does not exist, which is worse than configuring none.
+   * The eval harness catches it indirectly by demanding a fixture per rule;
+   * this catches it directly, at the spec.
+   */
+  it("configures no joint cap that the angle model cannot reach", () => {
+    for (const spec of EXERCISES) {
+      for (const [joint, limit] of Object.entries(spec.safety.maxAngle ?? {})) {
+        expect(
+          limit,
+          `${spec.id}: maxAngle.${joint} = ${limit}° can never be reached`
+        ).toBeLessThanOrEqual(180);
+      }
+    }
   });
 
   it("every spec is marked provisional with a note (no clinician sign-off yet)", () => {

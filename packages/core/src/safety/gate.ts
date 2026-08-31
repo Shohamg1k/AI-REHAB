@@ -105,6 +105,16 @@ function trunkLeanVerdict(
   const limit = thresholds.maxTrunkLean;
   const observed = angles.trunkLean;
 
+  // Unmeasurable this frame. The gate cannot invent a verdict from evidence
+  // it does not have, so it stays silent — but this is *not* the same as
+  // "safe", and it must not be read that way. What keeps an unmeasurable
+  // trunk from being scored at all is the framing contract (A7): an exercise
+  // with a `maxTrunkLean` threshold declares the torso landmarks required,
+  // so losing them pauses scoring upstream of here. `trunkLean` used to
+  // default to 0 instead of null, which silently satisfied this comparison
+  // and disabled the rule outright.
+  if (observed === null) return null;
+
   if (observed > limit) {
     return {
       t,

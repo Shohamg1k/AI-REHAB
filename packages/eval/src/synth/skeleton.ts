@@ -186,3 +186,106 @@ export function sitToStandPose(
     [MP.RIGHT_WRIST]: add(rightShoulder, { x: 0.1, y: UPPER_ARM + FOREARM, z: 0 })
   });
 }
+
+/**
+ * Seated elbow flexion pose. The upper arm hangs at the side and the
+ * forearm is placed at an exact `rightElbowAngleDeg` measured
+ * shoulder → elbow → wrist, so the value read back through
+ * `computeJointAngles` is the value requested.
+ */
+export function seatedElbowFlexionPose(
+  rightElbowAngleDeg: number,
+  trunkLeanDeg = 2,
+  visibility = 1
+): Landmark[] {
+  const leftHip: Vec3 = { x: -0.15, y: 0, z: 0 };
+  const rightHip: Vec3 = { x: 0.15, y: 0, z: 0 };
+  const midHip: Vec3 = { x: 0, y: 0, z: 0 };
+  const midShoulder = midShoulderAtLean(midHip, trunkLeanDeg, 0.5);
+  const leftShoulder: Vec3 = add(midShoulder, { x: -0.2, y: 0, z: 0 });
+  const rightShoulder: Vec3 = add(midShoulder, { x: 0.2, y: 0, z: 0 });
+
+  // Upper arm hanging straight down at the side.
+  const rightElbow: Vec3 = add(rightShoulder, { x: 0, y: UPPER_ARM, z: 0 });
+  const leftElbow: Vec3 = add(leftShoulder, { x: 0, y: UPPER_ARM, z: 0 });
+
+  // Forearm swings in the sagittal plane, so the elbow angle is exact.
+  const rightWrist = placeAtAngle(
+    rightElbow,
+    rightShoulder,
+    { x: 0, y: 0, z: -1 },
+    rightElbowAngleDeg,
+    FOREARM
+  );
+  const leftWrist = add(leftElbow, { x: 0, y: FOREARM, z: 0 });
+
+  const leftKnee = add(leftHip, { x: 0, y: THIGH, z: -0.1 });
+  const rightKnee = add(rightHip, { x: 0, y: THIGH, z: -0.1 });
+
+  return fullSkeleton(
+    {
+      [MP.NOSE]: add(midShoulder, { x: 0, y: -0.25, z: 0 }),
+      [MP.LEFT_SHOULDER]: leftShoulder,
+      [MP.RIGHT_SHOULDER]: rightShoulder,
+      [MP.LEFT_HIP]: leftHip,
+      [MP.RIGHT_HIP]: rightHip,
+      [MP.LEFT_KNEE]: leftKnee,
+      [MP.RIGHT_KNEE]: rightKnee,
+      [MP.LEFT_ELBOW]: leftElbow,
+      [MP.RIGHT_ELBOW]: rightElbow,
+      [MP.LEFT_WRIST]: leftWrist,
+      [MP.RIGHT_WRIST]: rightWrist,
+      [MP.LEFT_INDEX]: add(leftWrist, { x: 0, y: 0.05, z: 0 }),
+      [MP.RIGHT_INDEX]: add(rightWrist, { x: 0, y: 0.05, z: 0 })
+    },
+    visibility
+  );
+}
+
+/**
+ * Seated neck side-tilt pose. The nose is placed at an exact angle from the
+ * torso axis, in the frontal plane, so `computeJointAngles`'s `neck` reads
+ * back the requested `neckAngleDeg`.
+ */
+export function seatedNeckSideTiltPose(
+  neckAngleDeg: number,
+  trunkLeanDeg = 2,
+  visibility = 1
+): Landmark[] {
+  const leftHip: Vec3 = { x: -0.15, y: 0, z: 0 };
+  const rightHip: Vec3 = { x: 0.15, y: 0, z: 0 };
+  const midHip: Vec3 = { x: 0, y: 0, z: 0 };
+  const midShoulder = midShoulderAtLean(midHip, trunkLeanDeg, 0.5);
+  const leftShoulder: Vec3 = add(midShoulder, { x: -0.2, y: 0, z: 0 });
+  const rightShoulder: Vec3 = add(midShoulder, { x: 0.2, y: 0, z: 0 });
+
+  // The reference has to be the torso axis continued past the shoulders,
+  // not world-vertical: `computeJointAngles` measures the head against the
+  // torso, so referencing vertical here left a systematic offset equal to
+  // the trunk lean (a requested 0° tilt read back as 2°). Caught by probing
+  // the generator against the real pipeline before building fixtures on it.
+  const torsoTip: Vec3 = {
+    x: midShoulder.x + (midShoulder.x - midHip.x),
+    y: midShoulder.y + (midShoulder.y - midHip.y),
+    z: midShoulder.z + (midShoulder.z - midHip.z)
+  };
+  const nose = placeAtAngle(midShoulder, torsoTip, { x: 1, y: 0, z: 0 }, neckAngleDeg, 0.25);
+
+  const leftElbow = add(leftShoulder, { x: 0, y: UPPER_ARM, z: 0 });
+  const rightElbow = add(rightShoulder, { x: 0, y: UPPER_ARM, z: 0 });
+
+  return fullSkeleton(
+    {
+      [MP.NOSE]: nose,
+      [MP.LEFT_SHOULDER]: leftShoulder,
+      [MP.RIGHT_SHOULDER]: rightShoulder,
+      [MP.LEFT_HIP]: leftHip,
+      [MP.RIGHT_HIP]: rightHip,
+      [MP.LEFT_ELBOW]: leftElbow,
+      [MP.RIGHT_ELBOW]: rightElbow,
+      [MP.LEFT_WRIST]: add(leftElbow, { x: 0, y: FOREARM, z: 0 }),
+      [MP.RIGHT_WRIST]: add(rightElbow, { x: 0, y: FOREARM, z: 0 })
+    },
+    visibility
+  );
+}

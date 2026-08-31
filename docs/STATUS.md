@@ -6,6 +6,27 @@
 
 ---
 
+## Upper body, and two real model defects
+
+**Three upper-body exercises added**, keeping all three existing ones: `standing-shoulder-flexion`, `seated-elbow-flexion`, `seated-neck-side-tilt`. Six in total, covering knee, hip, shoulder, elbow and neck. Every one is still `provisional` — ranges are reasoned from ordinary clinical norms, not signed off.
+
+**A new `neck` joint**: the 3D angle between the head vector (mid-shoulder → nose) and the torso vector (mid-hip → mid-shoulder). Measured against the *torso*, not world-vertical, so a patient slumped forward is not credited with a permanent head tilt. It is a **magnitude, not a direction** — a 25° sideways tilt and a 25° forward chin-poke read identically — so the setup and cues carry the burden of keeping the movement in plane. Neck *rotation* is deliberately not offered: it is yaw about the head's own axis, barely moves this angle, and inferring it from ear/nose asymmetry is not reliable enough to score someone's neck on.
+
+### Defect 1 — the trunk-lean rule could silently stop working
+
+`trunkLean` defaulted to **0** when the torso landmarks were not usable, and 0 reads as "perfectly upright". The safety rule compares `observed > limit`, so **losing sight of the hips mid-set disabled the trunk-lean block entirely and reported ideal posture** — the failure was invisible in exactly the situation the rule exists to catch. It is now `number | null`, the gate returns no verdict when it cannot measure, rep statistics skip unmeasured frames rather than averaging in a zero, and three regression tests pin it.
+
+### Defect 2 — a safety threshold that could never fire
+
+`seated-elbow-flexion` was first written with `maxAngle: { right_elbow: 185 }` to catch hyperextension. Joint angles here are three-point *interior* angles, mathematically bounded at 180°, so that rule **can never fire**. The eval harness surfaced it by refusing to accept a configured rule with no fixture proving it fires — and no fixture could be written. The threshold is gone: an unreachable rule is worse than an absent one, because it implies a protection that does not exist. A spec test now asserts no cap exceeds 180°, and guarding hyperextension properly needs a signed or plane-aware angle — a change to the angle model, not to a spec.
+
+### Also improved
+
+- **Angles are no longer computed from landmarks that were not observed.** A visibility floor (0.15) discards the frankly unseen. Deliberately far below the 0.5 scoring floor, because they answer different questions: the scoring floor decides whether a rep *counts toward a score*, and reps below it are still detected, counted and reported as unscored. Setting the new floor at 0.5 was tried and was wrong — it stopped reps being detected at all in poor light, silently, instead of counting them and marking them untrustworthy.
+- **Test timeout raised to 30s.** Several `apps/api` tests create three or four accounts and bcrypt is deliberately slow; that cost is the security property, not waste. They passed at the 5s default only while the rest of the suite left them a core. The heavier fixture set pushed them over under contention while they still passed in isolation — so the budget was wrong, not the tests.
+
+---
+
 ## Reports (F1) and messaging (F9)
 
 Both were designed but unbuilt; the Sharing screen used to say so. They exist now.
@@ -220,7 +241,9 @@ See `docs/adr/`. ADR-0006 and 0008 are open. ADR-0007 has an interim default (`h
 
 - **The M0 spike is only part-run** — `heavy` now has real numbers on one desktop-class machine and clears the bar there, but nothing has been measured on a phone, in a dim room, or against a real body.
 - **Pose accuracy is still entirely unobserved.** The pipeline has been timed, not validated. No real person has ever been tracked by this app.
-- **Every exercise spec is provisional** — unchanged since M1.
+- **Every exercise spec is provisional** — unchanged since M1, and now across six exercises rather than three. The neck ranges are the ones a physiotherapist should look at first: it is the joint where forcing range has real consequences, and its 45° cap and 20–35° target are reasoned, not clinical.
+- **Shoulder flexion and abduction read the same angle.** Both are hip → shoulder → elbow, which grows whether the arm travels forward or sideways; only the camera view distinguishes them, and the angle is not policing the plane. A plane-aware measurement is the next real upper-body accuracy improvement.
+- **The `neck` angle cannot tell a sideways tilt from a forward chin-poke.** A patient doing the wrong movement will be scored as though they did the right one.
 - **The Postgres role in `docker-compose.yml` bypasses its own RLS policies** — do not treat the local dev setup as a security reference for a real deployment.
 - **`contraindicatedRegions` is unverified self-report data** — E5 checking it is real but its inputs are not clinically validated.
 - **Milestone thresholds are unvalidated guesses** — new this branch; see "Next actions."

@@ -1,5 +1,11 @@
 import type { Fixture, FixtureExpectation } from "../fixture.js";
-import { seatedKneeExtensionPose, sitToStandPose, standingShoulderAbductionPose } from "./skeleton.js";
+import {
+  seatedElbowFlexionPose,
+  seatedKneeExtensionPose,
+  seatedNeckSideTiltPose,
+  sitToStandPose,
+  standingShoulderAbductionPose
+} from "./skeleton.js";
 import { cycleValueAt, frameTimestamps, type RepCycleSpec } from "./trajectory.js";
 
 const DEFAULT_CYCLE: Omit<RepCycleSpec, "restValue" | "peakValue"> = {
@@ -32,6 +38,73 @@ function kneeExtensionFixture(opts: {
     frames: timestamps.map((t) => ({
       t,
       world: seatedKneeExtensionPose(cycleValueAt(cycle, t), opts.trunkLean ?? 2, opts.visibility ?? 1)
+    })),
+    expected: opts.expected
+  };
+}
+
+/**
+ * Elbow flexion runs "backwards": the angle *falls* through the rep, so
+ * `restValue` is the straight arm and `peakValue` is the bent one.
+ */
+function elbowFlexionFixture(opts: {
+  id: string;
+  description: string;
+  reps: number;
+  flexedAngle: number;
+  straightAngle?: number;
+  trunkLean?: number;
+  expected: FixtureExpectation;
+}): Fixture {
+  const cycle: RepCycleSpec = {
+    ...DEFAULT_CYCLE,
+    restValue: opts.straightAngle ?? 175,
+    peakValue: opts.flexedAngle
+  };
+  const timestamps = frameTimestamps({ reps: opts.reps, frameIntervalMs: FRAME_INTERVAL_MS, cycle: DEFAULT_CYCLE });
+
+  return {
+    id: opts.id,
+    exerciseId: "seated-elbow-flexion",
+    description: opts.description,
+    source: "synthetic",
+    frames: timestamps.map((t) => ({
+      t,
+      world: seatedElbowFlexionPose(cycleValueAt(cycle, t), opts.trunkLean ?? 2)
+    })),
+    expected: opts.expected
+  };
+}
+
+function neckSideTiltFixture(opts: {
+  id: string;
+  description: string;
+  reps: number;
+  peakAngle: number;
+  restAngle?: number;
+  trunkLean?: number;
+  expected: FixtureExpectation;
+}): Fixture {
+  const cycle: RepCycleSpec = {
+    ...DEFAULT_CYCLE,
+    restValue: opts.restAngle ?? 2,
+    peakValue: opts.peakAngle
+  };
+  // Neck work is coached slowly, so the cycle is stretched to match the
+  // spec's 2.5-7s tempo target rather than reusing the default.
+  const slowCycle = { ...DEFAULT_CYCLE, riseMs: 1600, holdMs: 400, fallMs: 1600, gapMs: 600 };
+  const timestamps = frameTimestamps({ reps: opts.reps, frameIntervalMs: FRAME_INTERVAL_MS, cycle: slowCycle });
+  const slow: RepCycleSpec = { ...slowCycle, restValue: opts.restAngle ?? 2, peakValue: opts.peakAngle };
+  void cycle;
+
+  return {
+    id: opts.id,
+    exerciseId: "seated-neck-side-tilt",
+    description: opts.description,
+    source: "synthetic",
+    frames: timestamps.map((t) => ({
+      t,
+      world: seatedNeckSideTiltPose(cycleValueAt(slow, t), opts.trunkLean ?? 2)
     })),
     expected: opts.expected
   };
@@ -164,6 +237,36 @@ export const FIXTURES: Fixture[] = [
     reps: 1,
     peakAngle: 178,
     expected: { repCount: 1, requiredSafetyRuleIds: ["max_angle_right_shoulder"] }
+  }),
+
+  elbowFlexionFixture({
+    id: "elbow-flexion-good-form",
+    description: "Three clean curls through a full range, body still.",
+    reps: 3,
+    flexedAngle: 45,
+    expected: { repCount: 3, forbiddenSafetyVerdicts: ["block", "escalate"] }
+  }),
+  elbowFlexionFixture({
+    id: "elbow-flexion-safety-overbend",
+    description: "Elbow forced past the configured safe floor — must block.",
+    reps: 1,
+    flexedAngle: 18,
+    expected: { repCount: 1, requiredSafetyRuleIds: ["min_angle_right_elbow"] }
+  }),
+
+  neckSideTiltFixture({
+    id: "neck-tilt-good-form",
+    description: "Three slow, controlled tilts within a comfortable range.",
+    reps: 3,
+    peakAngle: 27,
+    expected: { repCount: 3, forbiddenSafetyVerdicts: ["block", "escalate"] }
+  }),
+  neckSideTiltFixture({
+    id: "neck-tilt-safety-forced-range",
+    description: "Neck forced well past the safe cap — must block. The tightest cap in the catalogue, deliberately.",
+    reps: 1,
+    peakAngle: 52,
+    expected: { repCount: 1, requiredSafetyRuleIds: ["max_angle_neck"] }
   }),
 
   sitToStandFixture({

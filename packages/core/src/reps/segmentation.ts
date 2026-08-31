@@ -99,10 +99,20 @@ function accumulate(
     minAngles,
     confidenceSamples,
     angleSamples,
-    trunkLeanSamples: [...state.trunkLeanSamples, angles.trunkLean],
+    // Frames where the torso was not visible contribute nothing rather than
+    // contributing a zero. Averaging in a 0 for "unknown" would drag the
+    // rep's trunk-lean statistics toward "upright" precisely when the
+    // evidence for uprightness is missing.
+    trunkLeanSamples:
+      angles.trunkLean === null
+        ? state.trunkLeanSamples
+        : [...state.trunkLeanSamples, angles.trunkLean],
     auxMetrics: {
       ...state.auxMetrics,
-      peakTrunkLean: Math.max(state.auxMetrics.peakTrunkLean, angles.trunkLean),
+      peakTrunkLean:
+        angles.trunkLean === null
+          ? state.auxMetrics.peakTrunkLean
+          : Math.max(state.auxMetrics.peakTrunkLean, angles.trunkLean),
       peakSymmetry
     }
   };

@@ -33,7 +33,8 @@ export const MP = {
  * it isn't a 3-point joint angle.
  */
 export const JOINT_INDEX: Record<
-  Exclude<JointName, "trunk">,
+  // `trunk` and `neck` are excluded: neither is a three-point joint angle.
+  Exclude<JointName, "trunk" | "neck">,
   { vertex: number; a: number; b: number }
 > = {
   left_shoulder: { vertex: MP.LEFT_SHOULDER, a: MP.LEFT_HIP, b: MP.LEFT_ELBOW },
@@ -49,6 +50,25 @@ export const JOINT_INDEX: Record<
   left_wrist: { vertex: MP.LEFT_WRIST, a: MP.LEFT_ELBOW, b: MP.LEFT_INDEX },
   right_wrist: { vertex: MP.RIGHT_WRIST, a: MP.RIGHT_ELBOW, b: MP.RIGHT_INDEX }
 };
+
+/**
+ * Below this a landmark is effectively absent, and an angle derived from it
+ * is noise wearing a number's clothes.
+ *
+ * Deliberately far below `FORM_SCORE_CONFIDENCE_FLOOR` (0.5), because the
+ * two answer different questions. The scoring floor asks *should this rep
+ * count towards a score* — reps below it are still detected, still counted,
+ * and reported to the patient as unscored, which is the right behaviour and
+ * predates this change. This threshold asks the narrower question *was
+ * anything actually observed here*, and only discards the frankly
+ * unobserved.
+ *
+ * Setting it at the scoring floor instead was tried and was wrong: it
+ * stopped reps being detected at all at visibility 0.3, so a patient
+ * exercising in poor light silently stopped having their reps counted
+ * rather than having them counted and marked untrustworthy.
+ */
+export const MIN_LANDMARK_VISIBILITY = 0.15;
 
 type Vec3 = { x: number; y: number; z: number };
 
@@ -100,18 +120,23 @@ export function computeJointAngles(world: readonly Landmark[], t: number): Joint
   const confidence: Partial<Record<JointName, number>> = {};
 
   for (const [joint, idx] of Object.entries(JOINT_INDEX) as Array<
-    [Exclude<JointName, "trunk">, (typeof JOINT_INDEX)[Exclude<JointName, "trunk">]]
+    [Exclude<JointName, "trunk" | "neck">, (typeof JOINT_INDEX)[Exclude<JointName, "trunk" | "neck">]]
   >) {
     const vertex = world[idx.vertex];
     const a = world[idx.a];
     const b = world[idx.b];
     if (!vertex || !a || !b) continue;
 
+    // The weakest landmark caps the whole angle: a joint is only as
+    // well-observed as the least-visible point it is computed from.
+    const jointConfidence = Math.min(vertex.visibility, a.visibility, b.visibility);
+    if (jointConfidence < MIN_LANDMARK_VISIBILITY) continue;
+
     const angle = angleAtVertex(a, vertex, b);
     if (Number.isNaN(angle)) continue;
 
     angles[joint] = angle;
-    confidence[joint] = Math.min(vertex.visibility, a.visibility, b.visibility);
+    confidence[joint] = jointConfidence;
   }
 
   const leftShoulder = world[MP.LEFT_SHOULDER];
@@ -119,14 +144,36 @@ export function computeJointAngles(world: readonly Landmark[], t: number): Joint
   const leftHip = world[MP.LEFT_HIP];
   const rightHip = world[MP.RIGHT_HIP];
 
-  let trunkLean = 0;
-  if (leftShoulder && rightShoulder && leftHip && rightHip) {
-    const midShoulder: Vec3 = {
+  // Null, not 0 — see the note on `JointAngles.trunkLean`. Unknown posture
+  // and upright posture are different facts, and conflating them disabled
+  // the trunk-lean safety rule whenever the hips left the frame.
+  let trunkLean: number | null = null;
+  const torsoConfidence =
+    leftShoulder && rightShoulder && leftHip && rightHip
+      ? Math.min(
+          leftShoulder.visibility,
+          rightShoulder.visibility,
+          leftHip.visibility,
+          rightHip.visibility
+        )
+      : 0;
+
+  let midShoulder: Vec3 | null = null;
+  let midHip: Vec3 | null = null;
+
+  if (
+    leftShoulder &&
+    rightShoulder &&
+    leftHip &&
+    rightHip &&
+    torsoConfidence >= MIN_LANDMARK_VISIBILITY
+  ) {
+    midShoulder = {
       x: (leftShoulder.x + rightShoulder.x) / 2,
       y: (leftShoulder.y + rightShoulder.y) / 2,
       z: (leftShoulder.z + rightShoulder.z) / 2
     };
-    const midHip: Vec3 = {
+    midHip = {
       x: (leftHip.x + rightHip.x) / 2,
       y: (leftHip.y + rightHip.y) / 2,
       z: (leftHip.z + rightHip.z) / 2
@@ -138,13 +185,31 @@ export function computeJointAngles(world: readonly Landmark[], t: number): Joint
       const cos = Math.min(1, Math.max(-1, dot(torso, up) / m));
       trunkLean = (Math.acos(cos) * 180) / Math.PI;
     }
-    angles.trunk = trunkLean;
-    confidence.trunk = Math.min(
-      leftShoulder.visibility,
-      rightShoulder.visibility,
-      leftHip.visibility,
-      rightHip.visibility
-    );
+    if (trunkLean !== null) {
+      angles.trunk = trunkLean;
+      confidence.trunk = torsoConfidence;
+    }
+  }
+
+  // `neck` — how far the head sits off the torso axis, in 3D.
+  //
+  // Measured against the torso rather than against vertical on purpose: a
+  // patient leaning forward has not tilted their head, and comparing to
+  // world-vertical would say they had. Because MediaPipe world landmarks are
+  // metric 3D, this is one angle that behaves the same from the front or the
+  // side — but it is a magnitude, so it cannot tell a sideways tilt from a
+  // forward one. Exercises constrain direction through setup and cues.
+  const nose = world[MP.NOSE];
+  if (nose && midShoulder && midHip && nose.visibility >= MIN_LANDMARK_VISIBILITY) {
+    const torso = sub(midShoulder, midHip);
+    const head = sub(nose, midShoulder);
+    const mTorso = mag(torso);
+    const mHead = mag(head);
+    if (mTorso > 0 && mHead > 0) {
+      const cos = Math.min(1, Math.max(-1, dot(head, torso) / (mTorso * mHead)));
+      angles.neck = (Math.acos(cos) * 180) / Math.PI;
+      confidence.neck = Math.min(nose.visibility, torsoConfidence);
+    }
   }
 
   const symmetry: Partial<Record<"shoulder" | "elbow" | "hip" | "knee", number>> = {};
