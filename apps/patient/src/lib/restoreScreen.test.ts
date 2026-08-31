@@ -9,6 +9,7 @@ import { readRestoredScreen, writeRestoredScreen } from "./restoreScreen.js";
  * moment they are least likely to forgive it.
  */
 beforeEach(() => {
+  localStorage.clear();
   sessionStorage.clear();
 });
 
@@ -54,12 +55,45 @@ describe("readRestoredScreen", () => {
   );
 
   it("ignores a screen name it does not recognise rather than crashing on it", () => {
-    sessionStorage.setItem("ai-rehab:screen", JSON.stringify({ screen: "nonsense" }));
+    localStorage.setItem("ai-rehab:screen", JSON.stringify({ screen: "nonsense" }));
     expect(readRestoredScreen()).toBeNull();
   });
 
   it("survives malformed storage", () => {
-    sessionStorage.setItem("ai-rehab:screen", "not json {{{");
+    localStorage.setItem("ai-rehab:screen", "not json {{{");
+    expect(readRestoredScreen()).toBeNull();
+  });
+});
+
+/**
+ * The store matters as much as the decision table. `sessionStorage` is
+ * per-tab and cleared when the browser closes, so a patient who shuts the
+ * app between sets would come back to the welcome screen — the exact
+ * complaint this is meant to answer.
+ */
+describe("surviving a browser restart", () => {
+  it("persists somewhere that outlives the tab, not just the page load", () => {
+    writeRestoredScreen({ screen: "program", exerciseId: null });
+
+    // What a browser restart actually does: session storage is gone, local
+    // storage is not.
+    sessionStorage.clear();
+
+    expect(readRestoredScreen()).toEqual({ screen: "program", exerciseId: null });
+  });
+
+  it("brings a patient back to the exercise they left, in a fresh browser session", () => {
+    writeRestoredScreen({ screen: "session", exerciseId: "standing-shoulder-flexion" });
+    sessionStorage.clear();
+
+    expect(readRestoredScreen()).toEqual({
+      screen: "session",
+      exerciseId: "standing-shoulder-flexion"
+    });
+  });
+
+  it("still sends a genuinely new patient to welcome", () => {
+    localStorage.clear();
     expect(readRestoredScreen()).toBeNull();
   });
 });

@@ -2,15 +2,29 @@ import { getExerciseSpec } from "@ai-rehab/exercises";
 import type { Screen } from "../App.js";
 
 /**
- * Where the app was, so a refresh puts the patient back rather than at the
- * front door.
+ * Where the app was, so reopening it puts the patient back rather than at
+ * the front door.
  *
  * Both the screen *and* the exercise are remembered: "the page I was on"
  * mid-workout means a specific exercise, and restoring the screen without it
  * would land on a session with nothing to run.
  *
- * Session-scoped, not local: this restores a tab you refreshed, and does not
- * silently drop someone back into a half-finished workout days later.
+ * Stored in `localStorage`, so it survives closing the browser and not just
+ * a refresh. That is a deliberate trade: `sessionStorage` would keep each
+ * tab independent and forget everything on exit, which is tidier but means
+ * a patient who closes the app between sets comes back to the welcome
+ * screen. Being returned to where you were is worth more than per-tab
+ * independence in an app people use in short bursts.
+ *
+ * Two consequences of that choice, neither hidden:
+ * - Tabs share one value, so the last screen navigated to in *any* tab is
+ *   the one the next launch restores. Harmless — every screen here is
+ *   reachable from the nav — and preferable to per-tab state that vanishes.
+ * - Nothing here expires. A restored screen is only ever a *view*: the
+ *   exercise id is re-validated on read, and no rep, score or session
+ *   survives in it. Landing on an exercise you opened last week costs a tap
+ *   to leave, so an expiry rule would add a moving part to solve a problem
+ *   nobody has.
  */
 const SCREEN_KEY = "ai-rehab:screen";
 
@@ -46,7 +60,7 @@ const RESTORE_MODE: Record<Screen, "exact" | "exercise" | "today"> = {
 
 export function readRestoredScreen(): PersistedScreen | null {
   try {
-    const raw = sessionStorage.getItem(SCREEN_KEY);
+    const raw = localStorage.getItem(SCREEN_KEY);
     if (!raw) return null;
     const saved = JSON.parse(raw) as PersistedScreen;
     if (!saved?.screen || !(saved.screen in RESTORE_MODE)) return null;
@@ -68,10 +82,10 @@ export function readRestoredScreen(): PersistedScreen | null {
   }
 }
 
-/** Records where the patient is, so the next reload can put them back. */
+/** Records where the patient is, so the next launch can put them back. */
 export function writeRestoredScreen(state: PersistedScreen): void {
   try {
-    sessionStorage.setItem(SCREEN_KEY, JSON.stringify(state));
+    localStorage.setItem(SCREEN_KEY, JSON.stringify(state));
   } catch {
     /* storage disabled — the app still works, it just forgets on reload */
   }

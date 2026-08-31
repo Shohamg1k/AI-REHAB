@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Seated neck side tilt: ear travels toward the shoulder while the shoulders stay level">
+  <rect width="320" height="200" fill="#ECF0F1"/>
+  <!-- seated body, front view: shoulders level, trunk upright -->
+  <g stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M120 92 L200 92"/>
+    <path d="M160 92 L160 150"/>
+    <path d="M120 92 L118 142"/>
+    <path d="M200 92 L202 142"/>
+  </g>
+  <!-- start: head upright, muted -->
+  <circle cx="160" cy="56" r="14" fill="none" stroke="#C2CCCD" stroke-width="6"/>
+  <path d="M160 70 L160 92" stroke="#C2CCCD" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- end: head tilted toward the shoulder -->
+  <circle cx="134" cy="62" r="14" fill="#0D6E68" stroke="none"/>
+  <path d="M160 92 L138 74" stroke="#0D6E68" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- the measured joint: head against the torso axis -->
+  <circle cx="160" cy="92" r="6" fill="#FFC24D"/>
+  <!-- motion arc, ear travelling toward the shoulder -->
+  <path d="M158 42 A 34 34 0 0 0 130 60" stroke="#0D6E68" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+  <path d="M128 52 L128 62 L138 62" stroke="#0D6E68" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- shoulders-level guide: the thing people cheat by lifting -->
+  <path d="M104 92 L216 92" stroke="#9CCFC8" stroke-width="2" stroke-dasharray="3 5"/>
+  <text x="220" y="88" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#0D6E68">Shoulders stay level</text>
+  <text x="20" y="182" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="12" fill="#47575A">Ear toward shoulder — never forced</text>
+</svg>
