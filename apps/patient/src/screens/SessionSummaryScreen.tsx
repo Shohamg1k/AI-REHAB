@@ -1,44 +1,55 @@
 import type { BodyRegion, FormScore, RepEvent } from "@ai-rehab/contracts";
 import { FORM_SCORE_CONFIDENCE_FLOOR, repConsistency } from "@ai-rehab/core";
 import { Button } from "../components/Button.js";
+import { Disclaimer } from "../components/Disclaimer.js";
 
 /**
- * H4 — post-session summary.
+ * M8 / H4 — session summary.
  *
  * Deliberately more than a score. Every reference implementation surveyed
  * (STGCN-rehab, Liao/Vakanski) ends at a single scalar, which tells a
- * patient nothing about what to change. This shows the set as a shape:
- * how consistent the reps were, which was the best, where the range
- * trended, and what to work on — each traceable to a named criterion.
+ * patient nothing about what to change. This shows the set as a shape: how
+ * consistent the reps were, which was the best, where the range trended,
+ * and what to work on — each traceable to a named criterion.
+ *
+ * Laid out to the design's stat grid and observations list, but the
+ * observations are derived from the set that was actually performed rather
+ * than the artboard's samples. The design's streak row and "Send a note to
+ * Ruth" are not reproduced: neither streak history nor clinician messaging
+ * exists yet, and a button that sends nothing is worse than no button.
  */
 
 type ScoredRep = { rep: RepEvent; score: FormScore };
 
-function Sparkline({ values }: { values: number[] }) {
-  if (values.length < 2) return null;
-  const max = Math.max(...values, 1);
-  const min = Math.min(...values, 0);
-  const span = max - min || 1;
-  const points = values
-    .map((v, i) => {
-      const x = (i / (values.length - 1)) * 100;
-      const y = 28 - ((v - min) / span) * 24;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-
+function Stat({
+  label,
+  value,
+  sublabel,
+  tone = "muted"
+}: {
+  label: string;
+  value: string;
+  sublabel: string;
+  tone?: "ok" | "pain" | "muted";
+}) {
+  const subColour =
+    tone === "ok" ? "text-ok" : tone === "pain" ? "text-pain" : "text-ink-3";
   return (
-    <svg viewBox="0 0 100 32" preserveAspectRatio="none" className="h-8 w-full" aria-hidden>
-      <polyline
-        points={points}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+    <div className="ds-card-hair flex flex-1 flex-col gap-2 p-13">
+      <span className="ds-label">{label}</span>
+      <span className="font-mono text-[25px] font-semibold tracking-[-.02em] text-ink">{value}</span>
+      <span className={`font-mono text-lb uppercase ${subColour}`}>{sublabel}</span>
+    </div>
+  );
+}
+
+function Observation({ tone, children }: { tone: "ok" | "pain" | "muted"; children: React.ReactNode }) {
+  const dot = tone === "ok" ? "bg-ok" : tone === "pain" ? "bg-pain" : "bg-ink-3";
+  return (
+    <div className="flex items-start gap-10">
+      <span className={`mt-8 h-5 w-5 flex-none rounded-pill ${dot}`} />
+      <span className="text-b2 text-ink-2">{children}</span>
+    </div>
   );
 }
 
@@ -85,122 +96,106 @@ export function SessionSummaryScreen({
   }
   const topShortfall = [...shortfalls.entries()].sort((a, b) => b[1] - a[1])[0] ?? null;
 
-  const tone =
-    avgScore === null
-      ? "neutral"
-      : avgScore >= 80
-        ? "good"
-        : avgScore >= 55
-          ? "fair"
-          : "work";
-
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-16 px-16 py-24">
-      <div className="flex flex-col items-center gap-8 rounded-xl border border-line bg-surf p-24 text-center">
-        <span aria-hidden className="text-h1">
-          {tone === "good" ? "🎉" : "✅"}
-        </span>
-        <h1 className="text-h1 text-ink">Set complete</h1>
-        <p className="text-b2 text-ink-2">{exerciseName}</p>
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+      <div className="flex flex-col gap-14 px-20 pt-10">
+        <div className="flex flex-col gap-4">
+          <span className="ds-label">{exerciseName}</span>
+          <h1 className="text-d1 text-ink">Set complete</h1>
+        </div>
 
-        <div className="mt-8 flex items-end gap-24">
-          <div className="flex flex-col items-center">
-            <span className="text-metric tabular-nums text-ink">{reps.length}</span>
-            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Reps</span>
+        <div className="flex flex-col gap-10">
+          <div className="flex items-stretch gap-10">
+            <Stat
+              label="Reps"
+              value={String(reps.length)}
+              sublabel={lowConfidenceCount === 0 ? "All reps scored" : `${confident.length} scored`}
+              tone={lowConfidenceCount === 0 ? "ok" : "muted"}
+            />
+            <Stat
+              label="Form"
+              value={avgScore === null ? "—" : String(avgScore)}
+              sublabel={avgScore === null ? "Not enough signal" : "Average this set"}
+              tone={avgScore !== null && avgScore >= 80 ? "ok" : "muted"}
+            />
           </div>
-          <div className="flex flex-col items-center">
-            <span
-              className={`text-metric tabular-nums ${
-                tone === "good"
-                  ? "text-emerald-600"
-                  : tone === "work"
-                    ? "text-amber-600"
-                    : "text-ink"
-              }`}
-            >
-              {avgScore ?? "—"}
-            </span>
-            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Form</span>
+          <div className="flex items-stretch gap-10">
+            <Stat
+              label="Discomfort"
+              value={painReport ? `${painReport.severity}/5` : "None"}
+              sublabel={
+                painReport?.region ? painReport.region.replace(/_/g, " ") : "Nothing reported"
+              }
+              tone={painReport && painReport.severity > 0 ? "pain" : "muted"}
+            />
+            <Stat
+              label="Capture"
+              value={lowConfidenceCount === 0 ? "Good" : "Mixed"}
+              sublabel={
+                lowConfidenceCount === 0
+                  ? "Scores trustworthy"
+                  : `${lowConfidenceCount} rep${lowConfidenceCount === 1 ? "" : "s"} unscored`
+              }
+            />
           </div>
-          {consistency !== null && (
-            <div className="flex flex-col items-center">
-              <span className="text-metric tabular-nums text-ink">{consistency}</span>
-              <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
-                Consistency
+        </div>
+
+        <div className="flex flex-col gap-10">
+          <span className="ds-label">What we noticed</span>
+
+          {best && (
+            <Observation tone="ok">
+              Your best was rep{" "}
+              <span className="font-mono font-semibold text-ink">{best.rep.repIndex + 1}</span> at{" "}
+              <span className="font-mono font-semibold text-ink">
+                {Math.round(best.score.score)}
               </span>
-            </div>
+              . {best.score.reason}
+            </Observation>
+          )}
+
+          {consistency !== null && (
+            <Observation tone={consistency >= 85 ? "ok" : "muted"}>
+              {consistency >= 85
+                ? "Your range held steady from the first rep to the last."
+                : "Your range drifted across the set — often a sign of fatigue."}
+            </Observation>
+          )}
+
+          {topShortfall && (
+            <Observation tone="muted">
+              Work on next time: <span className="text-ink">{topShortfall[0]}</span> — it came up
+              short on{" "}
+              <span className="font-mono font-semibold text-ink">{topShortfall[1]}</span> of{" "}
+              {confident.length} scored {confident.length === 1 ? "rep" : "reps"}.
+            </Observation>
+          )}
+
+          {painReport && (
+            <Observation tone="pain">
+              You reported {painReport.severity} out of 5
+              {painReport.region ? ` in your ${painReport.region.replace(/_/g, " ")}` : ""}. It is
+              saved with this set.
+            </Observation>
+          )}
+
+          {lowConfidenceCount > 0 && (
+            <Observation tone="muted">
+              {lowConfidenceCount} rep{lowConfidenceCount === 1 ? "" : "s"} had low tracking
+              confidence and {lowConfidenceCount === 1 ? "is" : "are"} not included above.
+            </Observation>
           )}
         </div>
       </div>
 
-      {romPerRep.length >= 2 && (
-        <div className="flex flex-col gap-8 rounded-lg border border-line bg-surf p-16">
-          <div className="flex items-baseline justify-between">
-            <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
-              Range across the set
-            </span>
-            <span className="text-cap text-ink-3">
-              rep 1 → rep {romPerRep.length}
-            </span>
-          </div>
-          <div className="text-teal">
-            <Sparkline values={romPerRep} />
-          </div>
-          <p className="text-cap text-ink-3">
-            {consistency !== null && consistency >= 85
-              ? "Your range held steady from first rep to last."
-              : "Your range drifted across the set — often a sign of fatigue."}
-          </p>
-        </div>
-      )}
+      <div className="flex-1" />
 
-      {best && (
-        <div className="rounded-lg border border-line bg-surf p-16">
-          <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Best rep</span>
-          <p className="mt-4 text-b1 text-ink">
-            Rep {best.rep.repIndex + 1} — {Math.round(best.score.score)} / 100
-          </p>
-          <p className="text-cap text-ink-3">{best.score.reason}</p>
-        </div>
-      )}
-
-      {topShortfall && (
-        <div className="rounded-lg border border-teal-wash bg-teal-wash p-16">
-          <span className="text-b2 font-medium uppercase tracking-wide text-teal">Work on next time</span>
-          <p className="mt-4 text-b1 text-ink">{topShortfall[0]}</p>
-          <p className="text-cap text-ink-3">
-            Came up short on {topShortfall[1]} of {confident.length} scored{" "}
-            {confident.length === 1 ? "rep" : "reps"}.
-          </p>
-        </div>
-      )}
-
-      {lowConfidenceCount > 0 && (
-        <p className="text-cap text-ink-3">
-          {lowConfidenceCount} rep{lowConfidenceCount === 1 ? "" : "s"} had low tracking confidence
-          and {lowConfidenceCount === 1 ? "is" : "are"} not included above.
-        </p>
-      )}
-
-      <div className="rounded-lg border border-line bg-surf p-16">
-        <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">
-          Pain this session
-        </span>
-        {painReport ? (
-          <p className="mt-4 text-b1 text-ink">
-            You said {painReport.severity} out of 5
-            {painReport.region ? ` — ${painReport.region.replace("_", " ")}` : ""}.
-          </p>
-        ) : (
-          <p className="mt-4 text-b1 text-ink">No pain reported.</p>
-        )}
+      <div className="flex flex-col gap-9 px-20 pb-12 pt-20">
+        <Button onClick={onDone}>Done for today</Button>
+        <Disclaimer>
+          These numbers describe what the camera could see. They are not a clinical assessment.
+        </Disclaimer>
       </div>
-
-      <p className="text-cap text-ink-3">
-        These numbers describe what the camera could see. They are not a clinical assessment.
-      </p>
-
-      <Button onClick={onDone}>Done</Button>
     </div>
   );
 }

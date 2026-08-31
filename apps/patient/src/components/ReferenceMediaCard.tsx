@@ -20,7 +20,7 @@ export function ReferenceMediaCard({
   const [failed, setFailed] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surf">
+    <div className="overflow-hidden rounded-md bg-surf shadow-hair">
       <div className="relative bg-sunk">
         {failed ? (
           <div className="flex items-center justify-center px-16 py-24 text-center text-cap text-ink-3">
@@ -74,7 +74,7 @@ export function ReferenceMediaDisclosure({ media }: { media: ReferenceMedia }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-lg border border-line bg-surf">
+    <div className="rounded-md bg-surf shadow-hair">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

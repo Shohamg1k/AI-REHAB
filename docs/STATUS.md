@@ -18,7 +18,9 @@ The design source of truth is `figma-svg/_source/v2.html` (the artboards the SVG
 
 **Bottom navigation now exists** — Today / Progress / Program / Sharing, which the app simply did not have. It is deliberately hidden for the whole exercise flow (intro → camera → live → rest → summary): a way out of a running set should not sit next to the set.
 
-**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M10 Sharing & privacy (new screen).
+**Screens rebuilt:** M1 Welcome (the three product promises, verbatim), M2 Today (program list with exactly one lifted "up next" card carrying its *why*), M3 Why this exercise (numbered technique steps, and the safety cap drawn from the exercise's *actual* thresholds rather than the artboard's named clinician), M8 Session summary (the design's 2×2 stat grid and observations list, fed by the set that was really performed), M9 Progress (seven-day streak strip from real adherence data), M10 Sharing & privacy (new screen).
+
+**A duplication M3 exposed:** the reference-media card and the new numbered steps both render `keyPoints`, so every technique cue appeared twice. The card's existing `compact` flag now suppresses its copy on that screen.
 
 **A duplication fixed on the way:** the data-sharing consent and access log lived at the bottom of Progress *and* now on Sharing. Progress rendered them even when signed out, showing a consent switch with nothing behind it. They now live only on Sharing, with their test coverage moved across rather than dropped.
 
@@ -96,7 +98,8 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 
 ## What's still a gap
 
-- **Screens M3–M9 are not yet rebuilt to their artboards.** They pick up the new palette, type and components automatically, so the app is visually coherent, but their structure and copy still differ from the designs. `docs/DESIGN-SCREENS.md` has the literal spec for each; this is continuation work, not a blocker.
+- **Screens M4–M7 are not yet rebuilt to their artboards** (camera setup, live session, safety block, rest check-in). They pick up the new palette, type and components automatically, so the app is visually coherent, but their structure and copy still differ from the designs. `docs/DESIGN-SCREENS.md` has the literal spec for each; this is continuation work, not a blocker. M5/M6 are the most involved: the design makes them full-bleed camera screens with everything absolutely positioned, unlike every other screen.
+- **M9's form-score chart and left-vs-right symmetry card are not built.** Neither a cross-session score series nor a per-side comparison is computed anywhere yet, and drawing the artboard's sample curve would show the patient a trend that is not theirs.
 - **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.
 - **`Program` in the bottom nav routes to Today.** There is no separate program screen yet; today's list is the program. Better than a stub, but it is not what the tab implies.
 - **No screen has been compared side by side against its artboard by eye.** The rebuild followed a written spec and was verified through the DOM (computed colours, fonts, type sizes, copy) because the Browser pane in this environment renders hidden. Spacing and optical alignment need a human to look at them.

@@ -76,7 +76,7 @@ describe("HistoryScreen", () => {
 
     expect(await screen.findByText(/sit-to-stand/)).toBeInTheDocument();
     expect(screen.getByText(/8 reps/)).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument(); // the streak count
+    expect(screen.getByText("1-day streak")).toBeInTheDocument();
     expect(screen.getByText(/First session/)).toBeInTheDocument();
   });
 

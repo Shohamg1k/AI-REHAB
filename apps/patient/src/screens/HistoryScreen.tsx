@@ -3,11 +3,35 @@ import type { AdherenceDay, RomTrendSeries, SessionSummary } from "@ai-rehab/con
 import { ApiError, fetchAdherence, fetchRomTrend, fetchSessions } from "../lib/api.js";
 
 /**
- * G2 (session list + ROM trend) + H1/H2 (streak, calendar, milestones) +
- * G5 (patient-visible access log + the data-sharing toggle that actually
- * gates it — see apps/api/src/routes/patients.ts), in one screen. Nothing
- * here blocks the guest-first flow: only reachable when signed in.
+ * M9 — Progress. G2 (session list + ROM trend) and H1/H2 (streak, week
+ * strip, milestones). Consent and the access log used to live here too;
+ * they now have their own screen (M10) so there is exactly one place to
+ * change who can see what.
+ *
+ * The design's form-score chart and left-vs-right symmetry card are not
+ * reproduced: neither a cross-session score series nor per-side comparison
+ * is computed anywhere yet, and drawing the artboard's sample curve would
+ * be showing the patient a trend that is not theirs.
  */
+
+/** The last seven days as (letter, isActive, isToday), oldest first. */
+function lastSevenDays(active: Set<string>): Array<{ key: string; letter: string; on: boolean; today: boolean }> {
+  const out = [];
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0, 10);
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    out.push({
+      key,
+      letter: ["S", "M", "T", "W", "T", "F", "S"][d.getDay()]!,
+      on: active.has(key),
+      today: key === todayKey
+    });
+  }
+  return out;
+}
 
 function computeStreak(days: AdherenceDay[]): number {
   const active = new Set(days.filter((d) => d.sessionCount > 0).map((d) => d.date));
@@ -98,15 +122,39 @@ export function HistoryScreen() {
   const milestones = sessions && adherence ? computeMilestones(streak ?? 0, sessions.length) : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-16 px-16 py-24">
-      <h1 className="text-h1 text-ink">Your history</h1>
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-12 px-20 pb-10 pt-8">
+      <h1 className="text-d1 text-ink">Progress</h1>
 
       {error && <p className="text-b2 text-dang">{error}</p>}
 
-      {streak !== null && streak > 0 && (
-        <div className="rounded-lg border border-teal-wash bg-teal-wash p-16 text-center">
-          <span className="text-metric text-teal">{streak}</span>
-          <p className="text-cap text-ink-3">day streak</p>
+      {adherence && (
+        <div className="ds-card-hair flex flex-col gap-11">
+          <div className="flex items-baseline">
+            <span className="flex-1 text-h2 text-ink">
+              {streak && streak > 0 ? `${streak}-day streak` : "No streak yet"}
+            </span>
+            <span className="font-mono text-[11px] uppercase text-ink-3">
+              {lastSevenDays(activeDays).filter((d) => d.on).length} of 7 days
+            </span>
+          </div>
+          <div className="flex gap-6" role="img" aria-label="Activity for the last seven days">
+            {lastSevenDays(activeDays).map((d, i) => (
+              <div key={d.key} className="flex flex-1 flex-col items-center gap-5">
+                <span className="font-mono text-[10px] text-ink-3">{d.letter}</span>
+                <span
+                  title={d.key}
+                  className={`h-30 w-full rounded-sm ${
+                    d.on
+                      ? "bg-teal"
+                      : d.today
+                        ? "bg-teal-wash shadow-[inset_0_0_0_1.5px_#0D6E68]"
+                        : "bg-sunk"
+                  }`}
+                  data-day={i}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -115,11 +163,7 @@ export function HistoryScreen() {
           {milestones.map((m) => (
             <span
               key={m.id}
-              className={`rounded-pill border px-12 py-4 text-cap ${
-                m.achieved
-                  ? "border-ok bg-ok-wash text-ok"
-                  : "border-line bg-sunk text-ink-3"
-              }`}
+              className={`ds-chip ${m.achieved ? "bg-ok-wash text-ok" : "bg-sunk text-ink-3"}`}
             >
               {m.achieved ? "✓ " : ""}
               {m.label}
@@ -129,8 +173,8 @@ export function HistoryScreen() {
       )}
 
       {adherence && (
-        <div className="rounded-lg border border-line bg-surf p-16">
-          <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Last 4 weeks</span>
+        <div className="ds-card-hair">
+          <span className="ds-label">Last 4 weeks</span>
           <div className="mt-8 grid grid-cols-7 gap-4" role="img" aria-label="Session activity calendar, last 28 days">
             {last28DayKeys().map((key) => (
               <div
@@ -144,8 +188,8 @@ export function HistoryScreen() {
       )}
 
       {romTrend && romTrend.length > 0 && (
-        <div className="rounded-lg border border-line bg-surf p-16">
-          <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Range of motion</span>
+        <div className="ds-card-hair">
+          <span className="ds-label">Range of motion</span>
           <div className="mt-8 flex flex-col gap-12">
             {romTrend.map((series) => {
               const first = series.points[0]?.peakAngle;
@@ -173,7 +217,7 @@ export function HistoryScreen() {
       )}
 
       <div>
-        <span className="text-b2 font-medium uppercase tracking-wide text-ink-2">Sessions</span>
+        <span className="ds-label">Sessions</span>
         {sessions === null && !error && <p className="mt-4 text-b2 text-ink-2">Loading…</p>}
         {sessions && sessions.length === 0 && (
           <p className="mt-4 text-b2 text-ink-2">No synced sessions yet.</p>
@@ -181,7 +225,7 @@ export function HistoryScreen() {
         {sessions && sessions.length > 0 && (
           <ul className="mt-8 flex flex-col gap-8">
             {sessions.map((s) => (
-              <li key={s.sessionId} className="rounded-lg border border-line bg-surf p-12">
+              <li key={s.sessionId} className="rounded-md bg-surf p-12 shadow-hair">
                 <div className="flex items-center justify-between text-b2 text-ink">
                   <span>{s.wallClock ? new Date(s.wallClock).toLocaleDateString() : "Unknown date"}</span>
                   <span className="text-ink-3">{s.exerciseIds.join(", ") || "—"}</span>
