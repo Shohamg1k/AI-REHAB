@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE, LocaleSchema, localeInfo, type Locale } from "@ai-rehab/contracts";
+import { bundledTts, playClip, stopClip } from "./tts/bundledTts.js";
 
 /**
  * Browser SpeechSynthesis wrapper for A3 (live corrective coaching), E3
@@ -85,6 +86,24 @@ export function loadSpeechPrefs(): SpeechPrefs {
     prefs = DEFAULT_PREFS; // private-mode Safari and friends
   }
   return prefs;
+}
+
+/**
+ * The bundled voice id for the current locale, or null when none is staged.
+ *
+ * Set by `useBundledVoice` rather than read here, because the manifest fetch
+ * is async and `speak` has to stay synchronous — a cue that has to await a
+ * network round trip before making a sound is a cue that arrives late.
+ */
+let bundledVoiceId: string | null = null;
+
+export function setBundledVoiceId(id: string | null): void {
+  bundledVoiceId = id;
+  for (const listener of listeners) listener();
+}
+
+export function getBundledVoiceId(): string | null {
+  return bundledVoiceId;
 }
 
 const listeners = new Set<() => void>();
@@ -187,8 +206,9 @@ export function voiceCoverage(
 
 export function setSpeechEnabled(value: boolean): void {
   enabled = value;
-  if (!value && isSpeechSupported()) {
-    window.speechSynthesis.cancel();
+  if (!value) {
+    if (isSpeechSupported()) window.speechSynthesis.cancel();
+    stopClip();
   }
 }
 
@@ -227,20 +247,66 @@ export function speakLocalised(
   localise: (locale: Locale) => string,
   opts: { urgent?: boolean } = {}
 ): void {
-  if (!enabled || !isSpeechSupported()) return;
+  // Not gated on `isSpeechSupported`: the bundled engine plays through
+  // WebAudio and works on a browser with no speechSynthesis at all.
+  if (!enabled) return;
 
-  if (opts.urgent) {
+  if (opts.urgent && isSpeechSupported()) {
     window.speechSynthesis.cancel(); // a safety message pre-empts whatever was being said
   }
 
   const p = loadSpeechPrefs();
   const voices = listVoices();
+
+  /**
+   * The bundled voice is preferred, but only for text already rendered.
+   *
+   * Synthesis costs ~5s in a browser (ADR-0011). Waiting for it would make a correction
+   * arrive after the rep it describes, so anything not pre-rendered goes to
+   * the device voice, which starts speaking immediately. `prerenderCues`
+   * during the countdown is what makes the cached path the common one.
+   */
+  if (bundledVoiceId) {
+    const text = localise(p.locale);
+    const clip = bundledTts.cached(text);
+    if (clip) {
+      if (opts.urgent) stopClip();
+      playClip(clip);
+      return;
+    }
+  }
+
+  if (!isSpeechSupported()) return;
   const locale = spokenLocale(p, voices);
   utter(localise(locale), locale, p, voices);
 }
 
+/**
+ * Render lines into the bundled voice's cache ahead of time. Called during the
+ * pre-set countdown, where there are ten seconds of nothing else to do.
+ * Resolves to how many were rendered; failures degrade to the device voice.
+ */
+export async function prerenderCues(texts: readonly string[]): Promise<number> {
+  if (!bundledVoiceId) return 0;
+  return bundledTts.prerender(bundledVoiceId, texts);
+}
+
 /** Speaks a sample so the patient can hear a voice before committing to it. */
-export function previewVoice(p: SpeechPrefs, sampleFor: (locale: Locale) => string): void {
+export async function previewVoice(
+  p: SpeechPrefs,
+  sampleFor: (locale: Locale) => string
+): Promise<void> {
+  // Preview is the one place waiting for synthesis is fine — the patient
+  // pressed a button and is listening for the answer.
+  if (bundledVoiceId) {
+    try {
+      const clip = await bundledTts.synthesise(bundledVoiceId, sampleFor(p.locale));
+      playClip(clip);
+      return;
+    } catch {
+      // Fall through to the device voice.
+    }
+  }
   if (!isSpeechSupported()) return;
   window.speechSynthesis.cancel();
   const voices = listVoices();
@@ -250,4 +316,8 @@ export function previewVoice(p: SpeechPrefs, sampleFor: (locale: Locale) => stri
 
 export function stopSpeaking(): void {
   if (isSpeechSupported()) window.speechSynthesis.cancel();
+  // The bundled engine plays through WebAudio, which `speechSynthesis.cancel`
+  // knows nothing about — the leak this function was written to fix would
+  // otherwise come straight back for bundled voices.
+  stopClip();
 }

@@ -74,6 +74,9 @@ export type UiStrings = {
     sample: string;
     /** Shown when the device has no voice for the chosen language. */
     noVoice: (language: string) => string;
+    /** Shown instead of `noVoice` when a voice ships with the app (ADR-0011). */
+    bundledVoice: (language: string) => string;
+    nonCommercial: string;
     /**
      * The unreviewed-translation caveat, in the language being warned about.
      * Showing it only in English would leave it unreadable by exactly the
@@ -134,7 +137,9 @@ const en: UiStrings = {
     sample: "This is how your coaching will sound.",
     unreviewedNote: UNREVIEWED_TRANSLATION_NOTE,
     noVoice: (language) =>
-      `This device has no ${language} voice installed. Cues will be shown in ${language} and spoken in English.`
+      `This device has no ${language} voice installed. Cues will be shown in ${language} and spoken in English.`,
+    bundledVoice: (language) => `${language} voice included with the app — no install needed.`,
+    nonCommercial: "non-commercial use only"
   }
 };
 
@@ -190,7 +195,9 @@ const es: UiStrings = {
     unreviewedNote:
       "Estas traducciones aún no han sido revisadas por un hablante nativo. Si una señal suena rara, sigue el movimiento que ves en pantalla y consulta a tu fisioterapeuta.",
     noVoice: (language) =>
-      `Este dispositivo no tiene ninguna voz en ${language}. Las señales se mostrarán en ${language} y se hablarán en inglés.`
+      `Este dispositivo no tiene ninguna voz en ${language}. Las señales se mostrarán en ${language} y se hablarán en inglés.`,
+    bundledVoice: (language) => `Voz en ${language} incluida en la aplicación — no hace falta instalar nada.`,
+    nonCommercial: "solo para uso no comercial"
   }
 };
 
@@ -246,7 +253,9 @@ const hi: UiStrings = {
     unreviewedNote:
       "इन अनुवादों की जाँच अभी तक किसी धाराप्रवाह बोलने वाले ने नहीं की है। अगर कोई संकेत अटपटा लगे, तो स्क्रीन पर दिख रहे मूवमेंट का पालन करें और अपने फ़िज़ियोथेरेपिस्ट से पूछें।",
     noVoice: (language) =>
-      `इस डिवाइस में ${language} की कोई आवाज़ नहीं है। संकेत ${language} में दिखाए जाएँगे और अंग्रेज़ी में बोले जाएँगे।`
+      `इस डिवाइस में ${language} की कोई आवाज़ नहीं है। संकेत ${language} में दिखाए जाएँगे और अंग्रेज़ी में बोले जाएँगे।`,
+    bundledVoice: (language) => `${language} आवाज़ ऐप के साथ ही आती है — कुछ इंस्टॉल करने की ज़रूरत नहीं।`,
+    nonCommercial: "केवल ग़ैर-व्यावसायिक उपयोग के लिए"
   }
 };
 
@@ -302,7 +311,9 @@ const fr: UiStrings = {
     unreviewedNote:
       "Ces traductions n'ont pas encore été relues par une personne parlant couramment la langue. Si une consigne semble étrange, suivez le mouvement affiché à l'écran et demandez à votre kinésithérapeute.",
     noVoice: (language) =>
-      `Cet appareil n'a aucune voix en ${language}. Les consignes seront affichées en ${language} et prononcées en anglais.`
+      `Cet appareil n'a aucune voix en ${language}. Les consignes seront affichées en ${language} et prononcées en anglais.`,
+    bundledVoice: (language) => `Voix en ${language} incluse dans l’application — rien à installer.`,
+    nonCommercial: "usage non commercial uniquement"
   }
 };
 

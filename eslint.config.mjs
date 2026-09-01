@@ -20,7 +20,10 @@ export default [
       "**/build/**",
       "**/node_modules/**",
       "**/*.config.{js,cjs,mjs,ts}",
-      "apps/patient/src/vite-env.d.ts"
+      "apps/patient/src/vite-env.d.ts",
+      // Staged third-party assets (pose model, Piper phonemizer). Vendored
+      // bundles, gitignored, and not ours to lint.
+      "apps/patient/public/**"
     ]
   },
   {

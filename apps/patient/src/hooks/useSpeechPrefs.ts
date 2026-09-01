@@ -5,9 +5,11 @@ import {
   loadSpeechPrefs,
   onVoicesChanged,
   saveSpeechPrefs,
+  setBundledVoiceId,
   subscribeSpeechPrefs,
   type SpeechPrefs
 } from "../lib/speech.js";
+import { bundledVoiceFor, type BundledVoice } from "../lib/tts/bundledTts.js";
 import { strings, type UiStrings } from "../lib/i18n/ui.js";
 
 /**
@@ -41,4 +43,30 @@ export function useVoices(): SpeechSynthesisVoice[] {
     return onVoicesChanged(refresh);
   }, []);
   return voices;
+}
+
+/**
+ * Resolves the bundled voice for the patient's locale and tells `speech.ts`
+ * about it (ADR-0011).
+ *
+ * The manifest fetch is async but `speak` must stay synchronous, so the id is
+ * pushed into the speech module rather than read from here on every call.
+ * Returns the voice for the settings card, which needs its licence to display.
+ */
+export function useBundledVoice(locale: Locale): BundledVoice | null {
+  const [voice, setVoice] = useState<BundledVoice | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void bundledVoiceFor(locale).then((found) => {
+      if (cancelled) return;
+      setVoice(found);
+      setBundledVoiceId(found?.id ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
+
+  return voice;
 }

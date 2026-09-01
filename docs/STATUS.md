@@ -33,6 +33,34 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## A Hindi voice that ships with the app (H9, ADR-0011)
+
+H9 gave patients four languages and then ran into the limit of the Web Speech API: **it can only use voices the operating system already has.** This machine has eight English voices and no Hindi one. The app handled that honestly — captions in Hindi, speech in English, and a note saying so — but honest handling of a missing feature is still a missing feature, and "install a language pack" is not an answer for someone doing knee rehab on a borrowed laptop.
+
+A neural voice now ships with the app: espeak-ng (wasm) phonemises, a ~60MB Piper VITS graph synthesises, both in a Web Worker, both served from our own origin.
+
+### The licences were the hard part, not the code
+
+**Every Piper Hindi voice is encumbered**, which was checked rather than assumed: `hi_IN-pratham-medium` and `hi_IN-priyamvada-medium` are **CC BY-NC-SA 4.0**; `hi_IN-rohan-medium` sits under a bespoke IIT Madras agreement whose terms are not public. The product owner was asked directly and **confirmed this project is non-commercial**, which makes CC BY-NC-SA usable. The attribution and the non-commercial term render in the Settings card, and `nonCommercial` is a flag in the voice registry so the constraint is visible where a second voice would be added. **If that answer ever changes, ADR-0011 is the blocker — and the fix is not "swap the voice", because there is no permissive Piper Hindi voice.**
+
+The permissive alternative was investigated and rejected on a *technical* blocker, not a licensing one. **Kokoro-82M is Apache-2.0 with four Hindi voices** and one 80MB model covering all four of our locales — strictly better on both counts. But `kokoro-js` refuses non-English voices, and the `phonemizer` package the JS ecosystem depends on is an **English-only** espeak-ng build (verified: `hi`, `es`, `fr` all return "Invalid language identifier"). Piper's wasm *is* a full 113-language build, `hi_dict` included, which is the entire reason this route works today. **Compiling espeak-ng to wasm with full language data is the unlock** if the commercial answer changes, and it would not require touching `ttsWorker.ts`.
+
+### Measure in the browser, not in Node
+
+The Node spike said 1.4s per cue. **The browser says ~5s** — single-threaded wasm, because threaded wasm needs cross-origin isolation this app cannot assume of whoever deploys it. That difference changed the design after it was written: pre-rendering was originally scheduled during the 10-second countdown, which does not fit six cues at 5s each. It now starts when the session mounts and runs through the intro, framing and countdown — a minute or more — in the spec's own cue priority order, so a patient who rushes still gets the lines most likely to matter. Cache hits play in 0.5ms.
+
+Anything that cannot be rendered in advance falls back to the device voice. Safety reasons quote live numbers, so they cannot be pre-rendered — and for a safety message "starts speaking immediately" beats "sounds better", with the full text captioned on the sheet regardless.
+
+### Verified end to end in a browser
+
+Pressing "Test voice" with Hindi selected played **1.88s of 22050Hz audio from the bundled voice**, with the device speech path untouched. Cold first synthesis is ~13s (one-time ONNX session creation); warm is ~5s; cached is 0.5ms.
+
+### The privacy guard earned its keep
+
+`privacy.test.ts` failed on the new `fetch` calls, exactly as designed. Rather than widening the outbound allowlist — which is about *data leaving the device*, and these send nothing — a second, narrower category was added for files that fetch our own staged assets, with a test asserting every fetch in them targets a literal path under the asset base. `fetch(someUrl)` in those files now fails the build; that was confirmed by temporarily introducing one.
+
+---
+
 ## Hands-free session control (C7, ADR-0010)
 
 A patient doing an exercise is several feet away with both hands busy, often on the floor. Every control we shipped needed them to walk back and tap. The pain bookmark was close to useless mid-set: by the time they reached the phone, the rep they wanted to flag was several reps ago.
@@ -262,6 +290,8 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
 - **Voice commands have never been spoken to.** The matcher is tested hard, but the `SpeechRecognition` plumbing around it — permission, continuous restart, error recovery — has not been exercised by an actual microphone, because the Browser pane here has none. Recognition *quality*, especially for Hindi, is the vendor's and is entirely unmeasured.
 - **ADR-0006's regulatory question is now urgent rather than theoretical, for the second time.** Voice data in a health context has its own treatment under several regimes. ADR-0009 made cross-border processing of derived data a live question; ADR-0010 adds unbounded audio to it.
+- **The bundled voice has never been listened to by a human.** It was verified as real audio — correct sample rate, plausible duration, non-zero peak, played through WebAudio — but nobody has confirmed the Hindi *sounds* right, and the voice is a community model trained by a third party. A native speaker should listen before this is put in front of a patient.
+- **~5s per cue means pre-rendering is load-bearing.** Anything added to the spoken channel later must either be pre-renderable or accept the device-voice fallback. There is no path where the bundled voice says something new quickly.
 - **No non-English string has been checked by a fluent speaker.** The Spanish, Hindi and French cue text, safety sentences and UI copy were written without review. The bounded part of the risk is that the *decision* to stop is language-independent — the gate fires on numbers, and the sheet offers no way to continue in any language — but the wording a patient reads while being stopped is unreviewed, and one wrong verb there matters more than anywhere else in the app.
 - **Only English speech has ever been heard.** The dev machine has eight English voices and none for Spanish, Hindi or French, so the non-English *spoken* path is verified by unit test and by watching the fallback behave, never by ear. What a Hindi voice actually does with these strings is unknown.
 - **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.
