@@ -148,6 +148,23 @@ export function SharingScreen({
           </p>
         </div>
 
+        {/*
+          Added with ADR-0009. This screen is where a patient comes to find
+          out who can see their data, so a service that processes it cannot
+          be mentioned only in a footnote on another screen.
+        */}
+        <div className="ds-card-hair flex flex-col gap-6">
+          <div className="flex items-center gap-6">
+            <Icon name="warning" size={15} className="text-warn" />
+            <span className="ds-label text-warn">Sent to an AI service</span>
+          </div>
+          <p className="text-b2 text-ink-2">
+            When you ask the coach a question after a set, that set's figures — reps, form scores,
+            what you said about pain — are sent to Groq to answer it. Your camera video is not, and
+            neither is your name or email. If you never ask, nothing is sent.
+          </p>
+        </div>
+
         {error && <p className="text-b2 text-dang">{error}</p>}
 
         {!signedIn && (
