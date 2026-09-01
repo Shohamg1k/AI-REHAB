@@ -16,9 +16,17 @@ import { Disclaimer } from "./Disclaimer.js";
  * unsourced judgement, and the framing stays non-diagnostic (CLAUDE.md §6).
  */
 export function ReportCard({ report }: { report: ProgressReport }) {
-  const period = `${new Date(report.periodStart).toLocaleDateString()} – ${new Date(
-    report.periodEnd
-  ).toLocaleDateString()}`;
+  // Formatted from the ISO date prefix, not by parsing to a local Date.
+  // Periods are bucketed in UTC (as adherence has always been), so parsing
+  // `2026-09-01T23:59:59.999Z` in a positive-offset timezone rendered a
+  // single day as "9/1/2026 – 9/2/2026".
+  const startDate = report.periodStart.slice(0, 10);
+  const endDate = report.periodEnd.slice(0, 10);
+  const asLocalDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString();
+  const period =
+    startDate === endDate
+      ? asLocalDate(startDate)
+      : `${asLocalDate(startDate)} – ${asLocalDate(endDate)}`;
 
   return (
     <div className="flex flex-col gap-14">

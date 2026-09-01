@@ -17,6 +17,7 @@ import type {
 import {
   computeAdherence,
   computeBaseline,
+  computeDailyReports,
   computeReport,
   computeRomTrend,
   summariseSessions,
@@ -281,6 +282,21 @@ export class MemoryStore implements Store {
     const patient = await this.findUserById(tenantId, patientId);
     const userSessions = this.sessions.get(patientId);
     return computeReport(userSessions ? [...userSessions.values()] : [], {
+      patientId,
+      patientDisplayName: patient?.displayName ?? "Unknown patient",
+      periodStart: period.start,
+      periodEnd: period.end
+    });
+  }
+
+  async getDailyReports(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport[]> {
+    const patient = await this.findUserById(tenantId, patientId);
+    const userSessions = this.sessions.get(patientId);
+    return computeDailyReports(userSessions ? [...userSessions.values()] : [], {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,

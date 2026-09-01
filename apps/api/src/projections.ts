@@ -266,6 +266,15 @@ export function computeReport(
     }
   }
 
+  // The latest session in the window, by wall clock. Not `Date.now()`: this
+  // projection is deliberately clock-free so it can be tested against a
+  // fixture, and "when did this report last change" is a fact about the
+  // events, not about when someone happened to open it.
+  const lastActivityAt =
+    withEvents.length > 0
+      ? withEvents.reduce((a, b) => (b.startedAt > a.startedAt ? b : a)).startedAt
+      : null;
+
   const adherence = computeAdherence(inPeriod);
   const avgFormScore = scoredReps > 0 ? Math.round((scoreSum / scoredReps) * 10) / 10 : null;
   const perExercise = computeExerciseSummaries(withEvents);
@@ -277,6 +286,7 @@ export function computeReport(
     patientDisplayName: input.patientDisplayName,
     periodStart: input.periodStart,
     periodEnd: input.periodEnd,
+    lastActivityAt,
     sessionCount: inPeriod.length,
     activeDays: adherence.length,
     totalReps,
@@ -467,4 +477,52 @@ function buildObservations(d: {
   }
 
   return out;
+}
+
+
+/**
+ * F1 — one report per day the patient did something.
+ *
+ * **Why a day is the right period, and why nothing is stored.** A report is
+ * recomputed from the event log on every read, so "the report for today" is
+ * always already up to date: finish another exercise and the same day's report
+ * simply says more the next time it is opened. There is no generate step, no
+ * regenerate step, and no stored copy that can disagree with the events it
+ * came from.
+ *
+ * Days with no sessions are omitted rather than returned empty. A list of
+ * blank reports for the days someone did not exercise is noise, and adherence
+ * already answers "which days were missed" properly.
+ *
+ * Clock-free, like everything else in this file: the caller passes the window,
+ * and days are bucketed by the `wallClock` on `session_started` — the same
+ * UTC-date key `computeAdherence` uses, so the two can never disagree about
+ * which day a session belongs to.
+ */
+export function computeDailyReports(
+  sessions: StoredSession[],
+  input: { patientId: string; patientDisplayName: string; periodStart: string; periodEnd: string }
+): ProgressReport[] {
+  const byDate = new Map<string, StoredSession[]>();
+
+  for (const session of sessions) {
+    const started = sortedEvents(session).find((e) => e.type === "session_started");
+    if (started?.type !== "session_started") continue;
+    if (started.wallClock < input.periodStart || started.wallClock > input.periodEnd) continue;
+    const date = started.wallClock.slice(0, 10); // YYYY-MM-DD, as computeAdherence keys it
+    byDate.set(date, [...(byDate.get(date) ?? []), session]);
+  }
+
+  return [...byDate.entries()]
+    // Newest first: the day someone is most likely to want is the one they
+    // just finished.
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, daysSessions]) =>
+      computeReport(daysSessions, {
+        patientId: input.patientId,
+        patientDisplayName: input.patientDisplayName,
+        periodStart: `${date}T00:00:00.000Z`,
+        periodEnd: `${date}T23:59:59.999Z`
+      })
+    );
 }

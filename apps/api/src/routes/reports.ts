@@ -4,6 +4,15 @@ import type { Store } from "../store/types.js";
 
 /** Default reporting window when the caller doesn't specify one. */
 const DEFAULT_PERIOD_DAYS = 7;
+/** How far back the daily list may reach. Each day is a full report. */
+const MAX_DAILY_DAYS = 90;
+const DEFAULT_DAILY_DAYS = 30;
+
+/** Clamped, because each day in the window is a full report to compute. */
+function dailyPeriod(daysParam: string | undefined): { start: string; end: string } {
+  const requested = Number(daysParam) || DEFAULT_DAILY_DAYS;
+  return defaultPeriod(Math.min(Math.max(1, requested), MAX_DAILY_DAYS));
+}
 
 function defaultPeriod(days: number): { start: string; end: string } {
   const end = new Date();
@@ -43,6 +52,30 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
     }
   );
 
+  /**
+   * One report per day the patient did something, newest first.
+   *
+   * Derived on read like every other report, which is what makes "the day's
+   * report already includes what you just did" true without a regenerate
+   * step: finishing another exercise changes the events, and the next read
+   * simply says more.
+   */
+  fastify.get<{ Querystring: { days?: string } }>(
+    "/me/reports/daily",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      const auth = requireAuth(request, reply);
+      if (!auth) return;
+      if (auth.role !== "patient") {
+        forbidden(reply, "Only a patient has reports of their own.");
+        return;
+      }
+      reply.send(
+        await store.getDailyReports(auth.tenantId, auth.userId, dailyPeriod(request.query.days))
+      );
+    }
+  );
+
   fastify.get<{ Params: { patientId: string }; Querystring: { days?: string } }>(
     "/patients/:patientId/report",
     { preHandler: fastify.authenticate },
@@ -78,6 +111,46 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
 
       const days = Number(request.query.days) || DEFAULT_PERIOD_DAYS;
       reply.send(await store.getReport(auth.tenantId, patientId, defaultPeriod(days)));
+    }
+  );
+
+  fastify.get<{ Params: { patientId: string }; Querystring: { days?: string } }>(
+    "/patients/:patientId/reports/daily",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      const auth = requireAuth(request, reply);
+      if (!auth) return;
+      if (auth.role !== "clinician") {
+        forbidden(reply, "Only clinicians can read a patient's reports.");
+        return;
+      }
+
+      const { patientId } = request.params;
+      const linked = await store.isLinked(auth.tenantId, auth.userId, patientId);
+      if (!linked) {
+        forbidden(reply, "This patient is not on your roster.");
+        return;
+      }
+
+      const patient = await store.findUserById(auth.tenantId, patientId);
+      if (!patient?.dataSharingEnabled) {
+        forbidden(reply, "This patient has turned off data sharing with their clinician.");
+        return;
+      }
+
+      // Same gate, same audit entry as the single-period report: this is the
+      // same data, and reading thirty days of it a day at a time should not
+      // be a quieter act than reading it in one.
+      await store.recordAccess({
+        tenantId: auth.tenantId,
+        actorId: auth.userId,
+        subjectUserId: patientId,
+        action: "view_report"
+      });
+
+      reply.send(
+        await store.getDailyReports(auth.tenantId, patientId, dailyPeriod(request.query.days))
+      );
     }
   );
 }

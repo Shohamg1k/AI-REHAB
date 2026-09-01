@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import type { AuditEntry, User } from "@ai-rehab/contracts";
-import { ApiError, fetchAuditLog, fetchMe, joinWithCode, updateDataSharing } from "../lib/api.js";
+import type { AuditEntry, ProgressReport, User } from "@ai-rehab/contracts";
+import {
+  ApiError,
+  fetchAuditLog,
+  fetchMe,
+  fetchMyDailyReports,
+  joinWithCode,
+  updateDataSharing
+} from "../lib/api.js";
+import { ReportCard } from "../components/ReportCard.js";
 import { setSession } from "../lib/authStore.js";
 import { Button } from "../components/Button.js";
 import { Icon } from "../components/Icon.js";
@@ -74,6 +82,9 @@ export function SharingScreen({
   const [linked, setLinked] = useState(false);
   const [sharing, setSharing] = useState<boolean | null>(null);
   const [auditLog, setAuditLog] = useState<AuditEntry[] | null>(null);
+  const [dailyReports, setDailyReports] = useState<ProgressReport[] | null>(null);
+  /** Which day is expanded. Only one at a time — these are long. */
+  const [openDate, setOpenDate] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -87,6 +98,14 @@ export function SharingScreen({
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : "Couldn't load your sharing settings.")
       );
+
+    // Loaded separately: reports are the largest payload on this screen and
+    // the slowest to compute, and the consent controls above them should not
+    // wait on it. An empty list is a real answer, so failure sets [] rather
+    // than leaving the section in a permanent loading state.
+    fetchMyDailyReports()
+      .then(setDailyReports)
+      .catch(() => setDailyReports([]));
   }, [signedIn]);
 
   async function handleJoin() {
@@ -254,6 +273,73 @@ export function SharingScreen({
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {signedIn && dailyReports && (
+          <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-4">
+              <span className="ds-label">Your daily reports</span>
+              <p className="text-cap text-ink-3">
+                One report a day. It is rebuilt from your sessions every time it is opened, so
+                anything else you do today is already in today's — there is nothing to regenerate.
+              </p>
+            </div>
+
+            {dailyReports.length === 0 && (
+              <p className="text-b2 text-ink-2">
+                No reports yet. Finish an exercise and today's report appears here.
+              </p>
+            )}
+
+            {dailyReports.map((report) => {
+              const date = report.periodStart.slice(0, 10);
+              const open = openDate === date;
+              return (
+                <div key={date} className="ds-card-hair flex flex-col gap-9">
+                  <button
+                    type="button"
+                    onClick={() => setOpenDate(open ? null : date)}
+                    aria-expanded={open}
+                    className="flex items-center gap-11 text-left"
+                  >
+                    <span className="flex flex-1 flex-col gap-1">
+                      <span className="text-b1 font-medium text-ink">
+                        {/* Noon UTC so the weekday cannot shift across the
+                            date line in either direction. */}
+                        {new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "short",
+                          timeZone: "UTC"
+                        })}
+                      </span>
+                      <span className="font-mono text-lb uppercase text-ink-3">
+                        {report.sessionCount} session{report.sessionCount === 1 ? "" : "s"} ·{" "}
+                        {report.totalReps} reps
+                        {report.avgFormScore !== null ? ` · form ${report.avgFormScore}` : ""}
+                      </span>
+                    </span>
+                    <Icon name="chevron" size={16} className={open ? "-rotate-90" : "rotate-90"} />
+                  </button>
+
+                  {/* `lastActivityAt` is the only part of "this got updated"
+                      a reader cannot infer for themselves — the rest is just
+                      the report saying more than it did before. */}
+                  {/* UTC, to match the day it is filed under. Days are
+                      bucketed by UTC date (as adherence always has been), so
+                      rendering this in local time could show a time that
+                      belongs to the next day in the reader's timezone. */}
+                  {report.lastActivityAt && (
+                    <span className="text-cap text-ink-3">
+                      Last updated {report.lastActivityAt.slice(11, 16)} UTC
+                    </span>
+                  )}
+
+                  {open && <ReportCard report={report} />}
+                </div>
+              );
+            })}
           </div>
         )}
 

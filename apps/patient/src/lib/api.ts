@@ -168,9 +168,24 @@ export function fetchMyReport(days = 7): Promise<ProgressReport> {
   return request(`/me/report?days=${days}`, {}, true);
 }
 
+/**
+ * One report per day the patient did something, newest first.
+ *
+ * Each is derived on read, so today's already includes whatever was finished
+ * a minute ago — there is nothing to regenerate.
+ */
+export function fetchMyDailyReports(days = 30): Promise<ProgressReport[]> {
+  return request(`/me/reports/daily?days=${days}`, {}, true);
+}
+
 /** Clinician-side. Gated by the patient's data-sharing consent, and audit-logged. */
 export function fetchPatientReport(patientId: string, days = 7): Promise<ProgressReport> {
   return request(`/patients/${patientId}/report?days=${days}`, {}, true);
+}
+
+/** Clinician-side daily list. Same consent gate and audit entry as the single report. */
+export function fetchPatientDailyReports(patientId: string, days = 30): Promise<ProgressReport[]> {
+  return request(`/patients/${patientId}/reports/daily?days=${days}`, {}, true);
 }
 
 /** Omit `patientId` as a patient — the server always uses your own thread. */

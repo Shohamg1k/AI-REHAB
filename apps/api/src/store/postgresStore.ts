@@ -18,6 +18,7 @@ import type {
 import {
   computeAdherence,
   computeBaseline,
+  computeDailyReports,
   computeReport,
   computeRomTrend,
   summariseSessions,
@@ -430,6 +431,23 @@ export class PostgresStore implements Store {
       this.fetchAllSessions(tenantId, patientId)
     ]);
     return computeReport(sessions, {
+      patientId,
+      patientDisplayName: patient?.displayName ?? "Unknown patient",
+      periodStart: period.start,
+      periodEnd: period.end
+    });
+  }
+
+  async getDailyReports(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport[]> {
+    const [patient, sessions] = await Promise.all([
+      this.findUserById(tenantId, patientId),
+      this.fetchAllSessions(tenantId, patientId)
+    ]);
+    return computeDailyReports(sessions, {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,
