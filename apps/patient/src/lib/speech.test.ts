@@ -78,13 +78,13 @@ describe("voicesForLocale", () => {
   });
 
   it("returns nothing when the language is absent", () => {
-    expect(voicesForLocale("fr", [EN, ES, HI])).toEqual([]);
+    expect(voicesForLocale("hi", [EN, ES])).toEqual([]);
   });
 });
 
 describe("resolveVoice", () => {
   it("uses the explicitly chosen voice when it is still installed", () => {
-    expect(resolveVoice(prefs({ locale: "es", voiceURI: "Monica:es-ES" }), [EN, ES])).toBe(ES);
+    expect(resolveVoice(prefs({ locale: "hi", voiceURI: "Lekha:hi-IN" }), [EN, HI])).toBe(HI);
   });
 
   /**
@@ -101,7 +101,7 @@ describe("resolveVoice", () => {
   });
 
   it("returns null when nothing matches, leaving the browser to decide", () => {
-    expect(resolveVoice(prefs({ locale: "fr" }), [EN, ES])).toBeNull();
+    expect(resolveVoice(prefs({ locale: "hi" }), [EN, ES])).toBeNull();
   });
 });
 

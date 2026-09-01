@@ -176,8 +176,10 @@ export function CoachedSession({
     return () => window.clearTimeout(timer);
   }, [phase, countdown, state.reps.length, handleEndExercise]);
 
-  const isBlocked =
-    state.safetyVerdict?.verdict === "block" || state.safetyVerdict?.verdict === "escalate";
+  // Nothing blocks the patient any more (ADR-0012). The gate still runs and
+  // its verdicts are still logged for the clinician; they just no longer
+  // interrupt the set.
+  const isBlocked = false;
   const scoringArmed = phase === "live" && countdown === null && !paused && !isBlocked;
 
   /**
@@ -192,7 +194,7 @@ export function CoachedSession({
   const handleVoiceCommand = useCallback(
     (command: VoiceCommand) => {
       const allowed = isCommandAllowed(command.kind, {
-        blocked: !!isBlocked,
+        blocked: isBlocked,
         scoring: scoringArmed,
         countingDown: countdown !== null
       });
@@ -250,15 +252,6 @@ export function CoachedSession({
     locale,
     onCommand: handleVoiceCommand
   });
-
-  /**
-   * A safety block cancels a pause rather than stacking with it: the gate has
-   * taken over, and leaving `paused` set would let the patient "resume" out of
-   * a blocked state the moment the block cleared.
-   */
-  useEffect(() => {
-    if (isBlocked && paused) setPaused(false);
-  }, [isBlocked, paused]);
 
   /** Nothing this screen queued should still be talking after it is gone. */
   /** Nothing this screen queued should still be talking after it is gone. */

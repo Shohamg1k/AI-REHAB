@@ -3,7 +3,6 @@ import { FORM_SCORE_CONFIDENCE_FLOOR } from "@ai-rehab/core";
 import { localiseCue } from "@ai-rehab/exercises";
 import { signalStatusOf, type LiveSessionState } from "../hooks/useLiveSession.js";
 import { CameraStage, primaryGuidance } from "../components/CameraStage.js";
-import { SafetyBlockBanner } from "../components/SafetyBlockBanner.js";
 import { Icon } from "../components/Icon.js";
 import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
 
@@ -54,12 +53,9 @@ export function LiveSessionScreen({
   onBookmarkPain: () => void;
   onEndExercise: () => void;
 }) {
-  const { captureQuality, safetyVerdict, activeCue, reps } = liveState;
+  const { captureQuality, activeCue, reps } = liveState;
   const { locale, t } = useSpeechPrefs();
   const lastRep = reps[reps.length - 1] ?? null;
-  const isBlocked =
-    !!safetyVerdict && (safetyVerdict.verdict === "block" || safetyVerdict.verdict === "escalate");
-
   const counting = countdown !== null;
   const signalStatus = signalStatusOf(liveState);
   const trackingLost = signalStatus === "insufficient" || signalStatus === "no_person";
@@ -75,7 +71,6 @@ export function LiveSessionScreen({
         // M6: while blocked the pose overlay is suppressed. Tracking output
         // is coaching, and coaching has stopped — leaving a live skeleton
         // running would suggest the set is still being judged.
-        showSkeleton={!isBlocked}
         topLeft={
           <div className="flex items-center gap-12">
             <button type="button" onClick={onEndExercise} aria-label="End set" className="text-white">
@@ -83,18 +78,12 @@ export function LiveSessionScreen({
             </button>
             <div className="flex flex-col">
               <span className="text-[16px] font-semibold text-white">{spec.displayName}</span>
-              <span
-                className={`font-mono text-[11px] uppercase ${
-                  isBlocked ? "text-[#F2A79C]" : "text-white/60"
-                }`}
-              >
-                {isBlocked
-                  ? "Paused by safety"
-                  : paused
-                    ? t.session.paused
-                    : counting
-                      ? t.session.notCountingYet
-                      : `${reps.length} of ${targetReps} reps`}
+              <span className="font-mono text-[11px] uppercase text-white/60">
+                {paused
+                  ? t.session.paused
+                  : counting
+                    ? t.session.notCountingYet
+                    : `${reps.length} of ${targetReps} reps`}
               </span>
             </div>
             {listening && (
@@ -111,7 +100,7 @@ export function LiveSessionScreen({
         bottom={
           <div className="flex flex-col gap-10">
             {/* One message, chosen by priority — never a stack. */}
-            {paused && !isBlocked ? (
+            {paused ? (
               <div
                 role="status"
                 aria-live="polite"
@@ -125,7 +114,7 @@ export function LiveSessionScreen({
                   <span className="text-[11px] text-ink-3">{t.session.notCountingYet}</span>
                 </span>
               </div>
-            ) : counting && !isBlocked ? (
+            ) : counting ? (
               <div
                 role="status"
                 aria-live="polite"
@@ -143,8 +132,6 @@ export function LiveSessionScreen({
                   </span>
                 </span>
               </div>
-            ) : isBlocked && safetyVerdict ? (
-              <SafetyBlockBanner verdict={safetyVerdict} onEndExercise={onEndExercise} />
             ) : trackingLost ? (
               <div
                 role="status"
@@ -174,9 +161,7 @@ export function LiveSessionScreen({
               </div>
             ) : null}
 
-            {!isBlocked && (
-              <>
-                <button
+            <button
                   type="button"
                   onClick={onBookmarkPain}
                   disabled={reps.length === 0}
@@ -195,19 +180,11 @@ export function LiveSessionScreen({
                 >
                   End set
                 </button>
-              </>
-            )}
           </div>
         }
       >
-        {/* Flat dim, not a gradient — the camera keeps running so the
-            patient can still see themselves, but nothing on top of it is
-            claiming to measure anything any more. */}
-        {isBlocked && <div className="pointer-events-none absolute inset-0 bg-night/72" />}
-
         {/* Readouts sit below the header row rather than in a slot, so they
             keep their position whatever the header contains. */}
-        {!isBlocked && (
         <div className="pointer-events-none absolute inset-x-18 top-[92px] flex items-start justify-between">
           <div className="rounded bg-night/68 px-14 py-10 backdrop-blur-sm">
             <div className="font-mono text-[38px] font-semibold leading-none tracking-[-.03em] text-white">
@@ -230,10 +207,8 @@ export function LiveSessionScreen({
             </div>
           </div>
         </div>
-        )}
 
         {/* Per-rep progress, coloured by how each rep actually scored. */}
-        {!isBlocked && (
         <div className="pointer-events-none absolute inset-x-18 top-[188px] flex gap-3">
           {Array.from({ length: targetReps }, (_, i) => (
             <span
@@ -243,7 +218,6 @@ export function LiveSessionScreen({
             />
           ))}
         </div>
-        )}
       </CameraStage>
     </div>
   );

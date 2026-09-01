@@ -4,7 +4,10 @@ import { z } from "zod";
  * H9 (multi-language). The set of languages the patient-facing coaching can
  * be spoken and captioned in.
  *
- * Kept deliberately small. Every locale added here obliges someone to
+ * Deliberately two. Spanish and French were shipped and then removed at the
+ * product owner's request: nobody had reviewed those translations, and an
+ * unreviewed language nobody asked for is cost without benefit. Every locale
+ * added here obliges someone to
  * translate the whole cue catalogue and the safety reason templates, and an
  * untranslated locale is worse than an absent one — a patient who selects
  * their language and then hears English has been told the app supports
@@ -16,7 +19,7 @@ import { z } from "zod";
  * operating system's business, not ours. See apps/patient/src/lib/speech.ts
  * for what happens when no voice matches.
  */
-export const LocaleSchema = z.enum(["en", "es", "hi", "fr"]);
+export const LocaleSchema = z.enum(["en", "hi"]);
 export type Locale = z.infer<typeof LocaleSchema>;
 
 // Deliberately a literal type rather than `Locale`: callers narrow with
@@ -41,9 +44,7 @@ export type LocaleInfo = {
 
 export const LOCALES: readonly LocaleInfo[] = [
   { code: "en", nativeName: "English", englishName: "English", speechLang: "en-US", reviewed: true },
-  { code: "es", nativeName: "Español", englishName: "Spanish", speechLang: "es-ES", reviewed: false },
-  { code: "hi", nativeName: "हिन्दी", englishName: "Hindi", speechLang: "hi-IN", reviewed: false },
-  { code: "fr", nativeName: "Français", englishName: "French", speechLang: "fr-FR", reviewed: false }
+  { code: "hi", nativeName: "हिन्दी", englishName: "Hindi", speechLang: "hi-IN", reviewed: false }
 ];
 
 export const LOCALES_BY_CODE: ReadonlyMap<Locale, LocaleInfo> = new Map(

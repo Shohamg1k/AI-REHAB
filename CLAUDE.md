@@ -34,7 +34,7 @@ These are not style preferences. Breaking one requires an ADR and a human's agre
 
 1. **No model call in the per-frame path.** `packages/core` runs at 30fps and must stay deterministic and offline. Conversation, pain inference, and adaptation live in the slow loop, between sets. See ADR-0001.
 2. **Video never leaves the device.** Pose runs in the browser. Persist landmark-derived features, scores, and events — never frames, never a video file. See ADR-0002.
-3. **The safety layer is a pure function with veto.** `packages/core/safety` has no I/O, no clock, no randomness, no model. Everything else may suggest; only safety may block. Nothing may soften a `block` or `escalate` verdict downstream.
+3. **The safety layer is a pure function.** `packages/core/safety` has no I/O, no clock, no randomness, no model, and nothing may rewrite a verdict it produces — they are recorded exactly as returned. **The in-session veto is currently suspended (ADR-0012):** the gate still runs and its verdicts still reach the clinician's report, but nothing stops the patient mid-set, because the thresholds are unreviewed and the gate fires on a single frame. Reinstating it needs a physiotherapist's thresholds, a persistence window, and a fixture proving a one-frame spike does not fire.
 4. **Every decision carries a `reason` string.** No score, block, or recommendation is persisted as a bare number.
 
 ---

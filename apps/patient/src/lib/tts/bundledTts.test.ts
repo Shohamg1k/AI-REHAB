@@ -45,7 +45,7 @@ describe("bundled voice manifest", () => {
 
   it("returns null for a locale with no staged voice", async () => {
     const mod = await withFetch(async () => new Response(JSON.stringify(manifest), { status: 200 }));
-    await expect(mod.bundledVoiceFor("fr")).resolves.toBeNull();
+    await expect(mod.bundledVoiceFor("en")).resolves.toBeNull();
   });
 
   /** `pnpm setup:tts` never run. Supported, not an error. */
@@ -69,11 +69,7 @@ describe("bundled voice manifest", () => {
     vi.stubGlobal("fetch", fetchMock);
     const mod = await import("./bundledTts.js");
 
-    await Promise.all([
-      mod.bundledVoiceFor("hi"),
-      mod.bundledVoiceFor("en"),
-      mod.bundledVoiceFor("fr")
-    ]);
+    await Promise.all([mod.bundledVoiceFor("hi"), mod.bundledVoiceFor("en")]);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

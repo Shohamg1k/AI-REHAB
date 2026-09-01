@@ -76,8 +76,8 @@ describe("localiseCue", () => {
   });
 
   it("translates a known cue", () => {
-    expect(localiseCue("Straighten your knees fully at the top.", "es")).toBe(
-      "Estira las rodillas del todo arriba."
+    expect(localiseCue("Straighten your knees fully at the top.", "hi")).toBe(
+      "ऊपर पहुँचकर घुटनों को पूरी तरह सीधा करें।"
     );
   });
 

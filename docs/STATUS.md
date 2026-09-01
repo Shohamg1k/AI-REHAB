@@ -1,6 +1,6 @@
 # Status
 
-**Last updated:** 2026-09-01
+**Last updated:** 2026-09-02
 **Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
 **Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design, and the first round of real-use feedback on them is fixed. What is left is the features the mock depicts but the system does not have, listed below — not styling.
 
@@ -30,6 +30,22 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 **A real failure found this way:** the first model name (`llama-3.3-70b-versatile`) returned a bare 404 indistinguishable from a bad URL. Groq had removed it. `scripts/groq-models.mjs` lists what a key can actually reach; the default is now `openai/gpt-oss-120b`, verified against this account, and the constant is marked perishable because Groq rotates its lineup.
 
 **Left alone deliberately:** the deterministic clinician report (F1). Generated prose reads better and is less checkable, which is the wrong trade for the document a clinician acts on. Cue text still comes from the exercise spec's cue table (ADR-0001), and the safety gate remains a pure function with veto.
+
+---
+
+## The in-session safety block is gone (ADR-0012), and two languages went with it
+
+**The block fired wrongly and the product owner asked for it to go.** That matches what the code did, and the mechanism is not mysterious: the thresholds are provisional and unreviewed, and `evaluateSafety` runs *per frame* with no persistence requirement — any single noisy frame crossing a limit produced a full-screen stop with the reason spoken at urgent priority. An unvalidated threshold compared against a noisy per-frame signal produces false positives; that is a design gap, not a tuning problem.
+
+**A wrong stop is worse than no stop.** A patient halted for no reason learns to distrust the app, and the next warning — including a correct one — becomes noise.
+
+So: no sheet, no speech, no dimmed camera. `SafetyBlockBanner` and the safety-reason localiser are deleted. **But the gate still runs and every verdict is still written to the event log**, which costs the patient nothing and moves the signal from *interrupting them* to *informing their clinician*. A physiotherapist reading "the trunk-lean rule fired 14 times across 3 sessions" can judge whether that is compensation or a bad threshold. The patient could judge neither, and was being stopped on it.
+
+**CLAUDE.md invariant 3 is amended, not quietly broken.** The layer is still pure and nothing rewrites a verdict; the *veto* is suspended, and the invariant now says so with a pointer to ADR-0012. Leaving it asserting a veto that no longer exists would repeat the "nothing is uploaded" mistake this project already corrected once.
+
+Reinstating it needs, in order: a physiotherapist's thresholds (the standing M1 blocker), a persistence window instead of single-frame firing, and a fixture proving a one-frame spike does *not* fire. The eval library is untouched — it drives `evaluateSafety` directly, still 15/15 — so this is a UI change plus a debounce away from coming back, not a rebuild.
+
+**Spanish and French are removed.** Two locales, English and Hindi. Nobody had reviewed the Spanish or French strings, and an unreviewed language nobody asked for is cost without benefit — it was four columns of translation to keep in step for no reader. Hindi keeps its bundled neural voice (ADR-0011).
 
 ---
 

@@ -12,7 +12,6 @@ import { POSE_MODEL_TIER } from "virtual:pose-model-tier";
 import { localiseCue } from "@ai-rehab/exercises";
 import type { MainToWorkerMessage, WorkerToMainMessage } from "../worker/protocol.js";
 import { speakLocalised, stopSpeaking } from "../lib/speech.js";
-import { localiseSafetyReason } from "../lib/i18n/safetyReason.js";
 
 /** Measured pipeline cost, surfaced so ADR-0007 can be closed with a number. */
 export type PosePerf = {
@@ -353,13 +352,10 @@ export function useLiveSession(exerciseId: string) {
         }, 4000);
       }
 
-      if (
-        msg.safetyVerdict &&
-        (msg.safetyVerdict.verdict === "block" || msg.safetyVerdict.verdict === "escalate")
-      ) {
-        const verdict = msg.safetyVerdict;
-        speakLocalised((locale) => localiseSafetyReason(verdict, locale), { urgent: true });
-      }
+      // The safety gate still runs and its verdicts are still recorded for the
+      // clinician's report — but nothing is spoken or shown to the patient any
+      // more. See ADR-0012: the thresholds are provisional and were firing on
+      // single-frame landmark spikes, so the interruption was mostly wrong.
     };
 
     const initMsg: MainToWorkerMessage = { type: "init", exerciseId, tier: POSE_MODEL_TIER };
