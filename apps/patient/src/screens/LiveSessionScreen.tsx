@@ -7,8 +7,6 @@ import { SafetyBlockBanner } from "../components/SafetyBlockBanner.js";
 import { Icon } from "../components/Icon.js";
 import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
 
-const TARGET_REPS = 8;
-
 /**
  * M5 — the live coached session (A1–A4, B5). The camera *is* the screen:
  * everything else is an overlay on it, so the patient's attention stays on
@@ -35,12 +33,17 @@ function repTone(rep: { score: { score: number; confidence: number } } | undefin
 export function LiveSessionScreen({
   spec,
   liveState,
+  countdown,
+  targetReps,
   attachVideo,
   onBookmarkPain,
   onEndExercise
 }: {
   spec: ExerciseSpec;
   liveState: LiveSessionState;
+  /** Seconds until counting arms, or null once it has. */
+  countdown: number | null;
+  targetReps: number;
   attachVideo: (el: HTMLVideoElement | null) => void;
   onBookmarkPain: () => void;
   onEndExercise: () => void;
@@ -51,6 +54,7 @@ export function LiveSessionScreen({
   const isBlocked =
     !!safetyVerdict && (safetyVerdict.verdict === "block" || safetyVerdict.verdict === "escalate");
 
+  const counting = countdown !== null;
   const signalStatus = signalStatusOf(liveState);
   const trackingLost = signalStatus === "insufficient" || signalStatus === "no_person";
   const scored = lastRep && lastRep.score.confidence >= FORM_SCORE_CONFIDENCE_FLOOR;
@@ -78,7 +82,11 @@ export function LiveSessionScreen({
                   isBlocked ? "text-[#F2A79C]" : "text-white/60"
                 }`}
               >
-                {isBlocked ? "Paused by safety" : `${reps.length} of ${TARGET_REPS} reps`}
+                {isBlocked
+                  ? "Paused by safety"
+                  : counting
+                    ? t.session.notCountingYet
+                    : `${reps.length} of ${targetReps} reps`}
               </span>
             </div>
           </div>
@@ -86,7 +94,25 @@ export function LiveSessionScreen({
         bottom={
           <div className="flex flex-col gap-10">
             {/* One message, chosen by priority — never a stack. */}
-            {isBlocked && safetyVerdict ? (
+            {counting && !isBlocked ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+              >
+                <span className="flex h-40 w-40 flex-none items-center justify-center rounded-sm bg-teal-wash font-mono text-[19px] font-semibold text-teal-deep tabular-nums">
+                  {countdown}
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-[13.5px] font-medium text-ink">
+                    {t.session.getIntoPosition}
+                  </span>
+                  <span className="text-[11px] text-ink-3">
+                    {t.session.startingIn} {countdown}s · {t.session.notCountingYet}
+                  </span>
+                </span>
+              </div>
+            ) : isBlocked && safetyVerdict ? (
               <SafetyBlockBanner verdict={safetyVerdict} onEndExercise={onEndExercise} />
             ) : trackingLost ? (
               <div
@@ -157,7 +183,7 @@ export function LiveSessionScreen({
               {String(reps.length).padStart(2, "0")}
             </div>
             <div className="font-mono text-[10.5px] uppercase tracking-[.09em] text-white/65">
-              of {TARGET_REPS} reps
+              of {targetReps} reps
             </div>
           </div>
 
@@ -178,7 +204,7 @@ export function LiveSessionScreen({
         {/* Per-rep progress, coloured by how each rep actually scored. */}
         {!isBlocked && (
         <div className="pointer-events-none absolute inset-x-18 top-[188px] flex gap-3">
-          {Array.from({ length: TARGET_REPS }, (_, i) => (
+          {Array.from({ length: targetReps }, (_, i) => (
             <span
               key={i}
               className="h-4 flex-1 rounded-xs"

@@ -11,7 +11,7 @@ import type {
 import { POSE_MODEL_TIER } from "virtual:pose-model-tier";
 import { localiseCue } from "@ai-rehab/exercises";
 import type { MainToWorkerMessage, WorkerToMainMessage } from "../worker/protocol.js";
-import { speakLocalised } from "../lib/speech.js";
+import { speakLocalised, stopSpeaking } from "../lib/speech.js";
 import { localiseSafetyReason } from "../lib/i18n/safetyReason.js";
 
 /** Measured pipeline cost, surfaced so ADR-0007 can be closed with a number. */
@@ -227,6 +227,11 @@ export function useLiveSession(exerciseId: string) {
   }, []);
 
   const stop = useCallback(() => {
+    // Speech outlives the screen that queued it: `speechSynthesis` is a
+    // browser-global queue, so a cue spoken as the patient ends the set would
+    // carry on talking over the summary screen, or the next exercise. Nothing
+    // used to cancel it.
+    stopSpeaking();
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     if (cueClearTimerRef.current !== null) window.clearTimeout(cueClearTimerRef.current);
@@ -361,7 +366,17 @@ export function useLiveSession(exerciseId: string) {
     worker.postMessage(initMsg);
   }, [exerciseId, loop]);
 
+  /**
+   * Arms or disarms rep counting in the worker. Separate from `start`, which
+   * only means "camera and model running" — the patient spends the framing
+   * phase in front of a live camera and must not be scored for it.
+   */
+  const setScoring = useCallback((scoring: boolean) => {
+    const msg: MainToWorkerMessage = { type: "setScoring", scoring };
+    workerRef.current?.postMessage(msg);
+  }, []);
+
   useEffect(() => stop, [stop]); // stop the camera and worker on unmount, no matter how we got here
 
-  return { state, start, stop, attachVideo };
+  return { state, start, stop, setScoring, attachVideo };
 }

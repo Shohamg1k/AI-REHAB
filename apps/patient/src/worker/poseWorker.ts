@@ -97,7 +97,38 @@ function toContractLandmarks(
   return raw.map((l) => ({ x: l.x, y: l.y, z: l.z, visibility: l.visibility ?? 0 }));
 }
 
+/**
+ * Whether rep counting is armed.
+ *
+ * Off until the main thread says otherwise, because the camera and the model
+ * start during *framing* — the patient is moving around getting themselves in
+ * shot, and every one of those movements used to run through the rep
+ * segmenter. A patient who tested the movement while checking their framing
+ * arrived at the live screen with reps already on the board.
+ *
+ * Framing, landmarks, joint angles and the safety gate all keep running while
+ * this is false: none of them count anything, and a patient who bends too far
+ * during setup should still be told.
+ */
+let scoring = false;
+
+/**
+ * Clears what a rep is measured from, without touching the smoothers.
+ *
+ * Deliberately not `resetSessionState()`: the One Euro filters have warmed up
+ * on the patient's actual movement by the time scoring arms, and resetting
+ * them would make the skeleton visibly jump at the exact moment the patient
+ * is being told to begin.
+ */
+function resetScoringState(): void {
+  segState = createRepSegmenterState();
+  cooldownState = {};
+  consecutiveFailedReps = 0;
+}
+
 function resetSessionState(): void {
+  // A new exercise means a new setup phase, so counting disarms with it.
+  scoring = false;
   smoother = new LandmarkSmoother();
   displaySmoother = new LandmarkSmoother(DISPLAY_SMOOTHING_PARAMS);
   segState = createRepSegmenterState();
@@ -296,7 +327,11 @@ function handleFrame(bitmap: ImageBitmap, t: number): void {
   let closedRep: { rep: RepEvent; score: FormScore } | null = null;
   let cue: CoachingCue | null = null;
 
-  if (captureQuality.requiredLandmarksOk) {
+  if (!scoring) {
+    // Framing phase or countdown. Nothing is counted and no cue is spoken —
+    // a form correction before the patient has been told to begin is noise.
+    discardPartialRep();
+  } else if (captureQuality.requiredLandmarksOk) {
     const step = stepRepSegmenter(segState, jointAngles, spec, 0);
     segState = step.state;
 
@@ -340,6 +375,12 @@ ctx.onmessage = (event: MessageEvent<MainToWorkerMessage>) => {
     case "setExercise":
       currentExerciseId = msg.exerciseId;
       resetSessionState();
+      break;
+    case "setScoring":
+      // Arming always starts from a clean slate, so a half-finished movement
+      // made while getting into position cannot close as the first rep.
+      if (msg.scoring && !scoring) resetScoringState();
+      scoring = msg.scoring;
       break;
     case "frame":
       handleFrame(msg.bitmap, msg.t);

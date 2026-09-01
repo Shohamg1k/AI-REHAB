@@ -35,6 +35,15 @@ export type UiStrings = {
   cue: {
     captionNote: string;
   };
+  session: {
+    getIntoPosition: string;
+    /** Spoken and shown the moment counting arms. */
+    go: string;
+    startingIn: string;
+    /** Why the rep counter is sitting at zero during the countdown. */
+    notCountingYet: string;
+    setComplete: string;
+  };
   settings: {
     title: string;
     language: string;
@@ -74,6 +83,13 @@ const en: UiStrings = {
     blockFooter: "You can try a different exercise, or come back to this one later."
   },
   cue: { captionNote: "spoken cue · always captioned" },
+  session: {
+    getIntoPosition: "Get into position",
+    go: "Go",
+    startingIn: "Starting in",
+    notCountingYet: "Reps are not counted yet",
+    setComplete: "Set complete"
+  },
   settings: {
     title: "Coaching voice & language",
     language: "Language",
@@ -108,6 +124,13 @@ const es: UiStrings = {
     blockFooter: "Puedes probar otro ejercicio o volver a este más tarde."
   },
   cue: { captionNote: "señal hablada · siempre subtitulada" },
+  session: {
+    getIntoPosition: "Ponte en posición",
+    go: "¡Ya!",
+    startingIn: "Empezamos en",
+    notCountingYet: "Todavía no se cuentan repeticiones",
+    setComplete: "Serie completada"
+  },
   settings: {
     title: "Voz e idioma del entrenamiento",
     language: "Idioma",
@@ -143,6 +166,13 @@ const hi: UiStrings = {
     blockFooter: "आप कोई दूसरा व्यायाम आज़मा सकते हैं, या बाद में इस पर लौट सकते हैं।"
   },
   cue: { captionNote: "बोला गया संकेत · हमेशा कैप्शन के साथ" },
+  session: {
+    getIntoPosition: "अपनी जगह पर आ जाएँ",
+    go: "शुरू करें",
+    startingIn: "शुरू होने में",
+    notCountingYet: "अभी गिनती शुरू नहीं हुई है",
+    setComplete: "सेट पूरा हुआ"
+  },
   settings: {
     title: "कोचिंग की आवाज़ और भाषा",
     language: "भाषा",
@@ -178,6 +208,13 @@ const fr: UiStrings = {
     blockFooter: "Vous pouvez essayer un autre exercice, ou revenir à celui-ci plus tard."
   },
   cue: { captionNote: "consigne vocale · toujours sous-titrée" },
+  session: {
+    getIntoPosition: "Mettez-vous en position",
+    go: "C'est parti",
+    startingIn: "Départ dans",
+    notCountingYet: "Les répétitions ne sont pas encore comptées",
+    setComplete: "Série terminée"
+  },
   settings: {
     title: "Voix et langue du coaching",
     language: "Langue",
