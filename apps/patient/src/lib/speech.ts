@@ -22,9 +22,23 @@ export type SpeechPrefs = {
   /** `SpeechSynthesisVoice.voiceURI`, or null to let the browser pick for the locale. */
   voiceURI: string | null;
   rate: number;
+  /**
+   * C7 — whether the app listens for spoken session commands.
+   *
+   * Off by default and never turned on implicitly. In every shipping browser
+   * `SpeechRecognition` streams microphone audio to the vendor's servers
+   * (Google, for Chrome), so this is a microphone *and* a network decision,
+   * and it is the patient's to make. See ADR-0010.
+   */
+  commandsEnabled: boolean;
 };
 
-export const DEFAULT_PREFS: SpeechPrefs = { locale: DEFAULT_LOCALE, voiceURI: null, rate: 1.0 };
+export const DEFAULT_PREFS: SpeechPrefs = {
+  locale: DEFAULT_LOCALE,
+  voiceURI: null,
+  rate: 1.0,
+  commandsEnabled: false
+};
 
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -52,7 +66,10 @@ export function parsePrefs(raw: string | null): SpeechPrefs {
     return {
       locale: locale.success ? locale.data : DEFAULT_PREFS.locale,
       voiceURI: typeof parsed.voiceURI === "string" ? parsed.voiceURI : null,
-      rate: clampRate(parsed.rate)
+      rate: clampRate(parsed.rate),
+      // Anything other than an explicit stored `true` means off. A corrupt
+      // blob must not be able to switch the microphone on.
+      commandsEnabled: parsed.commandsEnabled === true
     };
   } catch {
     return DEFAULT_PREFS;

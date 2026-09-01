@@ -8,6 +8,9 @@ import { CameraSetupScreen } from "./CameraSetupScreen.js";
 import { LiveSessionScreen } from "./LiveSessionScreen.js";
 import { speakLocalised, stopSpeaking } from "../lib/speech.js";
 import { strings } from "../lib/i18n/ui.js";
+import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
+import { useVoiceCommands } from "../hooks/useVoiceCommands.js";
+import { isCommandAllowed, type VoiceCommand } from "../lib/voice/commands.js";
 
 type Phase = "intro" | "setup" | "live";
 
@@ -60,7 +63,17 @@ export function CoachedSession({
   const [phase, setPhase] = useState<Phase>("intro");
   /** Seconds left before counting arms; null once it has, or before it starts. */
   const [countdown, setCountdown] = useState<number | null>(null);
+  /** C7 — the patient asked to stop mid-set. Distinct from a safety block. */
+  const [paused, setPaused] = useState(false);
   const finishedRef = useRef(false);
+  const { prefs, locale } = useSpeechPrefs();
+  /**
+   * Kept in a ref because `handleSetupContinue` is redeclared every render and
+   * reads `state.captureQuality`. Listing it as a dependency of the voice
+   * handler would rebuild that handler constantly; omitting it would capture a
+   * stale one and log the wrong capture quality when a patient says "start".
+   */
+  const setupContinueRef = useRef<() => void>(() => {});
 
   const loggedRepCount = useRef(0);
   const loggedCueKey = useRef<string | null>(null);
@@ -137,6 +150,91 @@ export function CoachedSession({
     return () => window.clearTimeout(timer);
   }, [phase, countdown, state.reps.length, handleEndExercise]);
 
+  const isBlocked =
+    state.safetyVerdict?.verdict === "block" || state.safetyVerdict?.verdict === "escalate";
+  const scoringArmed = phase === "live" && countdown === null && !paused && !isBlocked;
+
+  /**
+   * Spoken session commands (C7).
+   *
+   * `isCommandAllowed` is the gate, and it lives in the pure module with the
+   * matcher so it is tested and so no call site can skip it. The rule that
+   * matters: while the safety gate is blocking, nothing spoken can restart the
+   * set (CLAUDE.md invariant 3). A blocked patient can still report pain and
+   * still end the exercise.
+   */
+  const handleVoiceCommand = useCallback(
+    (command: VoiceCommand) => {
+      const allowed = isCommandAllowed(command.kind, {
+        blocked: !!isBlocked,
+        scoring: scoringArmed,
+        countingDown: countdown !== null
+      });
+      if (!allowed) return;
+
+      switch (command.kind) {
+        case "start":
+          if (phase === "setup") setupContinueRef.current();
+          break;
+        case "pause":
+          setPaused(true);
+          setScoring(false);
+          speakLocalised((l) => strings(l).session.paused);
+          break;
+        case "resume":
+          setPaused(false);
+          setScoring(true);
+          speakLocalised((l) => strings(l).session.resumed);
+          break;
+        case "end":
+          handleEndExercise();
+          break;
+        case "pain": {
+          // B6: this records *that the patient said something hurt*, and
+          // where. It does not record how much — "a little pain" is not a
+          // number, and the check-in asks them for one in their own terms.
+          const repIndex = Math.max(0, state.reps.length - 1);
+          bookmarkedRepIndex.current = repIndex;
+          appendEvent(sessionId, {
+            type: "pain_bookmarked",
+            t: sessionT(),
+            repIndex,
+            region: command.region
+          });
+          speakLocalised((l) => strings(l).session.painNoted);
+          break;
+        }
+      }
+    },
+    [
+      isBlocked,
+      scoringArmed,
+      countdown,
+      phase,
+      setScoring,
+      state.reps.length,
+      sessionId,
+      sessionT,
+      handleEndExercise
+    ]
+  );
+
+  const voice = useVoiceCommands({
+    enabled: prefs.commandsEnabled && (phase === "setup" || phase === "live"),
+    locale,
+    onCommand: handleVoiceCommand
+  });
+
+  /**
+   * A safety block cancels a pause rather than stacking with it: the gate has
+   * taken over, and leaving `paused` set would let the patient "resume" out of
+   * a blocked state the moment the block cleared.
+   */
+  useEffect(() => {
+    if (isBlocked && paused) setPaused(false);
+  }, [isBlocked, paused]);
+
+  /** Nothing this screen queued should still be talking after it is gone. */
   /** Nothing this screen queued should still be talking after it is gone. */
   useEffect(() => stopSpeaking, []);
 
@@ -158,8 +256,9 @@ export function CoachedSession({
     });
     setPhase("live");
     setCountdown(COUNTDOWN_SECONDS);
-    speakLocalised((locale) => strings(locale).session.getIntoPosition);
+    speakLocalised((l) => strings(l).session.getIntoPosition);
   }
+  setupContinueRef.current = handleSetupContinue;
 
   function handleBookmarkPain() {
     const repIndex = state.reps.length - 1; // button is disabled until this is >= 0
@@ -200,6 +299,8 @@ export function CoachedSession({
       liveState={state}
       countdown={countdown}
       targetReps={TARGET_REPS}
+      paused={paused}
+      listening={voice.status === "listening" || voice.status === "restarting"}
       attachVideo={attachVideo}
       onBookmarkPain={handleBookmarkPain}
       onEndExercise={handleEndExercise}

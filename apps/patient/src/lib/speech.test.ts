@@ -45,11 +45,30 @@ describe("parsePrefs", () => {
   });
 
   it("keeps a valid locale and voice", () => {
-    expect(parsePrefs(JSON.stringify({ locale: "hi", voiceURI: "Lekha:hi-IN", rate: 0.9 }))).toEqual({
+    expect(
+      parsePrefs(JSON.stringify({ locale: "hi", voiceURI: "Lekha:hi-IN", rate: 0.9 }))
+    ).toEqual({
       locale: "hi",
       voiceURI: "Lekha:hi-IN",
-      rate: 0.9
+      rate: 0.9,
+      commandsEnabled: false
     });
+  });
+
+  /**
+   * C7 turns on a microphone whose audio leaves the device (ADR-0010), so it
+   * takes an explicit stored `true` and nothing else. A truthy-but-wrong value
+   * in a corrupt or hand-edited blob must not switch it on.
+   */
+  it("only enables voice commands for a literal stored true", () => {
+    expect(parsePrefs(JSON.stringify({ commandsEnabled: true })).commandsEnabled).toBe(true);
+    for (const value of ["true", 1, "yes", {}, []]) {
+      expect(
+        parsePrefs(JSON.stringify({ commandsEnabled: value })).commandsEnabled,
+        JSON.stringify(value)
+      ).toBe(false);
+    }
+    expect(parsePrefs(null).commandsEnabled).toBe(false);
   });
 });
 

@@ -43,6 +43,24 @@ export type UiStrings = {
     /** Why the rep counter is sitting at zero during the countdown. */
     notCountingYet: string;
     setComplete: string;
+    paused: string;
+    resumed: string;
+    /** Spoken back when a pain report is heard, so the patient knows it landed. */
+    painNoted: string;
+  };
+  voice: {
+    title: string;
+    enable: string;
+    /** What it listens for. */
+    examples: string;
+    /** The privacy fact, stated plainly rather than buried. */
+    privacy: string;
+    listening: string;
+    off: string;
+    denied: string;
+    unsupported: string;
+    /** Reassurance that the gate still wins. */
+    blockedNote: string;
   };
   settings: {
     title: string;
@@ -88,7 +106,21 @@ const en: UiStrings = {
     go: "Go",
     startingIn: "Starting in",
     notCountingYet: "Reps are not counted yet",
-    setComplete: "Set complete"
+    setComplete: "Set complete",
+    paused: "Paused",
+    resumed: "Carrying on",
+    painNoted: "Noted — I have marked that rep for your clinician"
+  },
+  voice: {
+    title: "Voice commands",
+    enable: "Listen for spoken commands during a session",
+    examples: "Say “start”, “pause”, “continue”, “I’m done”, or tell it where it hurts — “my shoulder hurts”.",
+    privacy: "Your browser sends what you say to its speech provider (Google, in Chrome) to turn it into text. Audio is not recorded by this app, and the microphone is only on during an exercise.",
+    listening: "Listening",
+    off: "Voice commands off",
+    denied: "Microphone access was declined. Voice commands are off.",
+    unsupported: "This browser cannot listen for commands.",
+    blockedNote: "If the coach stops your set for safety, speaking cannot restart it."
   },
   settings: {
     title: "Coaching voice & language",
@@ -129,7 +161,21 @@ const es: UiStrings = {
     go: "¡Ya!",
     startingIn: "Empezamos en",
     notCountingYet: "Todavía no se cuentan repeticiones",
-    setComplete: "Serie completada"
+    setComplete: "Serie completada",
+    paused: "En pausa",
+    resumed: "Seguimos",
+    painNoted: "Anotado — he marcado esa repetición para tu fisioterapeuta"
+  },
+  voice: {
+    title: "Comandos de voz",
+    enable: "Escuchar comandos hablados durante la sesión",
+    examples: "Di “empezar”, “pausa”, “continuar”, “he terminado”, o di dónde te duele — “me duele el hombro”.",
+    privacy: "Tu navegador envía lo que dices a su proveedor de voz (Google, en Chrome) para convertirlo en texto. Esta aplicación no graba el audio, y el micrófono solo está activo durante un ejercicio.",
+    listening: "Escuchando",
+    off: "Comandos de voz desactivados",
+    denied: "Se denegó el acceso al micrófono. Los comandos de voz están desactivados.",
+    unsupported: "Este navegador no puede escuchar comandos.",
+    blockedNote: "Si el entrenador para tu serie por seguridad, hablar no puede reanudarla."
   },
   settings: {
     title: "Voz e idioma del entrenamiento",
@@ -171,7 +217,21 @@ const hi: UiStrings = {
     go: "शुरू करें",
     startingIn: "शुरू होने में",
     notCountingYet: "अभी गिनती शुरू नहीं हुई है",
-    setComplete: "सेट पूरा हुआ"
+    setComplete: "सेट पूरा हुआ",
+    paused: "रुका हुआ है",
+    resumed: "जारी है",
+    painNoted: "दर्ज कर लिया — वह दोहराव आपके फ़िज़ियोथेरेपिस्ट के लिए चिह्नित कर दिया है"
+  },
+  voice: {
+    title: "आवाज़ से नियंत्रण",
+    enable: "व्यायाम के दौरान बोले गए आदेश सुनें",
+    examples: "कहें “शुरू करें”, “रुको”, “जारी रखो”, “हो गया”, या बताएँ कहाँ दर्द है — “मेरे कंधे में दर्द है”।",
+    privacy: "आप जो कहते हैं उसे टेक्स्ट में बदलने के लिए आपका ब्राउज़र उसे अपने स्पीच प्रोवाइडर (Chrome में Google) को भेजता है। यह ऐप ऑडियो रिकॉर्ड नहीं करता, और माइक्रोफ़ोन सिर्फ़ व्यायाम के दौरान चालू रहता है।",
+    listening: "सुन रहे हैं",
+    off: "आवाज़ से नियंत्रण बंद है",
+    denied: "माइक्रोफ़ोन की अनुमति नहीं मिली। आवाज़ से नियंत्रण बंद है।",
+    unsupported: "यह ब्राउज़र आदेश नहीं सुन सकता।",
+    blockedNote: "अगर सुरक्षा के लिए आपका सेट रोका जाता है, तो बोलकर उसे दोबारा शुरू नहीं किया जा सकता।"
   },
   settings: {
     title: "कोचिंग की आवाज़ और भाषा",
@@ -213,7 +273,21 @@ const fr: UiStrings = {
     go: "C'est parti",
     startingIn: "Départ dans",
     notCountingYet: "Les répétitions ne sont pas encore comptées",
-    setComplete: "Série terminée"
+    setComplete: "Série terminée",
+    paused: "En pause",
+    resumed: "On continue",
+    painNoted: "C’est noté — j’ai marqué cette répétition pour votre kinésithérapeute"
+  },
+  voice: {
+    title: "Commandes vocales",
+    enable: "Écouter les commandes vocales pendant la séance",
+    examples: "Dites “commencer”, “pause”, “continuer”, “j’ai fini”, ou dites où vous avez mal — “j’ai mal à l’épaule”.",
+    privacy: "Votre navigateur envoie ce que vous dites à son service de reconnaissance vocale (Google, dans Chrome) pour le transcrire. Cette application n’enregistre pas l’audio, et le microphone n’est actif que pendant un exercice.",
+    listening: "À l’écoute",
+    off: "Commandes vocales désactivées",
+    denied: "L’accès au microphone a été refusé. Les commandes vocales sont désactivées.",
+    unsupported: "Ce navigateur ne peut pas écouter de commandes.",
+    blockedNote: "Si le coach arrête votre série pour des raisons de sécurité, parler ne peut pas la relancer."
   },
   settings: {
     title: "Voix et langue du coaching",
