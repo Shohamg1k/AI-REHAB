@@ -9,6 +9,7 @@ import { ExercisePicker } from "../components/ExercisePicker.js";
 import { loadRoutine, pushRoutine, routineExercises, saveRoutine } from "../lib/routine.js";
 import { Disclaimer } from "../components/Disclaimer.js";
 import { Icon } from "../components/Icon.js";
+import { VoiceSettingsCard } from "../components/VoiceSettingsCard.js";
 
 /**
  * The prescribed plan, as distinct from Today.
@@ -198,6 +199,8 @@ export function ProgramScreen({
           </div>
         </div>
       )}
+
+      <VoiceSettingsCard />
 
       <div className="flex-1" />
 

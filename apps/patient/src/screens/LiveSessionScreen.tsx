@@ -1,9 +1,11 @@
 import type { ExerciseSpec } from "@ai-rehab/contracts";
 import { FORM_SCORE_CONFIDENCE_FLOOR } from "@ai-rehab/core";
+import { localiseCue } from "@ai-rehab/exercises";
 import { signalStatusOf, type LiveSessionState } from "../hooks/useLiveSession.js";
 import { CameraStage, primaryGuidance } from "../components/CameraStage.js";
 import { SafetyBlockBanner } from "../components/SafetyBlockBanner.js";
 import { Icon } from "../components/Icon.js";
+import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
 
 const TARGET_REPS = 8;
 
@@ -44,6 +46,7 @@ export function LiveSessionScreen({
   onEndExercise: () => void;
 }) {
   const { captureQuality, safetyVerdict, activeCue, reps } = liveState;
+  const { locale, t } = useSpeechPrefs();
   const lastRep = reps[reps.length - 1] ?? null;
   const isBlocked =
     !!safetyVerdict && (safetyVerdict.verdict === "block" || safetyVerdict.verdict === "escalate");
@@ -106,8 +109,10 @@ export function LiveSessionScreen({
                   <Icon name="sound" size={15} />
                 </span>
                 <span className="flex flex-col">
-                  <span className="text-[13.5px] font-medium text-ink">{activeCue.text}</span>
-                  <span className="text-[11px] text-ink-3">spoken cue · always captioned</span>
+                  <span className="text-[13.5px] font-medium text-ink">
+                    {localiseCue(activeCue.text, locale)}
+                  </span>
+                  <span className="text-[11px] text-ink-3">{t.cue.captionNote}</span>
                 </span>
               </div>
             ) : null}

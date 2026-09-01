@@ -14,6 +14,7 @@ export { seatedElbowFlexion } from "./specs/seatedElbowFlexion.js";
 export { standingShoulderFlexion } from "./specs/standingShoulderFlexion.js";
 export { seatedNeckSideTilt } from "./specs/seatedNeckSideTilt.js";
 export * from "./validator.js";
+export * from "./i18n/cueCatalogue.js";
 export { PROVISIONAL_NOTE } from "./provisional.js";
 
 /**
