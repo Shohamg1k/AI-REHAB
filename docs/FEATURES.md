@@ -27,7 +27,7 @@ The camera layer. Nothing else in the product works if this doesn't.
 | **A1** | Live pose tracking — full-body skeleton, single camera, no wearables | fast | M | — | | **MVP** | IN |
 | **A2** | Per-rep form scoring — joint angles, ROM, tempo, symmetry vs reference ranges | fast | L | A1, A6 | | **MVP** | IN |
 | **A3** | Live corrective coaching — visual + spoken cues mid-exercise, with cooldowns | fast | M | A2 | | **MVP** | IN |
-| **A4** | Automatic rep and set counting | fast | M | A1 | | **MVP** | IN |
+| **A4** | Automatic rep and set counting | fast | M | A1 | Armed by an explicit start, not by the camera opening: 10s countdown in, auto-end at target out | **MVP** | IN |
 | **A5** | Compensation pattern detection — back instead of knee, favouring one side | fast | L | A2 | | FF | OUT |
 | **A6** | Exercise library with reference models (the exercise DSL) | — | M | — | | **MVP** | IN |
 | **A7** | Camera setup coach + persistent capture-quality score | fast | M | A1 | ● | **MVP** | IN |

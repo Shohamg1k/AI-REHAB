@@ -20,6 +20,12 @@ export type MainToWorkerMessage =
    */
   | { type: "init"; exerciseId: string; tier: string }
   | { type: "setExercise"; exerciseId: string }
+  /**
+   * Arms or disarms rep counting. Off until the patient actually starts, so
+   * that moving around during camera framing cannot produce reps — see
+   * `scoring` in poseWorker.ts.
+   */
+  | { type: "setScoring"; scoring: boolean }
   | { type: "frame"; bitmap: ImageBitmap; t: number }
   | { type: "dispose" };
 

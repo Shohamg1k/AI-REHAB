@@ -33,6 +33,22 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## Session flow: counting starts when the patient does (A4/A7)
+
+Four defects reported from real use, all in the seam between framing the camera and actually exercising.
+
+**Reps were counted during camera setup.** The camera and pose model start when the patient reaches the framing screen — they have to, that screen exists to show what the camera can see — and every movement made while getting into position ran through the rep segmenter. A patient who tried the movement to check their framing arrived at the live screen with reps already on the board.
+
+The worker now has a `scoring` flag, off until the main thread arms it. Framing, landmarks, joint angles and the safety gate all keep running while it is off: none of them count anything, and a patient who bends too far while setting up should still be told. Arming resets the segmenter, so a half-finished movement made while getting into position cannot close as the first rep. It deliberately does **not** reset the One Euro smoothers — those have warmed up on the patient's real movement by then, and resetting them would make the skeleton jump at the exact moment the patient is told to begin.
+
+**There was no time to get into position.** Pressing "start exercise" went straight to a live, counting session, while the patient was still holding the phone. There is now a 10-second countdown, spoken and captioned, during which nothing is counted. Cues are suppressed too — a form correction before the patient has been told to begin is noise.
+
+**The set did not end itself.** Reaching the eighth rep left the patient to walk back to the screen and tap "end". It now ends on its own, after a 1.6s beat so the counter is seen reaching its target rather than the screen cutting away mid-movement. Both exits are guarded by one flag, so the button and the auto-end cannot both log a completion.
+
+**Speech carried on after the screen was gone.** `speechSynthesis` is a browser-global queue and nothing ever cancelled it — `stopSpeaking` existed and had no callers — so a cue spoken as a set ended kept talking over the summary screen. Cancelled now in `stop()` and on unmount.
+
+---
+
 ## Voice and language (H9, partial)
 
 The patient chooses the language they are coached in and the voice that speaks it — English, Spanish, Hindi and French — from the Program tab. The choice persists in `localStorage` and applies to spoken cues, cue captions and the safety sheet.
