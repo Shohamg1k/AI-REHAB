@@ -117,8 +117,10 @@ const en: UiStrings = {
   voice: {
     title: "Voice commands",
     enable: "Listen for spoken commands during a session",
-    examples: "Say “start”, “pause”, “continue”, “I’m done”, or tell it where it hurts — “my shoulder hurts”.",
-    privacy: "Your browser sends what you say to its speech provider (Google, in Chrome) to turn it into text. Audio is not recorded by this app, and the microphone is only on during an exercise.",
+    examples:
+      "Say “start”, “pause”, “continue”, “I’m done”, or tell it where it hurts — “my shoulder hurts”.",
+    privacy:
+      "Your browser sends what you say to its speech provider (Google, in Chrome) to turn it into text. Audio is not recorded by this app, and the microphone is only on during an exercise.",
     listening: "Listening",
     off: "Voice commands off",
     denied: "Microphone access was declined. Voice commands are off.",
@@ -140,64 +142,6 @@ const en: UiStrings = {
       `This device has no ${language} voice installed. Cues will be shown in ${language} and spoken in English.`,
     bundledVoice: (language) => `${language} voice included with the app — no install needed.`,
     nonCommercial: "non-commercial use only"
-  }
-};
-
-const es: UiStrings = {
-  safety: {
-    escalateTitle: "Para y consulta a tu fisioterapeuta",
-    blockTitle: "Hemos parado la serie",
-    thresholdReached: "{name} alcanzó {observed} frente a un límite de {limit}.",
-    ifItHurts: "Si te duele",
-    ifItHurtsBody:
-      "Para y contacta con tu fisioterapeuta. Si el dolor es intenso o no puedes apoyar el peso, llama al número de emergencias de tu zona. No te pediremos que continúes.",
-    writtenToLog: "Registrado en tu historial",
-    escalated: "Derivado",
-    blocked: "Bloqueado",
-    reasonAttached: "Motivo adjunto · visible para tu fisioterapeuta",
-    endExercise: "Terminar este ejercicio",
-    escalateFooter:
-      "Si se trata de una emergencia médica, llama a los servicios de emergencia. Si no, escribe a tu fisioterapeuta antes de la próxima sesión.",
-    blockFooter: "Puedes probar otro ejercicio o volver a este más tarde."
-  },
-  cue: { captionNote: "señal hablada · siempre subtitulada" },
-  session: {
-    getIntoPosition: "Ponte en posición",
-    go: "¡Ya!",
-    startingIn: "Empezamos en",
-    notCountingYet: "Todavía no se cuentan repeticiones",
-    setComplete: "Serie completada",
-    paused: "En pausa",
-    resumed: "Seguimos",
-    painNoted: "Anotado — he marcado esa repetición para tu fisioterapeuta"
-  },
-  voice: {
-    title: "Comandos de voz",
-    enable: "Escuchar comandos hablados durante la sesión",
-    examples: "Di “empezar”, “pausa”, “continuar”, “he terminado”, o di dónde te duele — “me duele el hombro”.",
-    privacy: "Tu navegador envía lo que dices a su proveedor de voz (Google, en Chrome) para convertirlo en texto. Esta aplicación no graba el audio, y el micrófono solo está activo durante un ejercicio.",
-    listening: "Escuchando",
-    off: "Comandos de voz desactivados",
-    denied: "Se denegó el acceso al micrófono. Los comandos de voz están desactivados.",
-    unsupported: "Este navegador no puede escuchar comandos.",
-    blockedNote: "Si el entrenador para tu serie por seguridad, hablar no puede reanudarla."
-  },
-  settings: {
-    title: "Voz e idioma del entrenamiento",
-    language: "Idioma",
-    voice: "Voz",
-    browserDefault: "Predeterminada del navegador",
-    speed: "Velocidad al hablar",
-    slower: "Más lenta",
-    faster: "Más rápida",
-    test: "Probar voz",
-    sample: "Así sonará tu entrenamiento.",
-    unreviewedNote:
-      "Estas traducciones aún no han sido revisadas por un hablante nativo. Si una señal suena rara, sigue el movimiento que ves en pantalla y consulta a tu fisioterapeuta.",
-    noVoice: (language) =>
-      `Este dispositivo no tiene ninguna voz en ${language}. Las señales se mostrarán en ${language} y se hablarán en inglés.`,
-    bundledVoice: (language) => `Voz en ${language} incluida en la aplicación — no hace falta instalar nada.`,
-    nonCommercial: "solo para uso no comercial"
   }
 };
 
@@ -232,13 +176,16 @@ const hi: UiStrings = {
   voice: {
     title: "आवाज़ से नियंत्रण",
     enable: "व्यायाम के दौरान बोले गए आदेश सुनें",
-    examples: "कहें “शुरू करें”, “रुको”, “जारी रखो”, “हो गया”, या बताएँ कहाँ दर्द है — “मेरे कंधे में दर्द है”।",
-    privacy: "आप जो कहते हैं उसे टेक्स्ट में बदलने के लिए आपका ब्राउज़र उसे अपने स्पीच प्रोवाइडर (Chrome में Google) को भेजता है। यह ऐप ऑडियो रिकॉर्ड नहीं करता, और माइक्रोफ़ोन सिर्फ़ व्यायाम के दौरान चालू रहता है।",
+    examples:
+      "कहें “शुरू करें”, “रुको”, “जारी रखो”, “हो गया”, या बताएँ कहाँ दर्द है — “मेरे कंधे में दर्द है”।",
+    privacy:
+      "आप जो कहते हैं उसे टेक्स्ट में बदलने के लिए आपका ब्राउज़र उसे अपने स्पीच प्रोवाइडर (Chrome में Google) को भेजता है। यह ऐप ऑडियो रिकॉर्ड नहीं करता, और माइक्रोफ़ोन सिर्फ़ व्यायाम के दौरान चालू रहता है।",
     listening: "सुन रहे हैं",
     off: "आवाज़ से नियंत्रण बंद है",
     denied: "माइक्रोफ़ोन की अनुमति नहीं मिली। आवाज़ से नियंत्रण बंद है।",
     unsupported: "यह ब्राउज़र आदेश नहीं सुन सकता।",
-    blockedNote: "अगर सुरक्षा के लिए आपका सेट रोका जाता है, तो बोलकर उसे दोबारा शुरू नहीं किया जा सकता।"
+    blockedNote:
+      "अगर सुरक्षा के लिए आपका सेट रोका जाता है, तो बोलकर उसे दोबारा शुरू नहीं किया जा सकता।"
   },
   settings: {
     title: "कोचिंग की आवाज़ और भाषा",
@@ -254,70 +201,13 @@ const hi: UiStrings = {
       "इन अनुवादों की जाँच अभी तक किसी धाराप्रवाह बोलने वाले ने नहीं की है। अगर कोई संकेत अटपटा लगे, तो स्क्रीन पर दिख रहे मूवमेंट का पालन करें और अपने फ़िज़ियोथेरेपिस्ट से पूछें।",
     noVoice: (language) =>
       `इस डिवाइस में ${language} की कोई आवाज़ नहीं है। संकेत ${language} में दिखाए जाएँगे और अंग्रेज़ी में बोले जाएँगे।`,
-    bundledVoice: (language) => `${language} आवाज़ ऐप के साथ ही आती है — कुछ इंस्टॉल करने की ज़रूरत नहीं।`,
+    bundledVoice: (language) =>
+      `${language} आवाज़ ऐप के साथ ही आती है — कुछ इंस्टॉल करने की ज़रूरत नहीं।`,
     nonCommercial: "केवल ग़ैर-व्यावसायिक उपयोग के लिए"
   }
 };
 
-const fr: UiStrings = {
-  safety: {
-    escalateTitle: "Arrêtez et contactez votre kinésithérapeute",
-    blockTitle: "Nous avons arrêté la série",
-    thresholdReached: "{name} a atteint {observed} pour une limite de {limit}.",
-    ifItHurts: "Si vous avez mal",
-    ifItHurtsBody:
-      "Arrêtez et contactez votre kinésithérapeute. Si la douleur est forte ou si vous ne pouvez pas prendre appui, appelez votre numéro d'urgence local. Nous ne vous demanderons pas de continuer.",
-    writtenToLog: "Enregistré dans votre journal",
-    escalated: "Signalé",
-    blocked: "Bloqué",
-    reasonAttached: "Motif joint · visible par votre kinésithérapeute",
-    endExercise: "Terminer cet exercice",
-    escalateFooter:
-      "En cas d'urgence médicale, appelez les services d'urgence. Sinon, écrivez à votre kinésithérapeute avant votre prochaine séance.",
-    blockFooter: "Vous pouvez essayer un autre exercice, ou revenir à celui-ci plus tard."
-  },
-  cue: { captionNote: "consigne vocale · toujours sous-titrée" },
-  session: {
-    getIntoPosition: "Mettez-vous en position",
-    go: "C'est parti",
-    startingIn: "Départ dans",
-    notCountingYet: "Les répétitions ne sont pas encore comptées",
-    setComplete: "Série terminée",
-    paused: "En pause",
-    resumed: "On continue",
-    painNoted: "C’est noté — j’ai marqué cette répétition pour votre kinésithérapeute"
-  },
-  voice: {
-    title: "Commandes vocales",
-    enable: "Écouter les commandes vocales pendant la séance",
-    examples: "Dites “commencer”, “pause”, “continuer”, “j’ai fini”, ou dites où vous avez mal — “j’ai mal à l’épaule”.",
-    privacy: "Votre navigateur envoie ce que vous dites à son service de reconnaissance vocale (Google, dans Chrome) pour le transcrire. Cette application n’enregistre pas l’audio, et le microphone n’est actif que pendant un exercice.",
-    listening: "À l’écoute",
-    off: "Commandes vocales désactivées",
-    denied: "L’accès au microphone a été refusé. Les commandes vocales sont désactivées.",
-    unsupported: "Ce navigateur ne peut pas écouter de commandes.",
-    blockedNote: "Si le coach arrête votre série pour des raisons de sécurité, parler ne peut pas la relancer."
-  },
-  settings: {
-    title: "Voix et langue du coaching",
-    language: "Langue",
-    voice: "Voix",
-    browserDefault: "Par défaut du navigateur",
-    speed: "Vitesse de parole",
-    slower: "Plus lente",
-    faster: "Plus rapide",
-    test: "Tester la voix",
-    sample: "Voici comment sonneront vos consignes.",
-    unreviewedNote:
-      "Ces traductions n'ont pas encore été relues par une personne parlant couramment la langue. Si une consigne semble étrange, suivez le mouvement affiché à l'écran et demandez à votre kinésithérapeute.",
-    noVoice: (language) =>
-      `Cet appareil n'a aucune voix en ${language}. Les consignes seront affichées en ${language} et prononcées en anglais.`,
-    bundledVoice: (language) => `Voix en ${language} incluse dans l’application — rien à installer.`,
-    nonCommercial: "usage non commercial uniquement"
-  }
-};
-
-const STRINGS: Record<Locale, UiStrings> = { en, es, hi, fr };
+const STRINGS: Record<Locale, UiStrings> = { en, hi };
 
 export function strings(locale: Locale): UiStrings {
   return STRINGS[locale] ?? en;

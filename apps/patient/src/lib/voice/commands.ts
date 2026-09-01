@@ -49,7 +49,18 @@ const PHRASES: Record<Locale, Phrases> = {
     start: ["start", "begin", "go", "start the exercise", "start exercise", "lets go", "let's go"],
     pause: ["pause", "wait", "hold on", "hang on", "stop for a second", "give me a second"],
     resume: ["resume", "continue", "carry on", "keep going", "im ready", "i'm ready", "ready"],
-    end: ["end", "finish", "done", "im done", "i'm done", "end the exercise", "end exercise", "stop the exercise", "that's it", "thats it"],
+    end: [
+      "end",
+      "finish",
+      "done",
+      "im done",
+      "i'm done",
+      "end the exercise",
+      "end exercise",
+      "stop the exercise",
+      "that's it",
+      "thats it"
+    ],
     pain: ["pain", "hurt", "hurts", "hurting", "sore", "aches", "aching", "ow", "ouch"],
     regions: {
       shoulder: ["shoulder"],
@@ -60,23 +71,6 @@ const PHRASES: Record<Locale, Phrases> = {
       knee: ["knee"],
       ankle: ["ankle"],
       neck: ["neck"]
-    }
-  },
-  es: {
-    start: ["empezar", "empieza", "comenzar", "comienza", "vamos", "empezar el ejercicio"],
-    pause: ["pausa", "espera", "para", "un momento", "un segundo"],
-    resume: ["continuar", "continua", "sigue", "seguir", "listo", "estoy listo", "estoy lista"],
-    end: ["terminar", "termina", "acabar", "he terminado", "ya esta", "ya está", "terminar el ejercicio"],
-    pain: ["dolor", "duele", "me duele", "molestia"],
-    regions: {
-      shoulder: ["hombro"],
-      elbow: ["codo"],
-      wrist: ["muneca", "muñeca"],
-      lower_back: ["espalda baja", "espalda", "lumbar"],
-      hip: ["cadera"],
-      knee: ["rodilla"],
-      ankle: ["tobillo"],
-      neck: ["cuello"]
     }
   },
   hi: {
@@ -94,23 +88,6 @@ const PHRASES: Record<Locale, Phrases> = {
       knee: ["घुटना", "घुटने", "ghutna"],
       ankle: ["टखना", "टखने"],
       neck: ["गर्दन", "gardan"]
-    }
-  },
-  fr: {
-    start: ["commencer", "commence", "demarrer", "démarrer", "allez", "on y va"],
-    pause: ["pause", "attends", "attendez", "arrete", "arrête", "une seconde"],
-    resume: ["continuer", "continue", "reprends", "reprendre", "je suis pret", "je suis prêt", "pret", "prêt"],
-    end: ["terminer", "termine", "fini", "j'ai fini", "jai fini", "c'est fini", "cest fini", "arreter l'exercice"],
-    pain: ["douleur", "mal", "j'ai mal", "jai mal", "ca fait mal", "ça fait mal"],
-    regions: {
-      shoulder: ["epaule", "épaule"],
-      elbow: ["coude"],
-      wrist: ["poignet"],
-      lower_back: ["bas du dos", "dos", "lombaire"],
-      hip: ["hanche"],
-      knee: ["genou"],
-      ankle: ["cheville"],
-      neck: ["cou", "nuque"]
     }
   }
 };

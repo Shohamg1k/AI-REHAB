@@ -87,7 +87,7 @@ The camera layer. Nothing else in the product works if this doesn't.
 
 | ID | Feature | Loop | Effort | Depends on | New | Rec | Pick |
 |---|---|---|---|---|:--:|:--:|:--:|
-| **E1** | Real-time safety gating — frame-level block/downgrade | fast | M | A2 | | **MVP** | IN |
+| **E1** | Real-time safety gating — frame-level block/downgrade | fast | M | A2 | Gate runs and logs; **in-session block suspended** pending reviewed thresholds + debounce (ADR-0012) | **MVP** | IN |
 | **E2** | Fall / instability detection during standing exercises | fast | M | A1, E1 | | FF | OUT |
 | **E3** | Escalation guidance — contact your clinician / emergency services | — | S | E1 | | **MVP** | IN |
 | **E4** | Non-diagnostic framing throughout, snapshot-tested | — | S | — | | **MVP** | IN |

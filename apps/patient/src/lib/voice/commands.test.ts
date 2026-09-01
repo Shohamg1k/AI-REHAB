@@ -57,23 +57,11 @@ describe("matchCommand", () => {
         { text: "keep going", kind: "resume" },
         { text: "I'm done", kind: "end" }
       ],
-      es: [
-        { text: "empezar", kind: "start" },
-        { text: "espera", kind: "pause" },
-        { text: "continuar", kind: "resume" },
-        { text: "he terminado", kind: "end" }
-      ],
       hi: [
         { text: "शुरू करें", kind: "start" },
         { text: "रुको", kind: "pause" },
         { text: "जारी रखो", kind: "resume" },
         { text: "हो गया", kind: "end" }
-      ],
-      fr: [
-        { text: "commencer", kind: "start" },
-        { text: "attends", kind: "pause" },
-        { text: "continuer", kind: "resume" },
-        { text: "j'ai fini", kind: "end" }
       ]
     };
 
@@ -87,9 +75,7 @@ describe("matchCommand", () => {
   it("hears a pain report in every locale", () => {
     const samples: Record<Locale, string> = {
       en: "my shoulder hurts",
-      es: "me duele el hombro",
-      hi: "मेरे कंधे में दर्द है",
-      fr: "j'ai mal à l'épaule"
+      hi: "मेरे कंधे में दर्द है"
     };
     for (const locale of ALL) {
       expect(matchCommand(samples[locale], locale), locale).toEqual({
