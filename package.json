@@ -2,7 +2,7 @@
   "name": "ai-rehab-coach",
   "private": true,
   "version": "0.0.0",
-  "description": "Camera-based rehabilitation coaching \u2014 monorepo root",
+  "description": "Camera-based rehabilitation coaching — monorepo root",
   "license": "MIT",
   "engines": {
     "node": ">=20"
@@ -19,7 +19,8 @@
     "dev:patient": "node scripts/fetch-pose-assets.mjs && pnpm --filter @ai-rehab/patient run dev",
     "ci": "pnpm run lint:boundaries && pnpm run build && pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run eval",
     "setup:pose": "node scripts/fetch-pose-assets.mjs",
-    "postinstall": "node scripts/fetch-pose-assets.mjs"
+    "postinstall": "node scripts/fetch-pose-assets.mjs",
+    "setup:tts": "node scripts/fetch-tts-assets.mjs"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",

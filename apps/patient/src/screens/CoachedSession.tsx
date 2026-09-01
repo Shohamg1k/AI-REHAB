@@ -6,9 +6,10 @@ import { appendEvent } from "../lib/db.js";
 import { ExerciseIntroScreen } from "./ExerciseIntroScreen.js";
 import { CameraSetupScreen } from "./CameraSetupScreen.js";
 import { LiveSessionScreen } from "./LiveSessionScreen.js";
-import { speakLocalised, stopSpeaking } from "../lib/speech.js";
+import { prerenderCues, speakLocalised, stopSpeaking } from "../lib/speech.js";
 import { strings } from "../lib/i18n/ui.js";
-import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
+import { localiseCue } from "@ai-rehab/exercises";
+import { useSpeechPrefs, useBundledVoice } from "../hooks/useSpeechPrefs.js";
 import { useVoiceCommands } from "../hooks/useVoiceCommands.js";
 import { isCommandAllowed, type VoiceCommand } from "../lib/voice/commands.js";
 
@@ -67,6 +68,7 @@ export function CoachedSession({
   const [paused, setPaused] = useState(false);
   const finishedRef = useRef(false);
   const { prefs, locale } = useSpeechPrefs();
+  useBundledVoice(locale);
   /**
    * Kept in a ref because `handleSetupContinue` is redeclared every render and
    * reads `state.captureQuality`. Listing it as a dependency of the voice
@@ -135,6 +137,30 @@ export function CoachedSession({
     const timer = window.setTimeout(() => setCountdown((n) => (n === null ? null : n - 1)), 1000);
     return () => window.clearTimeout(timer);
   }, [countdown, setScoring]);
+
+  /**
+   * Render this exercise's cues into the bundled voice, starting the moment
+   * the session mounts (ADR-0011).
+   *
+   * **Measured in the browser, which is where it counts: ~5s per cue.** The
+   * Node spike said 1.4s; single-threaded wasm in a browser is far slower, and
+   * threaded wasm needs cross-origin isolation this app cannot assume of
+   * whoever deploys it. Six cues is therefore ~30s of work, which does *not*
+   * fit the 10-second countdown it was originally written to use.
+   *
+   * So it starts at the intro screen instead and runs through framing and the
+   * countdown — a minute or more in practice. Cues are rendered in the spec's
+   * own priority order so that if the patient is quick, the lines most likely
+   * to be needed are the ones that made it. Everything not ready by the time
+   * it fires simply falls back to the device voice.
+   */
+  useEffect(() => {
+    if (!spec) return;
+    const lines = [...spec.cues]
+      .sort((a, b) => b.priority - a.priority)
+      .map((cue) => localiseCue(cue.text, locale));
+    void prerenderCues(lines);
+  }, [spec, locale]);
 
   /**
    * Auto-end once the set is done. The patient's hands are busy and they are

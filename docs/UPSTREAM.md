@@ -131,6 +131,10 @@ Useful wrappers: [KiMoRe_wrapper](https://github.com/petteriTeikari/KiMoRe_wrapp
 | UI-PRMD | Academic terms | **Check before commercial use or redistribution.** Cite the paper. |
 | KIMORE | Academic terms | **Check before commercial use or redistribution.** Cite Capecci et al. 2019 (IEEE TNSRE). |
 | wger | AGPL-3.0 | **Do not vendor.** Reference only. |
+| Piper (engine + wasm phonemizer) | MIT | Retain copyright + licence text. |
+| onnxruntime-web | MIT | Retain copyright + licence text. |
+| Piper voice `hi_IN-pratham-medium` | **CC BY-NC-SA 4.0** | **Non-commercial only, and ShareAlike.** Attribution shown in-app. See §7. |
+| espeak-ng data (bundled in the Piper wasm) | GPL-3.0 | Runs as a separate wasm artefact, unmodified and unlinked. **Re-check before any commercial release.** |
 
 Open question for `docs/adr/`: whether the academic dataset terms permit use in a commercial product's CI, or only in research. This gates I2's fixture library and needs an answer before M1 ends.
 
@@ -153,3 +157,56 @@ Open question for `docs/adr/`: whether the academic dataset terms permit use in 
 ---
 
 *Maintained document. Any new open-source dependency lands here with its licence and its adopt/adapt/replace decision before the first import.*
+
+---
+
+## 7. Bundled neural TTS (Piper) — ADR-0011
+
+**What and why.** The Web Speech API can only use voices the operating system
+already has. A machine with no Hindi voice cannot speak Hindi at all, and
+"install a language pack" is not a product. So a voice ships with the app.
+
+**Adopt / adapt / replace: adapt.** We use Piper's artefacts — the espeak-ng
+wasm phonemizer and a VITS ONNX voice — but not its JS wrappers. Both published
+wrappers (`@mintplex-labs/piper-tts-web`, `@diffusionstudio/vits-web`) hardcode
+jsDelivr, cdnjs and a Hugging Face mirror, and that mirror carries no Hindi
+voice at all. They are also ~40 lines of logic around `callMain` and one ONNX
+session. We call those directly and stage every asset into
+`apps/patient/public/tts`, which keeps the "no CDN at runtime" property the
+pose assets already have.
+
+### The licence position, stated plainly
+
+**Every Piper Hindi voice is encumbered.** This was checked, not assumed:
+
+| Voice | Licence | Usable? |
+|---|---|---|
+| `hi_IN-pratham-medium` | CC BY-NC-SA 4.0 | Non-commercial only |
+| `hi_IN-priyamvada-medium` | CC BY-NC-SA 4.0 | Non-commercial only |
+| `hi_IN-rohan-medium` | Bespoke IIT Madras Indic TTS agreement | Terms not public; needs a signed agreement |
+
+**The product owner confirmed this project is non-commercial**, so
+`hi_IN-pratham-medium` is used, with attribution rendered in the Settings card
+and the non-commercial term shown next to it. **If that ever changes, this is
+the first thing that has to be answered** — and the answer is not "swap the
+voice", because there isn't a permissive Piper Hindi voice to swap to.
+
+ShareAlike applies to *derivatives of the voice model*. We ship it unmodified
+and do not train on it, so it does not reach into our source. That reading
+should be confirmed by a lawyer before any distribution beyond this project.
+
+### The permissive alternative, and why it is not here yet
+
+**Kokoro-82M is Apache-2.0 and has four Hindi voices** — commercially clean,
+and one 80MB model covers English, Hindi, Spanish and French. It was rejected
+for now on a purely technical blocker: `kokoro-js` refuses non-English voices,
+and the `phonemizer` package the JS ecosystem uses is an **English-only**
+espeak-ng build (verified: `hi`, `es` and `fr` all return "Invalid language
+identifier"). Reaching Kokoro's Hindi from a browser means compiling espeak-ng
+to wasm with full language data first. Piper's wasm already is that build — it
+carries 113 dictionaries including `hi_dict` — which is the whole reason this
+route works today and that one does not.
+
+**If this project ever goes commercial, that espeak-ng build is the unlock**,
+and it would let the voice move to Apache-2.0 without changing any of the
+plumbing in `ttsWorker.ts`.

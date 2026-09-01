@@ -21,6 +21,14 @@ pnpm --filter @ai-rehab/patient run dev
 
 Open the printed URL in a browser with a camera. Runs entirely client-side by default — no account, nothing leaves the device.
 
+**Optional: a Hindi voice that does not depend on the device.** The Web Speech API can only use voices the operating system already has, and most machines have no Hindi one. To ship a voice with the app instead:
+
+```bash
+pnpm setup:tts
+```
+
+~83MB, staged into `apps/patient/public/tts` and served from the app's own origin. Run it once on the machine that serves the app and *every* visitor gets a Hindi voice. Skip it and the app falls back to device voices and says so. The bundled voice is **CC BY-NC-SA 4.0 — non-commercial only**; see [`docs/adr/0011-bundled-neural-tts.md`](docs/adr/0011-bundled-neural-tts.md).
+
 ### Run the full stack, including the backend
 
 ```bash

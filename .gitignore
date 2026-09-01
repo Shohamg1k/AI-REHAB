@@ -40,6 +40,8 @@ packages/eval/report.md
 # MediaPipe pose assets — staged by scripts/fetch-pose-assets.mjs on install,
 # not committed (wasm is reproducible from node_modules; the model is ~5.8MB).
 apps/patient/public/mediapipe/
+# Bundled neural TTS assets (ADR-0011) - fetched by `pnpm setup:tts`, ~83MB.
+apps/patient/public/tts/
 
 # Python (services/rehab-engine)
 .venv/

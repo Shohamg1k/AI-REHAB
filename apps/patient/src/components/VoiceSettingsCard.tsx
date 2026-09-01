@@ -1,7 +1,7 @@
 import { LOCALES, localeInfo } from "@ai-rehab/contracts";
 import { Button } from "./Button.js";
 import { Icon } from "./Icon.js";
-import { useSpeechPrefs, useVoices } from "../hooks/useSpeechPrefs.js";
+import { useBundledVoice, useSpeechPrefs, useVoices } from "../hooks/useSpeechPrefs.js";
 import { isVoiceCommandsSupported } from "../hooks/useVoiceCommands.js";
 import { strings } from "../lib/i18n/ui.js";
 import {
@@ -32,6 +32,7 @@ import {
 export function VoiceSettingsCard() {
   const { prefs, t, update } = useSpeechPrefs();
   const voices = useVoices();
+  const bundled = useBundledVoice(prefs.locale);
 
   const info = localeInfo(prefs.locale);
   const available = voicesForLocale(prefs.locale, voices);
@@ -87,8 +88,28 @@ export function VoiceSettingsCard() {
         </select>
       </label>
 
-      {coverage === "missing" && (
-        <p className="ds-sunk text-b2 text-ink-2">{t.settings.noVoice(info.nativeName)}</p>
+      {/*
+        ADR-0011. A staged voice makes the missing-device-voice warning wrong:
+        the language *is* available, just not from the operating system. The
+        licence is shown rather than buried because this particular voice is
+        non-commercial, and whoever deploys this needs to know that without
+        reading the repo.
+      */}
+      {bundled ? (
+        <div className="ds-sunk flex flex-col gap-6">
+          <span className="text-b2 text-ink">
+            {t.settings.bundledVoice(info.nativeName)}
+          </span>
+          <span className="text-cap text-ink-3">
+            {bundled.id} · {bundled.licence}
+            {bundled.nonCommercial ? ` · ${t.settings.nonCommercial}` : ""}
+          </span>
+          <span className="text-cap text-ink-3">{bundled.attribution}</span>
+        </div>
+      ) : (
+        coverage === "missing" && (
+          <p className="ds-sunk text-b2 text-ink-2">{t.settings.noVoice(info.nativeName)}</p>
+        )
       )}
 
       <label className="flex flex-col gap-6">

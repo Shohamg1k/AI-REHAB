@@ -59,9 +59,25 @@ describe("privacy: no raw camera data can leave the device (ADR-0002)", () => {
   // kind of change that should fail review, not sail through silently.
   const NETWORK_ALLOWED_FILES = ["lib/api.ts"];
 
+  /**
+   * A second, narrower category (ADR-0011): files that fetch **our own staged
+   * assets** — the bundled TTS voice and its config.
+   *
+   * Deliberately *not* folded into NETWORK_ALLOWED_FILES, because that list is
+   * about data leaving the device and these send nothing at all. They are
+   * same-origin GETs for files this repo staged. To keep that true rather than
+   * merely intended, the test below asserts every fetch in them targets a path
+   * under the asset base — so `fetch(someUrl)` here fails the build.
+   */
+  const ASSET_FETCH_ALLOWED_FILES = ["lib/tts/bundledTts.ts", "worker/ttsWorker.ts"];
+
+  function relativePath(path: string): string {
+    return path.replace(/\\/g, "/").split("/src/")[1] ?? "";
+  }
+
   function isAllowedNetworkFile(path: string): boolean {
-    const relative = path.replace(/\\/g, "/").split("/src/")[1];
-    return NETWORK_ALLOWED_FILES.includes(relative ?? "");
+    const relative = relativePath(path);
+    return NETWORK_ALLOWED_FILES.includes(relative) || ASSET_FETCH_ALLOWED_FILES.includes(relative);
   }
 
   it("makes network calls from nowhere except the explicitly reviewed sync client", () => {
@@ -76,6 +92,37 @@ describe("privacy: no raw camera data can leave the device (ADR-0002)", () => {
       (f) => !isAllowedNetworkFile(f.path) && forbidden.some((re) => re.test(f.code))
     ).map((f) => f.path);
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * The asset-fetch files must only ever reach for our own staged files. A
+   * hardcoded path cannot carry patient data off the device; a variable URL
+   * could, and that difference is what the allowlist above is claiming.
+   */
+  it("only fetches same-origin staged assets from the TTS files", () => {
+    const offenders: string[] = [];
+    for (const file of FILES) {
+      if (!ASSET_FETCH_ALLOWED_FILES.includes(relativePath(file.path))) continue;
+      for (const match of file.code.matchAll(/\bfetch\s*\(\s*([^),]*)/g)) {
+        const argument = (match[1] ?? "").trim();
+        const sameOrigin =
+          argument.startsWith("`${basePath}/") ||
+          argument.startsWith("`${BASE_PATH}/") ||
+          /^[`"']\/tts\//.test(argument);
+        if (!sameOrigin) {
+          offenders.push(`${relativePath(file.path)}: fetch(${argument.slice(0, 60)})`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("the bundled TTS never touches anything camera-shaped", () => {
+    for (const relative of ASSET_FETCH_ALLOWED_FILES) {
+      const file = FILES.find((f) => relativePath(f.path) === relative);
+      expect(file, relative).toBeDefined();
+      expect(file!.code, relative).not.toMatch(/landmark|bitmap|pixel|imagedata|videoElement/i);
+    }
   });
 
   it("the sync client only ever sends already-validated SessionEvents, never a landmark or frame", () => {
