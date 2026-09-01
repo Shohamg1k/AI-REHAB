@@ -2,6 +2,7 @@ import { LOCALES, localeInfo } from "@ai-rehab/contracts";
 import { Button } from "./Button.js";
 import { Icon } from "./Icon.js";
 import { useSpeechPrefs, useVoices } from "../hooks/useSpeechPrefs.js";
+import { isVoiceCommandsSupported } from "../hooks/useVoiceCommands.js";
 import { strings } from "../lib/i18n/ui.js";
 import {
   MAX_RATE,
@@ -117,6 +118,35 @@ export function VoiceSettingsCard() {
         <Icon name="sound" size={15} />
         {t.settings.test}
       </Button>
+
+      {/*
+        C7. Off by default and switched on only here, deliberately: in every
+        shipping browser `SpeechRecognition` streams microphone audio to the
+        vendor's servers, so this is a network decision as much as a
+        microphone one. The patient is told that in plain words before the
+        switch, not in a policy page after it. See ADR-0010.
+      */}
+      <div className="ds-sunk flex flex-col gap-9">
+        <span className="ds-label">{t.voice.title}</span>
+        {isVoiceCommandsSupported() ? (
+          <>
+            <label className="flex items-start gap-9">
+              <input
+                type="checkbox"
+                checked={prefs.commandsEnabled}
+                onChange={(e) => update({ commandsEnabled: e.target.checked })}
+                className="mt-2 h-16 w-16 flex-none accent-teal"
+              />
+              <span className="text-b2 text-ink">{t.voice.enable}</span>
+            </label>
+            <p className="text-cap text-ink-3">{t.voice.examples}</p>
+            <p className="text-cap text-ink-3">{t.voice.privacy}</p>
+            <p className="text-cap text-ink-3">{t.voice.blockedNote}</p>
+          </>
+        ) : (
+          <p className="text-cap text-ink-3">{t.voice.unsupported}</p>
+        )}
+      </div>
     </div>
   );
 }

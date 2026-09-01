@@ -33,6 +33,30 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## Hands-free session control (C7, ADR-0010)
+
+A patient doing an exercise is several feet away with both hands busy, often on the floor. Every control we shipped needed them to walk back and tap. The pain bookmark was close to useless mid-set: by the time they reached the phone, the rep they wanted to flag was several reps ago.
+
+Five spoken commands — start, pause, resume, end, and "it hurts (here)" — matched against fixed per-locale phrase tables in `lib/voice/commands.ts`. A pure function, no model: ADR-0001 keeps models out of the fast loop, and a patient saying "pause" mid-rep needs an answer in that instant.
+
+**The matcher is deliberately asymmetric, and that is the design.** Mishearing something as "pause" costs a tap. Mishearing something as "resume" restarts a set the patient wanted stopped, possibly while they are hurt. So pain and stop-like phrases are matched first and loosely; go-like phrases are matched last and only when nothing else in the utterance matched. *"My knee hurts but let's go"* is a pain report. *"Stop the exercise"* is an end, not a pause. *"Wait, I'm ready"* is a pause.
+
+**Speech cannot restart a blocked set.** `isCommandAllowed` lives in the same pure module as the matcher so no call site can skip it, and it is tested: `start` and `resume` are refused while the verdict is `block` or `escalate`; `pain` and `end` stay available, because a blocked patient still needs to report and to leave. Invariant 3 — a voice command is downstream, and nothing downstream may soften a block.
+
+**A heard pain report writes a region, which the button never could.** `pain_bookmarked` has carried a nullable `region` since G1 and the UI has always written `null`, because a button cannot know where it hurt. Speech can. Severity is deliberately *not* inferred — "a little pain" is not a number, and turning it into one is the exact fabrication B6 exists to prevent. The check-in still asks the patient to choose it themselves.
+
+### The cost, stated plainly
+
+**In every shipping browser, `SpeechRecognition` streams microphone audio to the vendor's servers** — Google, in Chrome. It cannot be turned off or routed around; it is how the API is implemented.
+
+This is a bigger step than ADR-0009. Groq receives a small struct of derived numbers that `CoachSessionFactsSchema` defines exhaustively. Speech recognition receives *audio*, unbounded in content, and we cannot constrain what a patient or their family says near a live microphone.
+
+So: off by default; enabled only by an explicit checkbox that says where the audio goes, in the patient's own language, above the switch rather than in a policy page below it; the microphone runs only during setup and live phases and is `abort`ed on unmount; and **neither the audio nor the transcript is persisted** — the event log gets the matched command and, for pain, the region. Recognisers mishear and rooms contain other people; a verbatim transcript in a clinical log is a liability with no matching benefit.
+
+An on-device recogniser (Vosk, Whisper WASM) would remove the third party entirely and is the right answer. It was rejected on size — 40–50 MB per language on top of the 30 MB pose model — not on principle. See ADR-0010 for that and the wake-word alternative.
+
+---
+
 ## Session flow: counting starts when the patient does (A4/A7)
 
 Four defects reported from real use, all in the seam between framing the camera and actually exercising.
@@ -236,6 +260,8 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 ## What's still a gap
 
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
+- **Voice commands have never been spoken to.** The matcher is tested hard, but the `SpeechRecognition` plumbing around it — permission, continuous restart, error recovery — has not been exercised by an actual microphone, because the Browser pane here has none. Recognition *quality*, especially for Hindi, is the vendor's and is entirely unmeasured.
+- **ADR-0006's regulatory question is now urgent rather than theoretical, for the second time.** Voice data in a health context has its own treatment under several regimes. ADR-0009 made cross-border processing of derived data a live question; ADR-0010 adds unbounded audio to it.
 - **No non-English string has been checked by a fluent speaker.** The Spanish, Hindi and French cue text, safety sentences and UI copy were written without review. The bounded part of the risk is that the *decision* to stop is language-independent — the gate fires on numbers, and the sheet offers no way to continue in any language — but the wording a patient reads while being stopped is unreviewed, and one wrong verb there matters more than anywhere else in the app.
 - **Only English speech has ever been heard.** The dev machine has eight English voices and none for Spanish, Hindi or French, so the non-English *spoken* path is verified by unit test and by watching the fallback behave, never by ear. What a Hindi voice actually does with these strings is unknown.
 - **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.

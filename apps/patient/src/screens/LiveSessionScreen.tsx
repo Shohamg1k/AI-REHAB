@@ -35,6 +35,8 @@ export function LiveSessionScreen({
   liveState,
   countdown,
   targetReps,
+  paused,
+  listening,
   attachVideo,
   onBookmarkPain,
   onEndExercise
@@ -44,6 +46,10 @@ export function LiveSessionScreen({
   /** Seconds until counting arms, or null once it has. */
   countdown: number | null;
   targetReps: number;
+  /** The patient asked to stop. Distinct from a safety block. */
+  paused: boolean;
+  /** C7 — the microphone is on and listening for commands. */
+  listening: boolean;
   attachVideo: (el: HTMLVideoElement | null) => void;
   onBookmarkPain: () => void;
   onEndExercise: () => void;
@@ -84,17 +90,42 @@ export function LiveSessionScreen({
               >
                 {isBlocked
                   ? "Paused by safety"
-                  : counting
-                    ? t.session.notCountingYet
-                    : `${reps.length} of ${targetReps} reps`}
+                  : paused
+                    ? t.session.paused
+                    : counting
+                      ? t.session.notCountingYet
+                      : `${reps.length} of ${targetReps} reps`}
               </span>
             </div>
+            {listening && (
+              <span
+                className="flex items-center gap-4 rounded-sm bg-white/15 px-6 py-3 text-[10px] font-medium uppercase tracking-wide text-white/80"
+                aria-label={t.voice.listening}
+              >
+                <span className="h-6 w-6 rounded-full bg-[#4ED6A8]" aria-hidden="true" />
+                {t.voice.listening}
+              </span>
+            )}
           </div>
         }
         bottom={
           <div className="flex flex-col gap-10">
             {/* One message, chosen by priority — never a stack. */}
-            {counting && !isBlocked ? (
+            {paused && !isBlocked ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+              >
+                <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
+                  <Icon name="sound" size={15} />
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-[13.5px] font-medium text-ink">{t.session.paused}</span>
+                  <span className="text-[11px] text-ink-3">{t.session.notCountingYet}</span>
+                </span>
+              </div>
+            ) : counting && !isBlocked ? (
               <div
                 role="status"
                 aria-live="polite"

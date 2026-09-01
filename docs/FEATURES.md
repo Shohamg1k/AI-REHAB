@@ -64,6 +64,7 @@ The camera layer. Nothing else in the product works if this doesn't.
 | **C4** | Adjustable coaching persona — encouraging / clinical / concise | slow | S | C1 | | Later | OUT |
 | **C5** | Difficulty-aware tone shifts on frustration or fatigue | slow | M | C1, A2 | | Later | OUT |
 | **C6** | "Why this exercise" rationale cards | — | S | A6 | ● | **MVP** | IN |
+| **C7** | Hands-free session control — spoken start/pause/resume/end and "it hurts here" | fast | M | A4, B5, H9 | ● | **MVP** | IN |
 
 > **C6 is a text field in the exercise spec** and one of the better-supported adherence levers. It is in the MVP because it costs almost nothing. The rest of group C is where the LLM budget goes — worth doing properly at M4 rather than badly at M1.
 
