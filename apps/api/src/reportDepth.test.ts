@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SessionEvent } from "@ai-rehab/contracts";
+import { computeDailyReports } from "./projections.js";
 import {
   computeDataQuality,
   computeExerciseSummaries,
@@ -343,5 +344,114 @@ describe("computeDataQuality", () => {
       unscoredReps: 0,
       meanConfidence: null
     });
+  });
+});
+
+/**
+ * F1 daily reports. The requested behaviour is "one report per day, and if a
+ * report is already there it picks up whatever else you do that day" — which
+ * falls out of deriving on read rather than storing, so what these pin is that
+ * the day boundary is right and that a second session folds into the same day.
+ */
+describe("computeDailyReports", () => {
+  const stored = (sessionId: string, wallClock: string, events: SessionEvent[]) => ({
+    sessionId,
+    events: [
+      { seq: 0, event: { type: "session_started", t: 0, sessionId, programId: null, wallClock } as SessionEvent },
+      ...events.map((event, i) => ({ seq: i + 1, event }))
+    ]
+  });
+
+  const period = { periodStart: "2026-08-01T00:00:00.000Z", periodEnd: "2026-09-30T00:00:00.000Z" };
+  const input = { patientId: "p1", patientDisplayName: "Asha", ...period };
+
+  it("returns one report per active day, newest first", () => {
+    const reports = computeDailyReports(
+      [
+        stored("a", "2026-09-01T09:00:00.000Z", [started("x"), repEvent({ index: 0, score: 80, confidence: 0.9 })]),
+        stored("b", "2026-09-03T09:00:00.000Z", [started("x"), repEvent({ index: 0, score: 90, confidence: 0.9 })])
+      ],
+      input
+    );
+    expect(reports.map((r) => r.periodStart.slice(0, 10))).toEqual(["2026-09-03", "2026-09-01"]);
+  });
+
+  /**
+   * The requested behaviour, stated directly: a second session on the same day
+   * does not make a second report — it makes the day's one report say more.
+   */
+  it("folds a later session into the same day's report rather than adding another", () => {
+    const morning = stored("am", "2026-09-01T09:00:00.000Z", [
+      started("seated-knee-extension"),
+      repEvent({ index: 0, score: 80, confidence: 0.9 })
+    ]);
+    const evening = stored("pm", "2026-09-01T19:30:00.000Z", [
+      started("sit-to-stand"),
+      repEvent({ index: 0, score: 60, confidence: 0.9 }),
+      repEvent({ index: 1, score: 60, confidence: 0.9 })
+    ]);
+
+    const before = computeDailyReports([morning], input);
+    expect(before).toHaveLength(1);
+    expect(before[0]!.totalReps).toBe(1);
+    expect(before[0]!.exercisesPerformed).toEqual(["seated-knee-extension"]);
+
+    const after = computeDailyReports([morning, evening], input);
+    expect(after).toHaveLength(1);
+    expect(after[0]!.totalReps).toBe(3);
+    expect(after[0]!.exercisesPerformed).toEqual(["seated-knee-extension", "sit-to-stand"]);
+    expect(after[0]!.sessionCount).toBe(2);
+  });
+
+  it("moves lastActivityAt forward as the day goes on", () => {
+    const morning = stored("am", "2026-09-01T09:00:00.000Z", [
+      started("x"),
+      repEvent({ index: 0, score: 80, confidence: 0.9 })
+    ]);
+    const evening = stored("pm", "2026-09-01T19:30:00.000Z", [
+      started("x"),
+      repEvent({ index: 0, score: 80, confidence: 0.9 })
+    ]);
+
+    expect(computeDailyReports([morning], input)[0]!.lastActivityAt).toBe("2026-09-01T09:00:00.000Z");
+    expect(computeDailyReports([morning, evening], input)[0]!.lastActivityAt).toBe(
+      "2026-09-01T19:30:00.000Z"
+    );
+  });
+
+  it("omits days with no sessions rather than returning empty reports", () => {
+    const reports = computeDailyReports(
+      [stored("a", "2026-09-01T09:00:00.000Z", [started("x"), repEvent({ index: 0, score: 80, confidence: 0.9 })])],
+      input
+    );
+    // A month-long window, one active day.
+    expect(reports).toHaveLength(1);
+  });
+
+  it("ignores sessions outside the window", () => {
+    const reports = computeDailyReports(
+      [stored("old", "2026-01-01T09:00:00.000Z", [started("x"), repEvent({ index: 0, score: 80, confidence: 0.9 })])],
+      input
+    );
+    expect(reports).toEqual([]);
+  });
+
+  it("keeps each day's numbers to that day", () => {
+    const reports = computeDailyReports(
+      [
+        stored("a", "2026-09-01T09:00:00.000Z", [started("x"), repEvent({ index: 0, score: 40, confidence: 0.9 })]),
+        stored("b", "2026-09-02T09:00:00.000Z", [
+          started("x"),
+          repEvent({ index: 0, score: 100, confidence: 0.9 }),
+          repEvent({ index: 1, score: 100, confidence: 0.9 })
+        ])
+      ],
+      input
+    );
+    const [sep2, sep1] = reports;
+    expect(sep2!.avgFormScore).toBe(100);
+    expect(sep2!.totalReps).toBe(2);
+    expect(sep1!.avgFormScore).toBe(40);
+    expect(sep1!.totalReps).toBe(1);
   });
 });

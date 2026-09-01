@@ -80,6 +80,7 @@ const EMPTY_REPORT: ProgressReport = {
   patientDisplayName: "Pat",
   periodStart: "2026-08-24T00:00:00.000Z",
   periodEnd: "2026-08-31T00:00:00.000Z",
+  lastActivityAt: null,
   sessionCount: 0,
   activeDays: 0,
   totalReps: 0,

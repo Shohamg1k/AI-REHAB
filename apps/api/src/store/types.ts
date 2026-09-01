@@ -113,6 +113,16 @@ export interface Store {
     patientId: string,
     period: { start: string; end: string }
   ): Promise<ProgressReport>;
+  /**
+   * F1 — one report per day the patient did something, newest first. Days
+   * with no sessions are omitted. Derived on read like `getReport`, so a
+   * day's report always already reflects everything done that day.
+   */
+  getDailyReports(
+    tenantId: string,
+    patientId: string,
+    period: { start: string; end: string }
+  ): Promise<ProgressReport[]>;
 
   // --- messages (F9) ---
   /** A thread belongs to one patient; `senderId` may be that patient or their clinician. */

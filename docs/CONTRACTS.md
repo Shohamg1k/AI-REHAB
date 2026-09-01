@@ -290,6 +290,23 @@ A rep the tracker could barely see would otherwise report a confident-looking
 "failed" against a criterion it never measured. Range of motion is the one
 exception: it is geometry, measurable on a rep too noisy to score.
 
+**One report per day, derived on read.** `GET /me/reports/daily` returns a
+`ProgressReport` for each day the patient did something, newest first, days
+with no sessions omitted. Because a report is computed from the event log
+every time it is read, finishing another exercise does not create a second
+report for the day — it makes that day's report say more the next time it is
+opened. There is no generate step and no stored copy to fall out of date.
+
+`lastActivityAt` is the wall clock of the most recent session in the period, or
+null. It is the only part of "this changed" a reader cannot infer for
+themselves. It is taken from the events, not from `Date.now()`, so the
+projection stays clock-free and testable.
+
+**Days are bucketed by UTC date**, the same key `computeAdherence` uses, so the
+two can never disagree about which day a session belongs to. The UI renders
+those labels in UTC for the same reason — see the known gap in `docs/STATUS.md`
+about patients whose local day differs.
+
 **`ReportObservation.exerciseId` is an id, not a name.** `apps/api` may depend
 on `@ai-rehab/contracts` only, so it cannot resolve a display name; the UI
 joins the two. That is why the field exists rather than the name being spelled

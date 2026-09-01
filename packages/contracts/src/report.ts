@@ -162,6 +162,15 @@ export const ProgressReportSchema = z.object({
   patientDisplayName: z.string(),
   periodStart: z.string(),
   periodEnd: z.string(),
+  /**
+   * The most recent session in the period, or null when there were none.
+   *
+   * A daily report is recomputed from the event log on every read, so it
+   * always already includes whatever the patient did most recently — there is
+   * no "regenerate" step. This is what lets the UI say *when* the day's report
+   * last changed, which is the only part of that a reader can't infer.
+   */
+  lastActivityAt: z.string().nullable(),
 
   sessionCount: z.number().int().nonnegative(),
   activeDays: z.number().int().nonnegative(),

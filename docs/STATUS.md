@@ -33,6 +33,28 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## A report a day, on the Sharing page (F1)
+
+The report existed but was a single rolling 7-day window, reachable only from Progress. It is now **one report per day**, listed on Sharing, newest first, each expanding to the full detail.
+
+**Nothing needed to be "regenerated", and that is the design.** Reports are derived from the event log on read and never stored, so the day's report already includes whatever was finished a minute ago. Do one exercise and today's report appears; do another that evening and the same report says more — no second report, no stale copy. Verified live: syncing an evening session left the count at four reports and moved 1 Sep from 1 session/11 reps to 2 sessions/14 reps, with `lastActivityAt` going 09:30 → 18:45.
+
+`lastActivityAt` was added for exactly that: it is the one part of "this changed" a reader cannot infer. It comes from the events rather than `Date.now()`, so `computeReport` stays clock-free and fixture-testable.
+
+**Days with no sessions are omitted**, rather than returned as empty reports. A list of blank days is noise, and adherence already answers "which days were missed".
+
+The clinician gets the same list at `GET /patients/:id/reports/daily`, behind the same `dataSharingEnabled` gate and writing the same audit entry — reading thirty days of data a day at a time should not be a quieter act than reading it in one.
+
+### Two display bugs found by looking at it
+
+A single day rendered as "9/1/2026 – 9/2/2026". Periods are bucketed in UTC and end at `T23:59:59.999Z`, which parses into the next local day in any positive-offset timezone. The label is now formatted from the ISO date prefix and collapses when start and end are the same day.
+
+"Last updated" was rendered in local time while the day it is filed under is UTC, so an evening session could show a time belonging to the next day. It renders in UTC now, matching its bucket.
+
+**The underlying limitation is real and unfixed:** days are bucketed by UTC, so for a patient far from UTC a late-evening session files under the previous day. That is pre-existing — `computeAdherence` and the streak counter have always keyed on UTC — and fixing it properly means making the API timezone-aware rather than patching the display. Flagged, not fixed.
+
+---
+
 ## The report says what is actually wrong now (F1)
 
 The report used to reduce every rep to one number. **"Average form 62" tells a clinician something is wrong; it does not tell them what, and it cannot be acted on.** The detail was already in the event log and was being averaged away — `FormScore.breakdown` has carried each criterion's value, target and pass/fail since M1, and `compensations` has carried named compensation patterns.
@@ -333,6 +355,7 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 ## What's still a gap
 
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
+- **Days are bucketed by UTC, everywhere.** Daily reports, adherence and streaks all key on the UTC date of `session_started`. A patient several hours from UTC will see a late-evening session filed under the previous day. Fixing it means a timezone-aware API, not a display patch.
 - **No clinician has read one of these reports.** The content is derived from real event logs and verified end to end against a seeded account, but whether it answers the questions a physiotherapist actually asks is unvalidated — the thresholds it reports against are unreviewed for the same reason.
 - **Voice commands have never been spoken to.** The matcher is tested hard, but the `SpeechRecognition` plumbing around it — permission, continuous restart, error recovery — has not been exercised by an actual microphone, because the Browser pane here has none. Recognition *quality*, especially for Hindi, is the vendor's and is entirely unmeasured.
 - **ADR-0006's regulatory question is now urgent rather than theoretical, for the second time.** Voice data in a health context has its own treatment under several regimes. ADR-0009 made cross-border processing of derived data a live question; ADR-0010 adds unbounded audio to it.
