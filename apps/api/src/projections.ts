@@ -446,7 +446,10 @@ function buildObservations(d: {
   if (d.pain.length > 0) {
     const worst = d.pain.reduce((a, b) => (b.severity > a.severity ? b : a));
     out.push({
-      text: `Pain was reported ${d.pain.length} time${d.pain.length === 1 ? "" : "s"}, highest ${worst.severity} of 5${worst.region ? ` in the ${worst.region.replace(/_/g, " ")}` : ""}${worst.exerciseId ? ` during ${worst.exerciseId}` : ""}.`,
+      text: `Pain was reported ${d.pain.length} time${d.pain.length === 1 ? "" : "s"}, highest ${worst.severity} of 5${worst.region ? ` in the ${worst.region.replace(/_/g, " ")}` : ""}.`,
+      // The exercise is carried in `exerciseId` and rendered as a prefix by
+      // the UI. Naming it in the text too produced "Seated Knee Extension:
+      // ... during seated-knee-extension" — twice, once as a raw id.
       basis: "Patient self-report on the 1–5 scale they were shown, tagged to the exercise that was running. Never inferred from movement.",
       exerciseId: worst.exerciseId
     });
