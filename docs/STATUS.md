@@ -33,6 +33,35 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## The report says what is actually wrong now (F1)
+
+The report used to reduce every rep to one number. **"Average form 62" tells a clinician something is wrong; it does not tell them what, and it cannot be acted on.** The detail was already in the event log and was being averaged away — `FormScore.breakdown` has carried each criterion's value, target and pass/fail since M1, and `compensations` has carried named compensation patterns.
+
+The same period now reads:
+
+> Knee extension range missed target on 6 of 8 scored reps — mean 125 against a target of 130–180, average miss 8.2
+> Movement tempo missed target on 6 of 8 scored reps — mean 1225 against 1500–3500, average miss 600
+> Leaning back to lift seen on 3 reps
+> Peak left knee angle increased by 15° over the period — best of first session 121°, best of last 136°
+> 56% of prescribed reps were completed
+> Form score rose 25 points across the period
+
+Six things a physiotherapist can act on, each carrying its basis (invariant 4). Range is short *and improving*; they are rushing; they compensate by leaning back; and they are cutting sets short — which is a different problem from doing them badly, and needs a different conversation.
+
+**What was added:** `perExercise[]` (criteria, compensations, ROM change, completion rate), `formTrend[]`, `dataQuality`, and pain entries tagged with the exercise and rep they happened on.
+
+**Design decisions worth keeping:**
+
+- **Criteria sort by failure *rate*, never by magnitude.** The first version tie-broke on average miss, which ranked a 600 ms tempo miss above an 8.2° range miss — comparing milliseconds to degrees. Found by reading real output, not by a test; there is a regression test now.
+- **Only reps above the confidence floor feed criterion stats** (G7, one level deeper than the average). A rep the tracker could barely see must not produce a confident "failed" against a criterion it never measured. **Range of motion is the deliberate exception** — it is geometry, and measurable on a rep too noisy to score.
+- **ROM compares peaks, not means.** A patient whose average dips because they tired still gained range if their best improved.
+- **`ReportObservation` carries `exerciseId`, not a display name.** `apps/api` may depend on contracts only, so it cannot resolve names; the UI joins them. The alternative was observations reading "seated-knee-extension: …" to a clinician.
+- **The safety section no longer says sets were stopped**, because they no longer are (ADR-0012), and it says the thresholds behind those flags are provisional — worth a look, not a conclusion.
+
+**The patient sees all of it**, on the Progress tab, through the same component. That was already the contract's stated posture and is now worth more, because there is more to see.
+
+---
+
 ## The in-session safety block is gone (ADR-0012), and two languages went with it
 
 **The block fired wrongly and the product owner asked for it to go.** That matches what the code did, and the mechanism is not mysterious: the thresholds are provisional and unreviewed, and `evaluateSafety` runs *per frame* with no persistence requirement — any single noisy frame crossing a limit produced a full-screen stop with the reason spoken at urgent priority. An unvalidated threshold compared against a noisy per-frame signal produces false positives; that is a design gap, not a tuning problem.
@@ -304,6 +333,7 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 ## What's still a gap
 
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
+- **No clinician has read one of these reports.** The content is derived from real event logs and verified end to end against a seeded account, but whether it answers the questions a physiotherapist actually asks is unvalidated — the thresholds it reports against are unreviewed for the same reason.
 - **Voice commands have never been spoken to.** The matcher is tested hard, but the `SpeechRecognition` plumbing around it — permission, continuous restart, error recovery — has not been exercised by an actual microphone, because the Browser pane here has none. Recognition *quality*, especially for Hindi, is the vendor's and is entirely unmeasured.
 - **ADR-0006's regulatory question is now urgent rather than theoretical, for the second time.** Voice data in a health context has its own treatment under several regimes. ADR-0009 made cross-border processing of derived data a live question; ADR-0010 adds unbounded audio to it.
 - **The bundled voice has never been listened to by a human.** It was verified as real audio — correct sample rate, plausible duration, non-zero peak, played through WebAudio — but nobody has confirmed the Hindi *sounds* right, and the voice is a community model trained by a third party. A native speaker should listen before this is put in front of a patient.

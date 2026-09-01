@@ -1,11 +1,19 @@
+import {
+  computeDataQuality,
+  computeExerciseSummaries,
+  computeFormTrend,
+  type SessionWithEvents
+} from "./reportDepth.js";
 import type {
   AdherenceDay,
   BaselineEntry,
   JointName,
   ProgressReport,
   ReportObservation,
+  ReportExerciseSummary,
   ReportPainEntry,
   ReportSafetyEvent,
+  ReportTrendPoint,
   RomTrendSeries,
   SessionEvent,
   SessionSummary
@@ -208,13 +216,25 @@ export function computeReport(
   let scoredReps = 0;
   let scoreSum = 0;
 
+  const withEvents: SessionWithEvents[] = [];
+
   for (const session of inPeriod) {
     const events = sortedEvents(session);
     const started = events.find((e) => e.type === "session_started");
     const at = started?.type === "session_started" ? started.wallClock : input.periodStart;
+    withEvents.push({ sessionId: session.sessionId, events, startedAt: at });
+
+    // Pain is recorded against whatever exercise was running. "Knee pain" is a
+    // symptom; "knee pain on rep 6 of sit-to-stand" is something a clinician
+    // can change a prescription over.
+    let currentExerciseId: string | null = null;
 
     for (const event of events) {
-      if (event.type === "exercise_started") exercises.add(event.exerciseId);
+      if (event.type === "exercise_started") {
+        exercises.add(event.exerciseId);
+        currentExerciseId = event.exerciseId;
+      }
+      if (event.type === "exercise_completed") currentExerciseId = null;
       if (event.type === "rep_completed") {
         totalReps += 1;
         if (event.score.confidence >= FORM_SCORE_CONFIDENCE_FLOOR) {
@@ -232,7 +252,9 @@ export function computeReport(
         pain.push({
           at,
           region: event.signal.region ?? null,
-          severity: event.signal.selfReported.severity
+          severity: event.signal.selfReported.severity,
+          exerciseId: currentExerciseId,
+          repIndex: event.signal.selfReported.repIndex ?? null
         });
       }
       if (
@@ -246,6 +268,9 @@ export function computeReport(
 
   const adherence = computeAdherence(inPeriod);
   const avgFormScore = scoredReps > 0 ? Math.round((scoreSum / scoredReps) * 10) / 10 : null;
+  const perExercise = computeExerciseSummaries(withEvents);
+  const formTrend = computeFormTrend(withEvents);
+  const dataQuality = computeDataQuality(withEvents);
 
   return {
     patientId: input.patientId,
@@ -258,6 +283,9 @@ export function computeReport(
     scoredReps,
     avgFormScore,
     exercisesPerformed: [...exercises],
+    perExercise,
+    formTrend,
+    dataQuality,
     adherence,
     pain,
     safetyEvents,
@@ -268,10 +296,28 @@ export function computeReport(
       scoredReps,
       avgFormScore,
       pain,
-      safetyEvents
+      safetyEvents,
+      perExercise,
+      formTrend
     })
   };
 }
+
+/**
+ * A criterion has to miss on this share of reps before it is worth a
+ * clinician's attention. One bad rep in twenty is how humans move.
+ */
+const CRITERION_FINDING_THRESHOLD = 0.3;
+/** Below this many scored reps, a failure rate is not a rate. */
+const MIN_REPS_FOR_A_FINDING = 3;
+/** Keep the summary readable when several criteria are failing at once. */
+const MAX_CRITERIA_PER_EXERCISE = 2;
+/** Peak-angle change smaller than this is inside pose-estimation noise. */
+const ROM_CHANGE_THRESHOLD_DEG = 5;
+/** Form-score movement worth mentioning at all. */
+const FORM_TREND_THRESHOLD = 5;
+/** Completing less than this share of prescribed reps is worth flagging. */
+const COMPLETION_CONCERN = 0.8;
 
 /**
  * Plain-language observations. Each carries the `basis` it was drawn from,
@@ -291,6 +337,8 @@ function buildObservations(d: {
   avgFormScore: number | null;
   pain: ReportPainEntry[];
   safetyEvents: ReportSafetyEvent[];
+  perExercise: ReportExerciseSummary[];
+  formTrend: ReportTrendPoint[];
 }): ReportObservation[] {
   const out: ReportObservation[] = [];
 
@@ -298,20 +346,23 @@ function buildObservations(d: {
     return [
       {
         text: "No sessions were recorded in this period.",
-        basis: "No session_started events fell inside the reporting window."
+        basis: "No session_started events fell inside the reporting window.",
+        exerciseId: null
       }
     ];
   }
 
   out.push({
     text: `${d.sessionCount} session${d.sessionCount === 1 ? "" : "s"} across ${d.activeDays} day${d.activeDays === 1 ? "" : "s"}.`,
-    basis: "Counted from synced session events."
+    basis: "Counted from synced session events.",
+    exerciseId: null
   });
 
   if (d.avgFormScore !== null) {
     out.push({
       text: `Average form score ${d.avgFormScore} across ${d.scoredReps} scored rep${d.scoredReps === 1 ? "" : "s"}.`,
-      basis: "Mean of per-rep scores that cleared the tracking-confidence floor."
+      basis: "Mean of per-rep scores that cleared the tracking-confidence floor.",
+      exerciseId: null
     });
   }
 
@@ -319,22 +370,96 @@ function buildObservations(d: {
   if (unscored > 0) {
     out.push({
       text: `${unscored} of ${d.totalReps} reps could not be scored reliably.`,
-      basis: "Tracking confidence fell below the floor — usually framing or lighting, not performance."
+      basis: "Tracking confidence fell below the floor — usually framing or lighting, not performance.",
+      exerciseId: null
     });
+  }
+
+  // The actionable line. A clinician cannot do anything with "average 62";
+  // they can do something with "peak knee angle short of target on 14 of 18
+  // reps". Only criteria that failed a real share of reps are worth surfacing
+  // — one bad rep in twenty is noise, not a finding.
+  for (const exercise of d.perExercise) {
+    // Every criterion that is failing often enough to matter, not just the
+    // worst one: an exercise can be going wrong in two ways at once, and
+    // reporting only the top one hides the second.
+    const failing = exercise.criteria
+      .filter((c) => c.reps >= MIN_REPS_FOR_A_FINDING)
+      .filter((c) => c.failed / c.reps >= CRITERION_FINDING_THRESHOLD)
+      .slice(0, MAX_CRITERIA_PER_EXERCISE);
+    for (const criterion of failing) {
+      out.push({
+        text: `${criterion.label} missed target on ${criterion.failed} of ${criterion.reps} scored reps.`,
+        basis: `Mean ${criterion.avgValue} against a target of ${criterion.target.min}–${criterion.target.max}; average miss ${criterion.avgMissBy}.`,
+        exerciseId: exercise.exerciseId
+      });
+    }
+  }
+
+  for (const exercise of d.perExercise) {
+    const top = exercise.compensations[0];
+    if (!top) continue;
+    out.push({
+      text: `${top.label} seen on ${top.occurrences} rep${top.occurrences === 1 ? "" : "s"}.`,
+      basis: `Compensation rule ${top.ruleId}, mean severity ${top.avgSeverity} of 1.`,
+      exerciseId: exercise.exerciseId
+    });
+  }
+
+  // Range of motion, which is the question rehab review is usually actually
+  // asking. Only reported across two or more sessions, and only when the
+  // change is large enough not to be measurement noise.
+  for (const exercise of d.perExercise) {
+    const moved = exercise.romChange.filter((r) => Math.abs(r.changeDeg) >= ROM_CHANGE_THRESHOLD_DEG);
+    for (const rom of moved) {
+      const direction = rom.changeDeg > 0 ? "increased" : "decreased";
+      out.push({
+        text: `Peak ${rom.joint.replace(/_/g, " ")} angle ${direction} by ${Math.abs(rom.changeDeg)}° over the period.`,
+        basis: `Best rep of the first session (${rom.firstPeak}°) against the best of the last (${rom.lastPeak}°), across ${rom.sessions} sessions.`,
+        exerciseId: exercise.exerciseId
+      });
+    }
+  }
+
+  for (const exercise of d.perExercise) {
+    if (exercise.completionRate === null || exercise.completionRate >= COMPLETION_CONCERN) continue;
+    out.push({
+      text: `${Math.round(exercise.completionRate * 100)}% of prescribed reps were completed.`,
+      basis: `${exercise.totalReps} reps done against ${Math.round(exercise.totalReps / exercise.completionRate)} prescribed across ${exercise.sessions} session${exercise.sessions === 1 ? "" : "s"}. Sets being cut short is a different problem from sets being done badly.`,
+      exerciseId: exercise.exerciseId
+    });
+  }
+
+  if (d.formTrend.length >= 2) {
+    const first = d.formTrend[0]!;
+    const last = d.formTrend[d.formTrend.length - 1]!;
+    const delta = Math.round((last.avgFormScore - first.avgFormScore) * 10) / 10;
+    if (Math.abs(delta) >= FORM_TREND_THRESHOLD) {
+      out.push({
+        text: `Form score ${delta > 0 ? "rose" : "fell"} ${Math.abs(delta)} points across the period.`,
+        basis: `First session averaged ${first.avgFormScore} over ${first.scoredReps} scored reps; last averaged ${last.avgFormScore} over ${last.scoredReps}. Two points are a difference, not a trend.`,
+        exerciseId: null
+      });
+    }
   }
 
   if (d.pain.length > 0) {
     const worst = d.pain.reduce((a, b) => (b.severity > a.severity ? b : a));
     out.push({
-      text: `Pain was reported ${d.pain.length} time${d.pain.length === 1 ? "" : "s"}, highest ${worst.severity} of 5${worst.region ? ` in the ${worst.region.replace(/_/g, " ")}` : ""}.`,
-      basis: "Patient self-report. Never inferred from movement."
+      text: `Pain was reported ${d.pain.length} time${d.pain.length === 1 ? "" : "s"}, highest ${worst.severity} of 5${worst.region ? ` in the ${worst.region.replace(/_/g, " ")}` : ""}${worst.exerciseId ? ` during ${worst.exerciseId}` : ""}.`,
+      basis: "Patient self-report on the 1–5 scale they were shown, tagged to the exercise that was running. Never inferred from movement.",
+      exerciseId: worst.exerciseId
     });
   }
 
   if (d.safetyEvents.length > 0) {
     out.push({
-      text: `The safety gate stopped a set ${d.safetyEvents.length} time${d.safetyEvents.length === 1 ? "" : "s"}.`,
-      basis: d.safetyEvents.map((e) => e.reason).join(" · ")
+      text: `The safety gate flagged ${d.safetyEvents.length} moment${d.safetyEvents.length === 1 ? "" : "s"} for review.`,
+      // ADR-0012: the gate no longer stops the patient, so this must not say
+      // it did. Thresholds are provisional and fire on a single frame, so
+      // these are worth a clinician's eye, not a conclusion.
+      basis: `Provisional thresholds, single-frame — treat as flags, not findings. ${d.safetyEvents.map((e) => e.reason).join(" · ")}`,
+      exerciseId: null
     });
   }
 

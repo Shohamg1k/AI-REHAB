@@ -258,6 +258,45 @@ type CoachingCue = {
 
 ---
 
+## `ProgressReport` — F1
+
+Computed from the event log on read, never stored. The patient reads the same
+report as the clinician: a report a patient is not allowed to see is a report
+that can say things about them they cannot check.
+
+Beyond the headline counts, it carries the detail that makes it actionable:
+
+- **`perExercise[]`** — per exercise: sessions, reps, average score,
+  `completionRate` against what was prescribed, and:
+  - **`criteria[]`** — *which* criterion is failing, how often, its mean value
+    against its target band, and the average miss when it misses. Sorted
+    worst-first by **failure rate**, never by magnitude: criteria carry
+    different units and ranking 600 ms above 8.2° compares nothing to nothing.
+  - **`compensations[]`** — named compensation patterns and how often each was
+    seen.
+  - **`romChange[]`** — best peak of the first session against the best of the
+    last. Peak, because peak is what the exercise trains; omitted entirely
+    below two sessions, since there is nothing to compare.
+- **`formTrend[]`** — average score per session, oldest first.
+- **`dataQuality`** — what share of reps were tracked well enough to score
+  (G7). A report that shows scores without saying how much of the movement was
+  visible invites confidence the data does not support.
+- **`pain[]`** — carries `exerciseId` and `repIndex`. "Knee pain" is a symptom;
+  "knee pain on rep 6 of sit-to-stand" is something a clinician can change a
+  prescription over.
+
+**Only reps above the confidence floor feed criterion and compensation stats.**
+A rep the tracker could barely see would otherwise report a confident-looking
+"failed" against a criterion it never measured. Range of motion is the one
+exception: it is geometry, measurable on a rep too noisy to score.
+
+**`ReportObservation.exerciseId` is an id, not a name.** `apps/api` may depend
+on `@ai-rehab/contracts` only, so it cannot resolve a display name; the UI
+joins the two. That is why the field exists rather than the name being spelled
+into `text`.
+
+---
+
 ## `Locale`
 
 ```ts
