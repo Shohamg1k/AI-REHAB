@@ -5,6 +5,8 @@ import type {
   BaselineEntry,
   BodyRegion,
   CreateProgramRequest,
+  CoachAnswer,
+  CoachQuestionRequest,
   Message,
   Program,
   ProgressReport,
@@ -147,6 +149,17 @@ export function fetchAuditLog(): Promise<AuditEntry[]> {
 
 export function fetchMyProgram(): Promise<Program | null> {
   return request("/programs/mine", {}, true);
+}
+
+// --- coaching assistant (C1/C3, ADR-0009) ---
+
+/** Whether a coach is configured at all. Unauthenticated: it reveals nothing about a patient. */
+export function fetchCoachStatus(): Promise<{ available: boolean }> {
+  return request("/coach/status", {});
+}
+
+export function askCoach(input: CoachQuestionRequest): Promise<CoachAnswer> {
+  return request("/coach/ask", { method: "POST", body: JSON.stringify(input) }, true);
 }
 
 // --- reports (F1) + messages (F9) ---

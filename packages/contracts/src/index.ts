@@ -17,3 +17,4 @@ export * from "./program.js";
 export * from "./sync.js";
 export * from "./message.js";
 export * from "./report.js";
+export * from "./coach.js";

@@ -2,6 +2,7 @@ import type { BodyRegion, FormScore, RepEvent } from "@ai-rehab/contracts";
 import { FORM_SCORE_CONFIDENCE_FLOOR, repConsistency } from "@ai-rehab/core";
 import { Button } from "../components/Button.js";
 import { Disclaimer } from "../components/Disclaimer.js";
+import { CoachPanel } from "../components/CoachPanel.js";
 
 /**
  * M8 / H4 — session summary.
@@ -186,6 +187,23 @@ export function SessionSummaryScreen({
             </Observation>
           )}
         </div>
+
+        {/* The slow loop: the set is over and nothing is being measured, so
+            ADR-0001's ban on models in the per-frame path does not apply. */}
+        <CoachPanel
+          facts={{
+            exerciseName,
+            repCount: reps.length,
+            scoredReps: confident.length,
+            avgFormScore: avgScore,
+            shortfalls: [...shortfalls.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .map(([label, count]) => ({ label, count })),
+            painSeverity: painReport?.severity ?? null,
+            painRegion: painReport?.region ? painReport.region.replace(/_/g, " ") : null,
+            safetyEvents: []
+          }}
+        />
       </div>
 
       <div className="flex-1" />

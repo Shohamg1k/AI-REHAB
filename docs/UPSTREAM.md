@@ -136,4 +136,20 @@ Open question for `docs/adr/`: whether the academic dataset terms permit use in 
 
 ---
 
+## 6. Groq (hosted LLM inference)
+
+**Service:** https://groq.com · **API:** OpenAI-compatible chat completions
+**Default model:** `llama-3.3-70b-versatile` (Meta Llama 3.3, Llama Community Licence)
+**Decision:** adopt as a **service, not a dependency**. No SDK — the call is one `fetch` to an OpenAI-shaped endpoint, and a package would add supply-chain surface for roughly twenty lines of code.
+
+**Used for:** the between-sets coaching assistant (C1/C3) only. See `docs/adr/0009-llm-coaching-assistant.md` for the decision and its consequences — including that it ended the app's on-device-only posture for *derived* data.
+
+**Not used for:** anything in the per-frame path (ADR-0001 stands), cue text (comes from the exercise spec's cue table), safety verdicts (a pure function with veto, invariant 3), or the clinician's progress report (F1 stays deterministic, every observation carrying its evidence).
+
+**What crosses the boundary:** derived session facts only — exercise name, rep counts, form scores, self-reported pain, safety-block reasons. No landmarks, no frames, no name, no email, no identifiers. Enforced by the shape of `CoachSessionFactsSchema`, which has no field for any of them, and asserted by a test rather than left to reviewer discipline.
+
+**Operational notes:** the key lives server-side in `apps/api` — a key shipped to a browser is a stolen key. Unconfigured is a supported state: the coach hides itself and nothing else changes. Groq's own terms govern retention; we make no claim about it beyond telling the patient it happens.
+
+---
+
 *Maintained document. Any new open-source dependency lands here with its licence and its adopt/adapt/replace decision before the first import.*

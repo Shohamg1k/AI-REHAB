@@ -135,7 +135,7 @@ export function CameraStage({
                 : "Starting camera…"}
           </span>
           <span className="px-24 text-center text-cap text-white/60">
-            Everything runs on your device. Your video never leaves it.
+            Pose tracking runs on your device. Your video never leaves it.
           </span>
         </div>
       )}

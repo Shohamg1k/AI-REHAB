@@ -10,7 +10,33 @@ import { MemoryStore } from "./store/memoryStore.js";
  *
  * `pnpm --filter @ai-rehab/api run dev:memory`
  */
+/**
+ * Load the repo-root `.env` if there is one.
+ *
+ * `.env.example` has always documented these variables, but nothing outside
+ * docker-compose ever read them — so running this server directly meant
+ * putting secrets on the command line, where they end up in shell history.
+ * `.env` is gitignored (CLAUDE.md §5), which makes it the right place for a
+ * real `GROQ_API_KEY`.
+ *
+ * Dev-only, and deliberately only here: the production entry point takes its
+ * environment from whatever orchestrates it, and should not start reading
+ * files off disk to find secrets.
+ */
+function loadDotEnv(): void {
+  try {
+    process.loadEnvFile(new URL("../../../.env", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
+    console.log("Loaded .env");
+  } catch {
+    // No .env, or this Node is too old for loadEnvFile. Neither is a
+    // problem: every variable has a working default or a documented
+    // fallback, and the coach simply stays unavailable without a key.
+  }
+}
+
 async function main(): Promise<void> {
+  loadDotEnv();
+
   if (!process.env.JWT_SECRET) {
     process.env.JWT_SECRET = "dev-memory-server-not-for-anything-real-xxxxxxxx";
   }

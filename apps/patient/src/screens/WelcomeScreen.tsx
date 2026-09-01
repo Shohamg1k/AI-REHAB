@@ -18,7 +18,11 @@ const PROMISES: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: "lock",
     title: "The video stays on your device",
-    body: "Nothing is recorded or uploaded — we keep the joint positions, never the picture."
+    // Narrowed from "nothing is recorded or uploaded" when ADR-0009 sent
+    // derived session data to Groq. The video claim is still exactly true and
+    // still mechanically enforced (lib/privacy.test.ts); the broader one
+    // stopped being true, so it stopped being said.
+    body: "Your camera video is never recorded or uploaded. We keep the joint positions, never the picture."
   },
   {
     icon: "cam",
