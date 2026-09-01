@@ -9,8 +9,10 @@ import type {
   SafetyVerdict
 } from "@ai-rehab/contracts";
 import { POSE_MODEL_TIER } from "virtual:pose-model-tier";
+import { localiseCue } from "@ai-rehab/exercises";
 import type { MainToWorkerMessage, WorkerToMainMessage } from "../worker/protocol.js";
-import { speak } from "../lib/speech.js";
+import { speakLocalised } from "../lib/speech.js";
+import { localiseSafetyReason } from "../lib/i18n/safetyReason.js";
 
 /** Measured pipeline cost, surfaced so ADR-0007 can be closed with a number. */
 export type PosePerf = {
@@ -334,8 +336,12 @@ export function useLiveSession(exerciseId: string) {
         activeCue: msg.cue ?? s.activeCue
       }));
 
+      // Localised for the ear and the screen only. `msg.cue` and
+      // `msg.safetyVerdict` are persisted verbatim by CoachedSession, so the
+      // clinician's record stays in one canonical language (invariant 4).
       if (msg.cue) {
-        speak(msg.cue.text);
+        const cue = msg.cue;
+        speakLocalised((locale) => localiseCue(cue.text, locale));
         if (cueClearTimerRef.current !== null) window.clearTimeout(cueClearTimerRef.current);
         cueClearTimerRef.current = window.setTimeout(() => {
           setState((s) => ({ ...s, activeCue: null }));
@@ -346,7 +352,8 @@ export function useLiveSession(exerciseId: string) {
         msg.safetyVerdict &&
         (msg.safetyVerdict.verdict === "block" || msg.safetyVerdict.verdict === "escalate")
       ) {
-        speak(msg.safetyVerdict.reason, { urgent: true });
+        const verdict = msg.safetyVerdict;
+        speakLocalised((locale) => localiseSafetyReason(verdict, locale), { urgent: true });
       }
     };
 

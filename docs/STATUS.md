@@ -1,6 +1,6 @@
 # Status
 
-**Last updated:** 2026-08-31
+**Last updated:** 2026-09-01
 **Milestone:** M0 + M1 + M2 merged, plus clinician UI/E5 wiring, history/consent, and the pose latency pass. This branch (`feature/design-system-v2`) adopts the approved visual design: the token system, IBM Plex, the bottom navigation the app never had, and the first screens rebuilt against their artboards.
 **Phase:** all ten patient screens (M1–M10) are rebuilt to the approved design, and the first round of real-use feedback on them is fixed. What is left is the features the mock depicts but the system does not have, listed below — not styling.
 
@@ -30,6 +30,24 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 **A real failure found this way:** the first model name (`llama-3.3-70b-versatile`) returned a bare 404 indistinguishable from a bad URL. Groq had removed it. `scripts/groq-models.mjs` lists what a key can actually reach; the default is now `openai/gpt-oss-120b`, verified against this account, and the constant is marked perishable because Groq rotates its lineup.
 
 **Left alone deliberately:** the deterministic clinician report (F1). Generated prose reads better and is less checkable, which is the wrong trade for the document a clinician acts on. Cue text still comes from the exercise spec's cue table (ADR-0001), and the safety gate remains a pure function with veto.
+
+---
+
+## Voice and language (H9, partial)
+
+The patient chooses the language they are coached in and the voice that speaks it — English, Spanish, Hindi and French — from the Program tab. The choice persists in `localStorage` and applies to spoken cues, cue captions and the safety sheet.
+
+**Cue translations are shipped data, not a runtime model call.** Cue text is spoken inside a set, which is the fast loop, and ADR-0001 forbids a model call there. Translating at runtime would also make coaching depend on the network in the one part of the app that has to keep working when it drops.
+
+`CUE_TRANSLATIONS` is keyed by the **English source string**, not by a cue id. That is the reverse of the obvious choice and it is deliberate: an id-keyed table survives an edit to the English copy, which sounds like an advantage and is in fact the failure mode — someone rewrites a cue, the Spanish entry keeps its old wording, and a Spanish-speaking patient is coached with text that no longer matches what the cue means. Keying by source text makes that edit a *miss*, so it falls back to English and the build goes red until the translation is redone. Losing a translation is recoverable; silently serving a wrong one is not.
+
+**The safety gate was not touched.** `SafetyVerdict.reason` is still generated inside the pure gate, still English, and still what is persisted for the clinician (invariant 4). `localiseSafetyReason` is presentation-only and rebuilds the sentence from the verdict's own `ruleId` and `threshold` fields — never by parsing the prose back into its parts, which would duplicate gate logic in the UI where it could drift and end up describing a different rule than the one that fired. It never sees `verdict`, so no translation can soften a block (invariant 3). A test asserts the localised sentence quotes **exactly** the numbers the gate reported, because otherwise the patient and their clinician would be looking at two different events.
+
+**Scope is drawn at a line worth keeping: anything spoken aloud, and anything that tells a patient to stop, is translated.** That is the cue catalogue, the safety sheet and the settings card. Navigation, history and the clinician-facing surfaces are still English. Half-translating the safety sheet would have been the worst outcome available — a patient coached in Hindi and then blocked in English at the moment it matters most.
+
+**A bug found by running it, not by testing it.** The first wiring localised the cue with the patient's *chosen* locale and then asked the speech module for a voice. On a device with no Hindi voice that fed Hindi words to an English engine — the precise failure `spokenLocale` exists to prevent, reintroduced one layer up. `speakLocalised` now takes a localiser function rather than a finished string, so the words and the voice resolve from a single value and cannot disagree. Three tests hold that shape in place. When the two genuinely diverge, captions stay in the chosen language, speech falls back to English, and the settings card explains that — in the chosen language.
+
+**Nobody fluent has read these translations.** Same posture as the provisional exercise ranges: shipped, usable, and labelled rather than quietly presented as finished. `UNREVIEWED_TRANSLATION_NOTE` renders next to the picker.
 
 ---
 
@@ -202,6 +220,8 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 ## What's still a gap
 
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
+- **No non-English string has been checked by a fluent speaker.** The Spanish, Hindi and French cue text, safety sentences and UI copy were written without review. The bounded part of the risk is that the *decision* to stop is language-independent — the gate fires on numbers, and the sheet offers no way to continue in any language — but the wording a patient reads while being stopped is unreviewed, and one wrong verb there matters more than anywhere else in the app.
+- **Only English speech has ever been heard.** The dev machine has eight English voices and none for Spanish, Hindi or French, so the non-English *spoken* path is verified by unit test and by watching the fallback behave, never by ear. What a Hindi voice actually does with these strings is unknown.
 - **M7's skeleton replay is not built and cannot be as specified.** The design scrubs back through the flagged rep with the pain moment marked. ADR-0002 means no landmark sequence is persisted past the pose worker, so there is nothing to replay — the design's own caption ("there is no video of this rep, because none was ever kept") is true of the skeleton too. Building it would mean deciding to store movement traces, which is an ADR, not a UI task.
 - **M9's form-score chart and left-vs-right symmetry card are not built.** Neither a cross-session score series nor a per-side comparison is computed anywhere yet, and drawing the artboard's sample curve would show the patient a trend that is not theirs.
 - **The five deliberate omissions above** (check-in, streak, caregiver/study consents, data export/erasure, camera hero) are unbuilt features, and two of them — export and erasure — are likely legal obligations rather than nice-to-haves.

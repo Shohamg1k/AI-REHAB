@@ -121,7 +121,7 @@ Split by seam, not by feature, so two people rarely need the same file.
 
 - **I3** React Native shell reusing `packages/core` unchanged — the whole reason for the split
 - **I1** exercise authoring studio; library from 3 to 20+
-- **H9** multi-language voice and UI, large text, high contrast
+- **H9** multi-language voice and UI, large text, high contrast — *the multi-language half shipped early* (4 locales across spoken cues, captions and the safety sheet); large text and high contrast remain here
 - **H10** wearable pairing · **H8** gamified variety packs
 - Revisit D2 with real outcome data — replace the rule table if the dataset supports it
 

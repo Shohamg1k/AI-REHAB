@@ -1,6 +1,9 @@
 import type { SafetyVerdict } from "@ai-rehab/contracts";
 import { Button } from "./Button.js";
 import { Icon } from "./Icon.js";
+import { useSpeechPrefs } from "../hooks/useSpeechPrefs.js";
+import { localiseSafetyReason } from "../lib/i18n/safetyReason.js";
+import { interpolate } from "../lib/i18n/interpolate.js";
 
 /**
  * M6 — `Banner/Safety Block` (E1 + E3), as the design's bottom sheet.
@@ -16,6 +19,11 @@ import { Icon } from "./Icon.js";
  * set"). It is stated here without attribution, because the thresholds come
  * from the exercise spec and no clinician has reviewed them yet — see
  * docs/STATUS.md on provisional specs.
+ *
+ * H9: every string here is localised, including `verdict.reason`. This is the
+ * one screen a patient must understand on sight, so it is not a place to fall
+ * back to English while the cues are in their language. The *persisted*
+ * verdict is untouched — see localiseSafetyReason.
  */
 export function SafetyBlockBanner({
   verdict,
@@ -24,6 +32,8 @@ export function SafetyBlockBanner({
   verdict: SafetyVerdict;
   onEndExercise: () => void;
 }) {
+  const { locale, t } = useSpeechPrefs();
+
   if (verdict.verdict !== "block" && verdict.verdict !== "escalate") return null;
 
   const isEscalate = verdict.verdict === "escalate";
@@ -39,55 +49,54 @@ export function SafetyBlockBanner({
         </span>
         <div className="flex flex-col gap-3">
           <h2 className="text-h1 text-dang">
-            {isEscalate ? "Stop and check in with your clinician" : "We stopped the set"}
+            {isEscalate ? t.safety.escalateTitle : t.safety.blockTitle}
           </h2>
-          <p className="text-b2 text-ink-2">{verdict.reason}</p>
+          <p className="text-b2 text-ink-2">{localiseSafetyReason(verdict, locale)}</p>
           {verdict.threshold && (
             <p className="text-b2 text-ink-2">
-              {verdict.threshold.name} reached{" "}
-              <span className="font-mono font-semibold text-ink">
-                {verdict.threshold.observed.toFixed(0)}
-              </span>{" "}
-              against a cap of{" "}
-              <span className="font-mono font-semibold text-ink">
-                {verdict.threshold.limit.toFixed(0)}
-              </span>
-              .
+              {interpolate(t.safety.thresholdReached, {
+                name: verdict.threshold.name,
+                observed: (
+                  <span className="font-mono font-semibold text-ink">
+                    {verdict.threshold.observed.toFixed(0)}
+                  </span>
+                ),
+                limit: (
+                  <span className="font-mono font-semibold text-ink">
+                    {verdict.threshold.limit.toFixed(0)}
+                  </span>
+                )
+              })}
             </p>
           )}
         </div>
       </div>
 
       <div className="ds-sunk flex flex-col gap-7">
-        <span className="ds-label">If it hurts</span>
-        <p className="text-b2 text-ink-2">
-          Stop and contact your clinician. If the pain is severe or you cannot bear weight, call your
-          local emergency number. We will not ask you to carry on.
-        </p>
+        <span className="ds-label">{t.safety.ifItHurts}</span>
+        <p className="text-b2 text-ink-2">{t.safety.ifItHurtsBody}</p>
       </div>
 
       <div className="flex flex-col gap-6">
-        <span className="ds-label">Written to your log</span>
+        <span className="ds-label">{t.safety.writtenToLog}</span>
         {/* A log entry, not a restatement — the reason is already above, and
             repeating it here just made the sheet say the same thing twice. */}
         <p className="font-mono text-[11.5px] leading-[1.6] uppercase text-ink-2">
-          {isEscalate ? "Escalated" : "Blocked"}
+          {isEscalate ? t.safety.escalated : t.safety.blocked}
           {verdict.threshold
             ? ` · ${verdict.threshold.name} ${verdict.threshold.observed.toFixed(0)} > cap ${verdict.threshold.limit.toFixed(0)}`
             : ""}
           <br />
-          Reason attached · visible to your clinician
+          {t.safety.reasonAttached}
         </p>
       </div>
 
       <div className="flex flex-col gap-9">
         <Button variant="danger" onClick={onEndExercise}>
-          End this exercise
+          {t.safety.endExercise}
         </Button>
         <p className="text-cap text-ink-3">
-          {isEscalate
-            ? "If this is a medical emergency, contact emergency services. Otherwise, message your clinician before your next session."
-            : "You can try a different exercise, or come back to this one later."}
+          {isEscalate ? t.safety.escalateFooter : t.safety.blockFooter}
         </p>
       </div>
     </div>

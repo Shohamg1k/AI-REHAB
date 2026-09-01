@@ -258,6 +258,33 @@ type CoachingCue = {
 
 ---
 
+## `Locale`
+
+```ts
+type Locale = 'en' | 'es' | 'hi' | 'fr';
+
+type LocaleInfo = {
+  code: Locale;
+  nativeName: string;   // what goes in the picker
+  englishName: string;  // logs, clinician surfaces, reports
+  speechLang: string;   // BCP-47, handed to SpeechSynthesisUtterance.lang
+  reviewed: boolean;    // false until a fluent speaker has read the strings
+};
+```
+
+The language the patient is coached in (H9). `DEFAULT_LOCALE` is `'en'` and is typed as a literal, not as `Locale` — callers narrow with `locale === DEFAULT_LOCALE`, and a widened type silently defeats that.
+
+**A locale is a presentation concern and never a storage one.** `CoachingCue.text` and `SafetyVerdict.reason` are persisted in English regardless of what the patient hears, so one canonical language reaches the clinician (invariant 4). Translation happens at the point of display and speech:
+
+- `localiseCue(text, locale)` in `packages/exercises` — a lookup in `CUE_TRANSLATIONS`, keyed by the English source string so that editing English copy fails the build rather than leaving a stale translation.
+- `localiseSafetyReason(verdict, locale)` in `apps/patient` — rebuilds the sentence from the verdict's `ruleId` and `threshold`, never from its prose. It cannot see `verdict.verdict`, so it cannot soften a block (invariant 3).
+
+Both fall back to English rather than to an empty string: a patient mid-rep needs *a* cue, and a patient being blocked needs *a* reason.
+
+Adding a locale to `LocaleSchema` fails the typecheck until every UI string exists, and fails `cueCatalogue.test.ts` until every cue is translated.
+
+---
+
 ## `PainSignal`
 
 ```ts

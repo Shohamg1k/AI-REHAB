@@ -143,9 +143,11 @@ The camera layer. Nothing else in the product works if this doesn't.
 | **H6** | Drop-out risk scoring — nudge before they quit, not after | slow | M | G2, H3 | ● | Later | OUT |
 | **H7** | Guest session without an account | plat | S | G1 | ● | FF | OUT |
 | **H8** | Gamified variety packs — reach-based mini-games | fast | L | A1, A6 | | Later | OUT |
-| **H9** | Multi-language, large text, high contrast, cue captions | — | L | — | | Later | OUT |
+| **H9** | Multi-language, large text, high contrast, cue captions | — | L | — | Multi-language **partial**: 4 locales across spoken cues, captions, safety sheet and voice settings. Large text and high contrast not started. | Later | OUT |
 | **H10** | Wearable integration for heart rate / recovery context | plat | L | G3 | | Later | OUT |
 
+> **H9's multi-language half was pulled forward** ahead of the rest of the accessibility programme, on the principle that a patient who cannot read the safety sheet is worse served than one who cannot enlarge it. Large text and high contrast remain Later.
+>
 > **H4 is in the MVP because a session needs an ending.** **H7 is nearly free** once G1 is local-first, and it removes the signup form standing between a first-time visitor and the only demo that matters. **H9 accessibility is Later as a full programme, but cue captions ship with A3** — a patient who cannot hear the coach still needs the coaching.
 
 ---
