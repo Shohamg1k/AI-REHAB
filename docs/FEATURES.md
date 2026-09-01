@@ -102,7 +102,7 @@ The camera layer. Nothing else in the product works if this doesn't.
 
 | ID | Feature | Loop | Effort | Depends on | New | Rec | Pick |
 |---|---|---|---|---|:--:|:--:|:--:|
-| **F1** | Automated session and weekly reports | slow | L | G1, G2 | | FF | OUT |
+| **F1** | Automated session and weekly reports | slow | L | G1, G2 | Per-exercise criteria, compensations, ROM change, completion rate, form trend and data quality; patient reads the same report | FF | OUT |
 | **F2** | Exportable clinician packet (PDF) | slow | M | F1 | | FF | OUT |
 | **F3** | Multi-session trend view — progressing / plateaued / regressing | slow | M | F1, G2 | | Later | OUT |
 | **F4** | Plain-language explanations of movement and pain data | slow | M | F1 | | Later | OUT |

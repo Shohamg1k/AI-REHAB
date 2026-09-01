@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ProgressReport } from "@ai-rehab/contracts";
 import { PatientDetailScreen } from "./PatientDetailScreen.js";
 import { setSession } from "../lib/authStore.js";
 
@@ -69,7 +70,12 @@ function mockApi(overrides: {
   return fetchMock;
 }
 
-const EMPTY_REPORT = {
+/**
+ * Typed as `ProgressReport` on purpose. As an untyped literal this fixture
+ * silently went stale when the contract gained fields, and the failure landed
+ * at runtime in seven tests instead of at the typecheck.
+ */
+const EMPTY_REPORT: ProgressReport = {
   patientId: "pat-1",
   patientDisplayName: "Pat",
   periodStart: "2026-08-24T00:00:00.000Z",
@@ -80,10 +86,15 @@ const EMPTY_REPORT = {
   scoredReps: 0,
   avgFormScore: null,
   exercisesPerformed: [],
+  perExercise: [],
+  formTrend: [],
+  dataQuality: { scoredRatio: 0, unscoredReps: 0, meanConfidence: null },
   adherence: [],
   pain: [],
   safetyEvents: [],
-  observations: [{ text: "No sessions were recorded in this period.", basis: "No session events." }]
+  observations: [
+    { text: "No sessions were recorded in this period.", basis: "No session events.", exerciseId: null }
+  ]
 };
 
 describe("PatientDetailScreen", () => {
