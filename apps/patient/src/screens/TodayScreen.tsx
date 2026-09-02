@@ -31,58 +31,49 @@ function ExerciseRow({
   // with no clinician has no prescription, so the row describes the
   // movement instead of inventing numbers for it.
   const meta = prescription ?? spec.movementType;
-
-  if (state === "next") {
-    return (
-      <button
-        type="button"
-        onClick={() => onPick(spec.id)}
-        className="ds-card-lift flex w-full flex-col gap-11 text-left"
-      >
-        <div className="flex items-center gap-11">
-          <span className="flex h-38 w-38 flex-none items-center justify-center rounded bg-teal-wash text-teal">
-            <Icon name="chart" size={20} />
-          </span>
-          <span className="flex flex-1 flex-col">
-            <span className="text-b1 font-semibold text-ink">{spec.displayName}</span>
-            <span className="font-mono text-[11.5px] uppercase text-ink-3">
-              {meta} · up next
-            </span>
-          </span>
-          <Icon name="chevron" size={18} className="flex-none text-ink-3" />
-        </div>
-        <span className="h-1 bg-line" />
-        <span className="text-b2 text-ink-2">
-          <b className="font-semibold text-ink">Why this one — </b>
-          {spec.rationale}
-        </span>
-      </button>
-    );
-  }
-
   const done = state === "done";
+  const next = state === "next";
+
+  /*
+   * A square tile rather than a full-width row. The list is short and highly
+   * visual — six movements, picked by recognition — and rows made a 1920px
+   * window into one long thin column.
+   *
+   * The "why this one" rationale (C6) does not fit in a square and is not
+   * dropped: it moves below the grid for the exercise that is up next, which
+   * is the only one it was ever about.
+   */
   return (
     <button
       type="button"
       onClick={() => onPick(spec.id)}
-      className={`flex w-full items-center gap-11 rounded-md bg-surf p-14 text-left shadow-hair ${
-        done ? "opacity-[.72]" : ""
-      }`}
+      aria-current={next ? "step" : undefined}
+      className={`flex aspect-square w-full flex-col justify-between rounded-md p-14 text-left ${
+        next ? "bg-surf shadow-lift" : "bg-surf shadow-hair"
+      } ${done ? "opacity-[.72]" : ""}`}
     >
       <span
-        className={`flex h-38 w-38 flex-none items-center justify-center rounded ${
-          done ? "bg-ok-wash text-ok" : "bg-sunk text-ink-2"
+        className={`flex h-40 w-40 flex-none items-center justify-center rounded ${
+          done ? "bg-ok-wash text-ok" : next ? "bg-teal-wash text-teal" : "bg-sunk text-ink-2"
         }`}
       >
-        <Icon name={done ? "check" : "chart"} size={20} />
+        <Icon name={done ? "check" : "chart"} size={21} />
       </span>
-      <span className="flex flex-1 flex-col">
-        <span className="text-b1 font-medium text-ink">{spec.displayName}</span>
-        <span className={`font-mono text-[11.5px] uppercase ${done ? "text-ok" : "text-ink-3"}`}>
-          {meta}
+
+      <span className="flex flex-col gap-2">
+        <span
+          className={`text-b1 leading-[1.25] text-ink ${next ? "font-semibold" : "font-medium"}`}
+        >
+          {spec.displayName}
+        </span>
+        <span
+          className={`font-mono text-lb uppercase ${
+            done ? "text-ok" : next ? "text-teal" : "text-ink-3"
+          }`}
+        >
+          {done ? "done" : next ? `${meta} · up next` : meta}
         </span>
       </span>
-      {!done && <Icon name="chevron" size={18} className="flex-none text-ink-3" />}
     </button>
   );
 }
@@ -129,7 +120,7 @@ export function TodayScreen({
           </span>
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div className="grid grid-cols-2 gap-11 md:grid-cols-3 xl:grid-cols-4">
           {exercises.map((spec) => (
             <ExerciseRow
               key={spec.id}
@@ -140,6 +131,14 @@ export function TodayScreen({
             />
           ))}
         </div>
+
+        {/* C6, kept: the rationale for whichever exercise is up next. */}
+        {next && (
+          <div className="ds-card-hair flex flex-col gap-4">
+            <span className="ds-label">Why {next.displayName.toLowerCase()}</span>
+            <span className="text-b2 text-ink-2">{next.rationale}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex-1" />

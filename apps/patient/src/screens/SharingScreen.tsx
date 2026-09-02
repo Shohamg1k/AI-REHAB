@@ -8,7 +8,9 @@ import {
   joinWithCode,
   updateDataSharing
 } from "../lib/api.js";
-import { ReportCard } from "../components/ReportCard.js";
+import { ReportFileCard } from "../components/ReportFileCard.js";
+import { ReportViewer } from "../components/ReportViewer.js";
+import { downloadReport } from "../lib/reportFile.js";
 import { setSession } from "../lib/authStore.js";
 import { Button } from "../components/Button.js";
 import { Icon } from "../components/Icon.js";
@@ -83,8 +85,8 @@ export function SharingScreen({
   const [sharing, setSharing] = useState<boolean | null>(null);
   const [auditLog, setAuditLog] = useState<AuditEntry[] | null>(null);
   const [dailyReports, setDailyReports] = useState<ProgressReport[] | null>(null);
-  /** Which day is expanded. Only one at a time — these are long. */
-  const [openDate, setOpenDate] = useState<string | null>(null);
+  /** The report open in the viewer, if any. */
+  const [openReport, setOpenReport] = useState<ProgressReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -277,7 +279,7 @@ export function SharingScreen({
         )}
 
         {signedIn && dailyReports && (
-          <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-11">
             <div className="flex flex-col gap-4">
               <span className="ds-label">Your daily reports</span>
               <p className="text-cap text-ink-3">
@@ -292,58 +294,21 @@ export function SharingScreen({
               </p>
             )}
 
-            {dailyReports.map((report) => {
-              // The report's own day label — see ProgressReport.periodDate.
-              const date = report.periodDate ?? report.periodStart.slice(0, 10);
-              const open = openDate === date;
-              return (
-                <div key={date} className="ds-card-hair flex flex-col gap-9">
-                  <button
-                    type="button"
-                    onClick={() => setOpenDate(open ? null : date)}
-                    aria-expanded={open}
-                    className="flex items-center gap-11 text-left"
-                  >
-                    <span className="flex flex-1 flex-col gap-1">
-                      <span className="text-b1 font-medium text-ink">
-                        {/* Noon UTC so the weekday cannot shift across the
-                            date line in either direction. */}
-                        {new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "short",
-                          timeZone: "UTC"
-                        })}
-                      </span>
-                      <span className="font-mono text-lb uppercase text-ink-3">
-                        {report.sessionCount} session{report.sessionCount === 1 ? "" : "s"} ·{" "}
-                        {report.totalReps} reps
-                        {report.avgFormScore !== null ? ` · form ${report.avgFormScore}` : ""}
-                      </span>
-                    </span>
-                    <Icon name="chevron" size={16} className={open ? "-rotate-90" : "rotate-90"} />
-                  </button>
-
-                  {/* `lastActivityAt` is the only part of "this got updated"
-                      a reader cannot infer for themselves — the rest is just
-                      the report saying more than it did before. */}
-                  {/* Rendered in the zone the days were bucketed in, so the
-                      time always belongs to the day it is filed under. */}
-                  {report.lastActivityAt && (
-                    <span className="text-cap text-ink-3">
-                      Last updated{" "}
-                      {new Date(report.lastActivityAt).toLocaleTimeString(undefined, {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        timeZone: report.timeZone
-                      })}
-                    </span>
-                  )}
-
-                  {open && <ReportCard report={report} />}
-                </div>
-              );
-            })}
+            {/*
+              A file grid rather than a list of expanders: these are documents,
+              and a clinician scanning a fortnight wants to see them all at
+              once. Two columns on a phone, more as the window allows.
+            */}
+            <div className="grid grid-cols-2 gap-11 md:grid-cols-3 xl:grid-cols-4">
+              {dailyReports.map((report) => (
+                <ReportFileCard
+                  key={report.periodDate ?? report.periodStart}
+                  report={report}
+                  onOpen={() => setOpenReport(report)}
+                  onDownload={() => downloadReport(report)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
@@ -370,6 +335,8 @@ export function SharingScreen({
           </Button>
         </div>
       )}
+
+      {openReport && <ReportViewer report={openReport} onClose={() => setOpenReport(null)} />}
     </div>
   );
 }
