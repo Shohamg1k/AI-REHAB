@@ -302,10 +302,17 @@ null. It is the only part of "this changed" a reader cannot infer for
 themselves. It is taken from the events, not from `Date.now()`, so the
 projection stays clock-free and testable.
 
-**Days are bucketed by UTC date**, the same key `computeAdherence` uses, so the
-two can never disagree about which day a session belongs to. The UI renders
-those labels in UTC for the same reason — see the known gap in `docs/STATUS.md`
-about patients whose local day differs.
+**Days are the patient's local days.** The client sends its IANA zone as `tz`;
+`computeAdherence` and `computeDailyReports` are given the same one, so the
+streak and the report list can never disagree about which day a session
+belongs to. An unrecognised zone falls back to UTC rather than throwing — the
+value arrives in a query string.
+
+`periodDate` is carried rather than derived, because east of UTC a local day
+*begins* on the previous UTC date: `periodStart` for 2 September in Kolkata is
+`2026-09-01T18:30:00Z`, and slicing that would label the report 1 September.
+`timeZone` says which clock the report is speaking in, so the UI can render
+times in the same one the days were counted in.
 
 **`ReportObservation.exerciseId` is an id, not a name.** `apps/api` may depend
 on `@ai-rehab/contracts` only, so it cannot resolve a display name; the UI

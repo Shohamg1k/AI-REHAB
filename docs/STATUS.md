@@ -33,6 +33,35 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## Days are the patient's days now (G2)
+
+Everything keyed on the UTC date of `session_started`. For a patient in Kolkata that filed an 11pm Tuesday session under Monday, and **the streak counter agreed with the mistake** — a rehab app that miscounts which day you exercised is wrong about the one thing adherence is for.
+
+The client now sends its IANA zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`) and the server buckets into that zone's calendar days. Daily reports, adherence and streaks all take the same zone, so they cannot disagree.
+
+Verified against a running server with two sessions either side of UTC midnight:
+
+```
+UTC            -> 2026-09-01 (2 sessions)
+                  adherence: 2026-09-01 x2
+Asia/Kolkata   -> 2026-09-02 (1 session)  |  2026-09-01 (1 session)
+                  adherence: 2026-09-01 x1, 2026-09-02 x1
+invalid tz     -> 200 (falls back to UTC, not a 500)
+```
+
+**No dependency.** `Intl.DateTimeFormat` already carries the IANA database, and `en-CA` formats as `YYYY-MM-DD`, which is exactly the key. `apps/api/src/timezone.ts` is ~100 lines.
+
+**Two things there are easy to get wrong and are tested:**
+
+- **`startOfLocalDay` samples the offset twice.** The offset has to be read *at* the instant being looked for; sampling once at UTC midnight lands an hour out on a spring-forward date. Both US DST transitions are pinned by tests.
+- **`hourCycle: "h23"`, not `hour12: false`.** The latter renders midnight as "24" in some runtimes, which parses as the next day and throws the offset out by a full day, once per day.
+
+`periodDate` is carried on the report rather than derived from `periodStart`, because east of UTC a local day *begins* on the previous UTC date — slicing the instant would label 2 September as the 1st. `timeZone` rides along so the UI renders times in the same clock the days were counted in.
+
+**A test name that lied got fixed too.** One case was called "keeps one evening together across UTC midnight" while asserting a *split* — correct assertion, wrong description. Renamed, and the case it claimed to cover (two sessions on one New York evening that UTC splits across two days) was added properly.
+
+---
+
 ## A report a day, on the Sharing page (F1)
 
 The report existed but was a single rolling 7-day window, reachable only from Progress. It is now **one report per day**, listed on Sharing, newest first, each expanding to the full detail.
@@ -51,7 +80,7 @@ A single day rendered as "9/1/2026 – 9/2/2026". Periods are bucketed in UTC an
 
 "Last updated" was rendered in local time while the day it is filed under is UTC, so an evening session could show a time belonging to the next day. It renders in UTC now, matching its bucket.
 
-**The underlying limitation is real and unfixed:** days are bucketed by UTC, so for a patient far from UTC a late-evening session files under the previous day. That is pre-existing — `computeAdherence` and the streak counter have always keyed on UTC — and fixing it properly means making the API timezone-aware rather than patching the display. Flagged, not fixed.
+**The underlying limitation is now fixed** — see below.
 
 ---
 
@@ -355,7 +384,6 @@ cp .env.example .env && docker compose up                  # full stack, Postgre
 ## What's still a gap
 
 - **M5 and M6 have been built but never seen running.** They need a live camera and `requestAnimationFrame`, and the Browser pane in this environment renders hidden, so the capture loop cannot run. Their structure is typechecked and the safety sheet is tested, but nobody has watched the live overlays sit over a moving image.
-- **Days are bucketed by UTC, everywhere.** Daily reports, adherence and streaks all key on the UTC date of `session_started`. A patient several hours from UTC will see a late-evening session filed under the previous day. Fixing it means a timezone-aware API, not a display patch.
 - **No clinician has read one of these reports.** The content is derived from real event logs and verified end to end against a seeded account, but whether it answers the questions a physiotherapist actually asks is unvalidated — the thresholds it reports against are unreviewed for the same reason.
 - **Voice commands have never been spoken to.** The matcher is tested hard, but the `SpeechRecognition` plumbing around it — permission, continuous restart, error recovery — has not been exercised by an actual microphone, because the Browser pane here has none. Recognition *quality*, especially for Hindi, is the vendor's and is entirely unmeasured.
 - **ADR-0006's regulatory question is now urgent rather than theoretical, for the second time.** Voice data in a health context has its own treatment under several regimes. ADR-0009 made cross-border processing of derived data a live question; ADR-0010 adds unbounded audio to it.

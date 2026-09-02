@@ -131,8 +131,21 @@ export function fetchSessions(): Promise<SessionSummary[]> {
   return request("/sessions", {}, true);
 }
 
+/**
+ * The browser's IANA zone, sent so the server buckets events into the days
+ * this patient actually lived through rather than UTC days. An 11pm session
+ * in Kolkata used to count towards the previous day — including in the streak.
+ */
+export function currentTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 export function fetchAdherence(): Promise<AdherenceDay[]> {
-  return request("/projections/adherence", {}, true);
+  return request(`/projections/adherence?tz=${encodeURIComponent(currentTimeZone())}`, {}, true);
 }
 
 export function fetchBaseline(): Promise<BaselineEntry[]> {
@@ -165,7 +178,7 @@ export function askCoach(input: CoachQuestionRequest): Promise<CoachAnswer> {
 // --- reports (F1) + messages (F9) ---
 
 export function fetchMyReport(days = 7): Promise<ProgressReport> {
-  return request(`/me/report?days=${days}`, {}, true);
+  return request(`/me/report?days=${days}&tz=${encodeURIComponent(currentTimeZone())}`, {}, true);
 }
 
 /**
@@ -175,17 +188,25 @@ export function fetchMyReport(days = 7): Promise<ProgressReport> {
  * a minute ago — there is nothing to regenerate.
  */
 export function fetchMyDailyReports(days = 30): Promise<ProgressReport[]> {
-  return request(`/me/reports/daily?days=${days}`, {}, true);
+  return request(`/me/reports/daily?days=${days}&tz=${encodeURIComponent(currentTimeZone())}`, {}, true);
 }
 
 /** Clinician-side. Gated by the patient's data-sharing consent, and audit-logged. */
 export function fetchPatientReport(patientId: string, days = 7): Promise<ProgressReport> {
-  return request(`/patients/${patientId}/report?days=${days}`, {}, true);
+  return request(
+    `/patients/${patientId}/report?days=${days}&tz=${encodeURIComponent(currentTimeZone())}`,
+    {},
+    true
+  );
 }
 
 /** Clinician-side daily list. Same consent gate and audit entry as the single report. */
 export function fetchPatientDailyReports(patientId: string, days = 30): Promise<ProgressReport[]> {
-  return request(`/patients/${patientId}/reports/daily?days=${days}`, {}, true);
+  return request(
+    `/patients/${patientId}/reports/daily?days=${days}&tz=${encodeURIComponent(currentTimeZone())}`,
+    {},
+    true
+  );
 }
 
 /** Omit `patientId` as a patient — the server always uses your own thread. */

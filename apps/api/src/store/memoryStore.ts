@@ -256,10 +256,10 @@ export class MemoryStore implements Store {
     return [...session.events].sort((a, b) => a.seq - b.seq).map((e) => e.event);
   }
 
-  async getAdherence(tenantId: string, userId: string): Promise<AdherenceDay[]> {
+  async getAdherence(tenantId: string, userId: string, timeZone?: string): Promise<AdherenceDay[]> {
     void tenantId;
     const userSessions = this.sessions.get(userId);
-    return computeAdherence(userSessions ? [...userSessions.values()] : []);
+    return computeAdherence(userSessions ? [...userSessions.values()] : [], timeZone);
   }
 
   async getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]> {
@@ -277,7 +277,7 @@ export class MemoryStore implements Store {
   async getReport(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport> {
     const patient = await this.findUserById(tenantId, patientId);
     const userSessions = this.sessions.get(patientId);
@@ -285,14 +285,15 @@ export class MemoryStore implements Store {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,
-      periodEnd: period.end
+      periodEnd: period.end,
+      timeZone: period.timeZone
     });
   }
 
   async getDailyReports(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport[]> {
     const patient = await this.findUserById(tenantId, patientId);
     const userSessions = this.sessions.get(patientId);
@@ -300,7 +301,8 @@ export class MemoryStore implements Store {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,
-      periodEnd: period.end
+      periodEnd: period.end,
+      timeZone: period.timeZone
     });
   }
 

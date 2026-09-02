@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SessionEvent } from "@ai-rehab/contracts";
-import { computeDailyReports } from "./projections.js";
+import { computeAdherence, computeDailyReports } from "./projections.js";
 import {
   computeDataQuality,
   computeExerciseSummaries,
@@ -453,5 +453,106 @@ describe("computeDailyReports", () => {
     expect(sep2!.totalReps).toBe(2);
     expect(sep1!.avgFormScore).toBe(40);
     expect(sep1!.totalReps).toBe(1);
+  });
+});
+
+/**
+ * The reported bug, at the level the patient experiences it: a session at 11pm
+ * in Kolkata is 18:45 UTC, and every projection used to file it under the
+ * previous day — the daily report list *and* the streak, consistently wrong
+ * together.
+ */
+describe("daily reports use the patient's calendar days, not UTC's", () => {
+  const stored = (sessionId: string, wallClock: string) => ({
+    sessionId,
+    events: [
+      { seq: 0, event: { type: "session_started", t: 0, sessionId, programId: null, wallClock } as SessionEvent },
+      { seq: 1, event: started("seated-knee-extension") },
+      { seq: 2, event: repEvent({ index: 0, score: 80, confidence: 0.9 }) }
+    ]
+  });
+
+  const base = {
+    patientId: "p1",
+    patientDisplayName: "Asha",
+    periodStart: "2026-08-01T00:00:00.000Z",
+    periodEnd: "2026-09-30T00:00:00.000Z"
+  };
+
+  /** 2026-09-01T18:45Z — Tuesday 1 Sep in UTC, Wednesday 2 Sep in Kolkata. */
+  const lateEvening = stored("late", "2026-09-01T18:45:00.000Z");
+
+  it("files a late-evening Indian session under the day it happened", () => {
+    const utc = computeDailyReports([lateEvening], { ...base, timeZone: "UTC" });
+    expect(utc[0]!.periodDate).toBe("2026-09-01");
+
+    const kolkata = computeDailyReports([lateEvening], { ...base, timeZone: "Asia/Kolkata" });
+    expect(kolkata[0]!.periodDate).toBe("2026-09-02");
+    expect(kolkata[0]!.timeZone).toBe("Asia/Kolkata");
+  });
+
+  /**
+   * UTC lumps these into one day; in Kolkata they are genuinely two, because
+   * the patient crossed their own midnight between them.
+   */
+  it("splits sessions that fall either side of the patient's midnight", () => {
+    const evening = stored("a", "2026-09-01T17:00:00.000Z"); // 22:30 IST, Tue 1 Sep
+    const afterMidnight = stored("b", "2026-09-01T19:30:00.000Z"); // 01:00 IST, Wed 2 Sep
+
+    expect(computeDailyReports([evening, afterMidnight], { ...base, timeZone: "UTC" })).toHaveLength(
+      1
+    );
+
+    const kolkata = computeDailyReports([evening, afterMidnight], {
+      ...base,
+      timeZone: "Asia/Kolkata"
+    });
+    expect(kolkata.map((r) => r.periodDate)).toEqual(["2026-09-02", "2026-09-01"]);
+  });
+
+  /**
+   * The mirror case, west of UTC, and the one that most obviously reads as a
+   * bug to a patient: two sessions on the same evening in New York used to be
+   * reported as two separate days, and counted as two days of adherence.
+   */
+  it("keeps one American evening together where UTC would split it", () => {
+    const early = stored("a", "2026-09-01T23:00:00.000Z"); // 19:00 EDT, Tue 1 Sep
+    const later = stored("b", "2026-09-02T01:00:00.000Z"); // 21:00 EDT, Tue 1 Sep
+
+    expect(computeDailyReports([early, later], { ...base, timeZone: "UTC" })).toHaveLength(2);
+
+    const newYork = computeDailyReports([early, later], { ...base, timeZone: "America/New_York" });
+    expect(newYork).toHaveLength(1);
+    expect(newYork[0]!.periodDate).toBe("2026-09-01");
+    expect(newYork[0]!.sessionCount).toBe(2);
+  });
+
+  /** Adherence and the report list must never disagree about the day. */
+  it("counts the same days as adherence does", () => {
+    const sessions = [lateEvening, stored("b", "2026-09-04T06:00:00.000Z")];
+    for (const timeZone of ["UTC", "Asia/Kolkata", "America/New_York"]) {
+      const reportDays = computeDailyReports(sessions, { ...base, timeZone })
+        .map((r) => r.periodDate)
+        .sort();
+      const adherenceDays = computeAdherence(sessions, timeZone)
+        .map((d) => d.date)
+        .sort();
+      expect(reportDays, timeZone).toEqual(adherenceDays);
+    }
+  });
+
+  it("brackets each report with the real instants of that local day", () => {
+    const [report] = computeDailyReports([lateEvening], { ...base, timeZone: "Asia/Kolkata" });
+    // 2 Sep in Kolkata runs from 1 Sep 18:30Z to 2 Sep 18:29:59.999Z.
+    expect(report!.periodStart).toBe("2026-09-01T18:30:00.000Z");
+    expect(report!.periodEnd).toBe("2026-09-02T18:29:59.999Z");
+    // And the session is inside it, which is what makes the filter work.
+    expect(report!.sessionCount).toBe(1);
+  });
+
+  it("falls back to UTC when no zone is given, so old callers are unchanged", () => {
+    const [report] = computeDailyReports([lateEvening], base);
+    expect(report!.periodDate).toBe("2026-09-01");
+    expect(report!.timeZone).toBe("UTC");
   });
 });

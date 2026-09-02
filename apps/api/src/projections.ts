@@ -4,6 +4,12 @@ import {
   computeFormTrend,
   type SessionWithEvents
 } from "./reportDepth.js";
+import {
+  DEFAULT_TIME_ZONE,
+  endOfLocalDay,
+  localDateKey,
+  startOfLocalDay
+} from "./timezone.js";
 import type {
   AdherenceDay,
   BaselineEntry,
@@ -82,12 +88,17 @@ export function summariseSessions(sessions: StoredSession[]): SessionSummary[] {
     .sort((a, b) => (a.wallClock ?? "").localeCompare(b.wallClock ?? "") * -1); // newest first
 }
 
-export function computeAdherence(sessions: StoredSession[]): AdherenceDay[] {
+export function computeAdherence(
+  sessions: StoredSession[],
+  timeZone: string = DEFAULT_TIME_ZONE
+): AdherenceDay[] {
   const byDate = new Map<string, number>();
   for (const session of sessions) {
     const started = sortedEvents(session).find((e) => e.type === "session_started");
     if (started?.type !== "session_started") continue;
-    const date = started.wallClock.slice(0, 10); // YYYY-MM-DD
+    // The patient's calendar day, not UTC's. Exercising at 11pm in Kolkata
+    // used to count towards the previous day, and the streak agreed.
+    const date = localDateKey(started.wallClock, timeZone);
     byDate.set(date, (byDate.get(date) ?? 0) + 1);
   }
   return [...byDate.entries()]
@@ -201,8 +212,17 @@ export function computeRomTrend(sessions: StoredSession[]): RomTrendSeries[] {
  */
 export function computeReport(
   sessions: StoredSession[],
-  input: { patientId: string; patientDisplayName: string; periodStart: string; periodEnd: string }
+  input: {
+    patientId: string;
+    patientDisplayName: string;
+    periodStart: string;
+    periodEnd: string;
+    timeZone?: string;
+    /** Set only for a single-day report; see `ProgressReport.periodDate`. */
+    periodDate?: string | null;
+  }
 ): ProgressReport {
+  const timeZone = input.timeZone ?? DEFAULT_TIME_ZONE;
   const inPeriod = sessions.filter((session) => {
     const started = sortedEvents(session).find((e) => e.type === "session_started");
     if (started?.type !== "session_started") return false;
@@ -275,7 +295,7 @@ export function computeReport(
       ? withEvents.reduce((a, b) => (b.startedAt > a.startedAt ? b : a)).startedAt
       : null;
 
-  const adherence = computeAdherence(inPeriod);
+  const adherence = computeAdherence(inPeriod, timeZone);
   const avgFormScore = scoredReps > 0 ? Math.round((scoreSum / scoredReps) * 10) / 10 : null;
   const perExercise = computeExerciseSummaries(withEvents);
   const formTrend = computeFormTrend(withEvents);
@@ -286,6 +306,8 @@ export function computeReport(
     patientDisplayName: input.patientDisplayName,
     periodStart: input.periodStart,
     periodEnd: input.periodEnd,
+    periodDate: input.periodDate ?? null,
+    timeZone,
     lastActivityAt,
     sessionCount: inPeriod.length,
     activeDays: adherence.length,
@@ -494,22 +516,33 @@ function buildObservations(d: {
  * blank reports for the days someone did not exercise is noise, and adherence
  * already answers "which days were missed" properly.
  *
- * Clock-free, like everything else in this file: the caller passes the window,
- * and days are bucketed by the `wallClock` on `session_started` — the same
- * UTC-date key `computeAdherence` uses, so the two can never disagree about
- * which day a session belongs to.
+ * **Days are the patient's, not UTC's.** Bucketing on the UTC date filed an
+ * 11pm session in Kolkata under the previous day. `timeZone` is the same one
+ * `computeAdherence` is given, so the report list and the streak can never
+ * disagree about which day a session belongs to. Each report's period is the
+ * real instant-bracket of that local day, which is why `periodDate` is carried
+ * separately — east of UTC the bracket *starts* on the previous UTC date.
+ *
+ * Clock-free, like everything else in this file: the caller passes the window.
  */
 export function computeDailyReports(
   sessions: StoredSession[],
-  input: { patientId: string; patientDisplayName: string; periodStart: string; periodEnd: string }
+  input: {
+    patientId: string;
+    patientDisplayName: string;
+    periodStart: string;
+    periodEnd: string;
+    timeZone?: string;
+  }
 ): ProgressReport[] {
+  const timeZone = input.timeZone ?? DEFAULT_TIME_ZONE;
   const byDate = new Map<string, StoredSession[]>();
 
   for (const session of sessions) {
     const started = sortedEvents(session).find((e) => e.type === "session_started");
     if (started?.type !== "session_started") continue;
     if (started.wallClock < input.periodStart || started.wallClock > input.periodEnd) continue;
-    const date = started.wallClock.slice(0, 10); // YYYY-MM-DD, as computeAdherence keys it
+    const date = localDateKey(started.wallClock, timeZone);
     byDate.set(date, [...(byDate.get(date) ?? []), session]);
   }
 
@@ -521,8 +554,10 @@ export function computeDailyReports(
       computeReport(daysSessions, {
         patientId: input.patientId,
         patientDisplayName: input.patientDisplayName,
-        periodStart: `${date}T00:00:00.000Z`,
-        periodEnd: `${date}T23:59:59.999Z`
+        periodStart: startOfLocalDay(date, timeZone),
+        periodEnd: endOfLocalDay(date, timeZone),
+        periodDate: date,
+        timeZone
       })
     );
 }

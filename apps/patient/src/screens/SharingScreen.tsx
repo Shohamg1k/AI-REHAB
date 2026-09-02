@@ -293,7 +293,8 @@ export function SharingScreen({
             )}
 
             {dailyReports.map((report) => {
-              const date = report.periodStart.slice(0, 10);
+              // The report's own day label — see ProgressReport.periodDate.
+              const date = report.periodDate ?? report.periodStart.slice(0, 10);
               const open = openDate === date;
               return (
                 <div key={date} className="ds-card-hair flex flex-col gap-9">
@@ -326,13 +327,16 @@ export function SharingScreen({
                   {/* `lastActivityAt` is the only part of "this got updated"
                       a reader cannot infer for themselves — the rest is just
                       the report saying more than it did before. */}
-                  {/* UTC, to match the day it is filed under. Days are
-                      bucketed by UTC date (as adherence always has been), so
-                      rendering this in local time could show a time that
-                      belongs to the next day in the reader's timezone. */}
+                  {/* Rendered in the zone the days were bucketed in, so the
+                      time always belongs to the day it is filed under. */}
                   {report.lastActivityAt && (
                     <span className="text-cap text-ink-3">
-                      Last updated {report.lastActivityAt.slice(11, 16)} UTC
+                      Last updated{" "}
+                      {new Date(report.lastActivityAt).toLocaleTimeString(undefined, {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZone: report.timeZone
+                      })}
                     </span>
                   )}
 
