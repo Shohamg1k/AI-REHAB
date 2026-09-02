@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SessionEvent } from "@ai-rehab/contracts";
-import { computeAdherence, computeDailyReports } from "./projections.js";
+import { computeAdherence, computeDailyReports, computeReport } from "./projections.js";
 import {
   computeDataQuality,
   computeExerciseSummaries,
@@ -554,5 +554,90 @@ describe("daily reports use the patient's calendar days, not UTC's", () => {
     const [report] = computeDailyReports([lateEvening], base);
     expect(report!.periodDate).toBe("2026-09-01");
     expect(report!.timeZone).toBe("UTC");
+  });
+});
+
+/**
+ * ADR-0012, second half: the safety gate's verdicts stay in the event log and
+ * stay out of the report.
+ *
+ * The thresholds are provisional and fire on a single noisy frame, so the
+ * "flags" were mostly false positives. Showing a clinician a list of them is
+ * not a neutral act — it spends their attention on noise and teaches them to
+ * discount the rest of the report. These tests feed a log that *does* contain
+ * verdicts and assert none of it comes out the other end.
+ */
+describe("safety verdicts do not reach the report", () => {
+  const withVerdicts = {
+    sessionId: "s1",
+    events: [
+      {
+        seq: 0,
+        event: {
+          type: "session_started",
+          t: 0,
+          sessionId: "s1",
+          programId: null,
+          wallClock: "2026-09-01T09:00:00.000Z"
+        } as SessionEvent
+      },
+      { seq: 1, event: started("seated-knee-extension") },
+      { seq: 2, event: repEvent({ index: 0, score: 80, confidence: 0.9 }) },
+      {
+        seq: 3,
+        event: {
+          type: "safety_verdict",
+          t: 1000,
+          verdict: {
+            t: 1000,
+            verdict: "block",
+            ruleId: "max_trunk_lean",
+            reason: "Trunk lean (34.2°) crossed the safe limit of 25° — likely compensating with the back.",
+            threshold: { name: "maxTrunkLean", limit: 25, observed: 34.2 },
+            downgradeTo: null,
+            source: "realtime_gate"
+          }
+        } as SessionEvent
+      }
+    ]
+  };
+
+  const input = {
+    patientId: "p1",
+    patientDisplayName: "Asha",
+    periodStart: "2026-08-01T00:00:00.000Z",
+    periodEnd: "2026-09-30T00:00:00.000Z"
+  };
+
+  it("carries no field for them at all", () => {
+    const report = computeReport([withVerdicts], input);
+    expect(report).not.toHaveProperty("safetyEvents");
+  });
+
+  /** The phrases the product owner asked never to see in a report. */
+  it("mentions neither the rule nor its threshold text anywhere", () => {
+    const serialised = JSON.stringify(computeReport([withVerdicts], input));
+    for (const phrase of ["trunk lean", "crossed the safe", "safe limit", "max_trunk_lean"]) {
+      expect(serialised.toLowerCase(), phrase).not.toContain(phrase.toLowerCase());
+    }
+  });
+
+  it("says nothing about a safety gate in its observations", () => {
+    const report = computeReport([withVerdicts], input);
+    for (const observation of report.observations) {
+      expect(`${observation.text} ${observation.basis}`.toLowerCase()).not.toContain("safety");
+    }
+  });
+
+  /** The rest of the report is unaffected — the rep still counts. */
+  it("still reports the session that contained them", () => {
+    const report = computeReport([withVerdicts], input);
+    expect(report.sessionCount).toBe(1);
+    expect(report.totalReps).toBe(1);
+  });
+
+  it("keeps them out of the daily reports too", () => {
+    const daily = computeDailyReports([withVerdicts], input);
+    expect(JSON.stringify(daily).toLowerCase()).not.toContain("safe limit");
   });
 });

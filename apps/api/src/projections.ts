@@ -18,7 +18,6 @@ import type {
   ReportObservation,
   ReportExerciseSummary,
   ReportPainEntry,
-  ReportSafetyEvent,
   ReportTrendPoint,
   RomTrendSeries,
   SessionEvent,
@@ -231,7 +230,6 @@ export function computeReport(
 
   const exercises = new Set<string>();
   const pain: ReportPainEntry[] = [];
-  const safetyEvents: ReportSafetyEvent[] = [];
   let totalReps = 0;
   let scoredReps = 0;
   let scoreSum = 0;
@@ -277,12 +275,10 @@ export function computeReport(
           repIndex: event.signal.selfReported.repIndex ?? null
         });
       }
-      if (
-        event.type === "safety_verdict" &&
-        (event.verdict.verdict === "block" || event.verdict.verdict === "escalate")
-      ) {
-        safetyEvents.push({ at, verdict: event.verdict.verdict, reason: event.verdict.reason });
-      }
+      // `safety_verdict` events are deliberately not read here. They stay in
+      // the event log; they do not reach the report. See ADR-0012 — the
+      // thresholds are provisional and fire on a single noisy frame, so
+      // surfacing them to a clinician spends attention on false positives.
     }
   }
 
@@ -320,7 +316,6 @@ export function computeReport(
     dataQuality,
     adherence,
     pain,
-    safetyEvents,
     observations: buildObservations({
       sessionCount: inPeriod.length,
       activeDays: adherence.length,
@@ -328,7 +323,6 @@ export function computeReport(
       scoredReps,
       avgFormScore,
       pain,
-      safetyEvents,
       perExercise,
       formTrend
     })
@@ -368,7 +362,6 @@ function buildObservations(d: {
   scoredReps: number;
   avgFormScore: number | null;
   pain: ReportPainEntry[];
-  safetyEvents: ReportSafetyEvent[];
   perExercise: ReportExerciseSummary[];
   formTrend: ReportTrendPoint[];
 }): ReportObservation[] {
@@ -484,17 +477,6 @@ function buildObservations(d: {
       // ... during seated-knee-extension" — twice, once as a raw id.
       basis: "Patient self-report on the 1–5 scale they were shown, tagged to the exercise that was running. Never inferred from movement.",
       exerciseId: worst.exerciseId
-    });
-  }
-
-  if (d.safetyEvents.length > 0) {
-    out.push({
-      text: `The safety gate flagged ${d.safetyEvents.length} moment${d.safetyEvents.length === 1 ? "" : "s"} for review.`,
-      // ADR-0012: the gate no longer stops the patient, so this must not say
-      // it did. Thresholds are provisional and fire on a single frame, so
-      // these are worth a clinician's eye, not a conclusion.
-      basis: `Provisional thresholds, single-frame — treat as flags, not findings. ${d.safetyEvents.map((e) => e.reason).join(" · ")}`,
-      exerciseId: null
     });
   }
 

@@ -50,7 +50,6 @@ const report = (overrides: Partial<ProgressReport> = {}): ProgressReport => ({
   pain: [
     { at: "2026-09-02T04:00:00.000Z", region: "knee", severity: 2, exerciseId: "seated-knee-extension", repIndex: 3 }
   ],
-  safetyEvents: [],
   observations: [
     { text: "2 sessions across 1 day.", basis: "Counted from synced session events.", exerciseId: null }
   ],
@@ -155,8 +154,7 @@ describe("reportToHtml", () => {
       report({
         perExercise: [],
         pain: [],
-        safetyEvents: [],
-        observations: [],
+              observations: [],
         avgFormScore: null,
         sessionCount: 0,
         totalReps: 0,
