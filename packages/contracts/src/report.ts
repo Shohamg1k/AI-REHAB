@@ -19,6 +19,14 @@ import { AdherenceDaySchema } from "./sync.js";
  * Framing (CLAUDE.md §6): this describes what the camera could see. It is
  * not an assessment, and every observation carries the `basis` it was drawn
  * from so no number appears as a bare claim (invariant 4).
+ *
+ * **Safety-gate verdicts are deliberately absent.** They are still written to
+ * the event log, but they do not appear here: the thresholds are provisional,
+ * unreviewed, and fire on a single noisy frame, so the "flags" were mostly
+ * false positives (ADR-0012). Presenting them to a clinician as something to
+ * review is worse than omitting them — it spends their attention on noise and
+ * teaches them to discount the rest of the report. They come back when the
+ * thresholds do.
  */
 
 export const ReportPainEntrySchema = z.object({
@@ -35,13 +43,6 @@ export const ReportPainEntrySchema = z.object({
   repIndex: z.number().int().nonnegative().nullable()
 });
 export type ReportPainEntry = z.infer<typeof ReportPainEntrySchema>;
-
-export const ReportSafetyEventSchema = z.object({
-  at: z.string(),
-  verdict: z.enum(["block", "escalate"]),
-  reason: z.string()
-});
-export type ReportSafetyEvent = z.infer<typeof ReportSafetyEventSchema>;
 
 export const ReportObservationSchema = z.object({
   text: z.string(),
@@ -202,7 +203,6 @@ export const ProgressReportSchema = z.object({
   dataQuality: ReportDataQualitySchema,
   adherence: z.array(AdherenceDaySchema),
   pain: z.array(ReportPainEntrySchema),
-  safetyEvents: z.array(ReportSafetyEventSchema),
   observations: z.array(ReportObservationSchema)
 });
 export type ProgressReport = z.infer<typeof ProgressReportSchema>;

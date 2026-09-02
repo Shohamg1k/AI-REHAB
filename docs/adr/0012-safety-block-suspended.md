@@ -92,6 +92,31 @@ This should come back. The conditions, in order:
 Until those hold, the honest position is that we do not know enough to stop
 someone mid-movement, and pretending otherwise trains patients to ignore us.
 
+## Addendum — the report drops them too (2026-09-02)
+
+This ADR originally kept the gate's verdicts flowing to the clinician's report,
+on the argument that a physiotherapist could judge whether "the trunk-lean rule
+fired 14 times" meant compensation or a bad threshold.
+
+**The product owner asked for them to be removed from the report as well**, and
+on reflection that argument was weak. A clinician reading a list of
+`Trunk lean (34.2°) crossed the safe limit of 25°` cannot tell a real
+compensation from a hip landmark jumping for one frame — the same thing that
+made the in-session block unusable makes the report line unusable. And it is
+not free: it spends the reader's attention on noise and teaches them to
+discount the rest of the page, which is the more expensive failure.
+
+So `safetyEvents` is gone from `ProgressReport` entirely — the field, the
+observation, the UI section and the downloadable document. **The events are
+still written to the event log**, so nothing is lost and re-adding the
+projection is a small change once the thresholds are reviewed.
+
+The Groq coach's prompt was corrected at the same time: two lines still told
+the model the gate "stopped a set", which stopped being true when this ADR
+landed. The protective intent of hard rule 3 is unchanged — never help anyone
+around a warning — it just no longer describes a mechanism that is switched
+off.
+
 ## Consequences
 
 - The app no longer intervenes in an unsafe movement. **Stated plainly: this

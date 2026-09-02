@@ -123,8 +123,6 @@ export function reportToHtml(report: ProgressReport): string {
     )
     .join("");
 
-  const flags = report.safetyEvents.map((e) => `<li>${esc(e.reason)}</li>`).join("");
-
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -168,7 +166,6 @@ export function reportToHtml(report: ProgressReport): string {
 ${exercises ? `<h2>Exercise by exercise</h2>${exercises}` : ""}
 ${observations ? `<h2>What we noticed</h2><ul>${observations}</ul>` : ""}
 ${pain ? `<h2>Pain reported</h2><ul>${pain}</ul><p class="muted">The patient's own answers. Nothing here is inferred from movement.</p>` : ""}
-${flags ? `<h2>Flagged for review</h2><ul>${flags}</ul><p class="muted">These did not interrupt the session. The thresholds behind them are provisional and have not been reviewed by a physiotherapist — worth a look, not a conclusion.</p>` : ""}
 
 <footer>This describes what the camera could see over the period. It is a coaching and monitoring aid, not a medical device, and not a clinical assessment.</footer>
 </body></html>`;

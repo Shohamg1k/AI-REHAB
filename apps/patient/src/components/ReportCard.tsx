@@ -143,24 +143,6 @@ export function ReportCard({ report }: { report: ProgressReport }) {
         </div>
       )}
 
-      {report.safetyEvents.length > 0 && (
-        <div className="flex flex-col gap-8 rounded-md bg-warn-wash p-14">
-          <span className="ds-label text-warn">Flagged for review</span>
-          {report.safetyEvents.map((e, i) => (
-            <p key={`${e.at}-${i}`} className="text-b2 text-ink-2">
-              {e.reason}
-            </p>
-          ))}
-          {/* ADR-0012: the gate no longer stops anyone, so this must not imply
-              it did — and its thresholds are unreviewed, so it must not read
-              as a finding either. */}
-          <p className="text-cap text-ink-3">
-            These did not interrupt the session. The thresholds behind them are provisional and have
-            not been reviewed by a physiotherapist — worth a look, not a conclusion.
-          </p>
-        </div>
-      )}
-
       <Disclaimer>
         This describes what the camera could see over the period. It is not a clinical assessment.
       </Disclaimer>

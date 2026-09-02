@@ -94,7 +94,6 @@ const EMPTY_REPORT: ProgressReport = {
   dataQuality: { scoredRatio: 0, unscoredReps: 0, meanConfidence: null },
   adherence: [],
   pain: [],
-  safetyEvents: [],
   observations: [
     { text: "No sessions were recorded in this period.", basis: "No session events.", exerciseId: null }
   ]

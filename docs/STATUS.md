@@ -33,6 +33,20 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## Safety-gate flags are out of the report as well (ADR-0012 addendum)
+
+ADR-0012 removed the in-session block but kept the gate's verdicts flowing to the clinician's report. **They are now out of the report too**, at the product owner's request — and the original argument for keeping them does not survive scrutiny.
+
+A clinician reading `Trunk lean (34.2°) crossed the safe limit of 25°` cannot tell a real compensation from a hip landmark jumping for one frame. The thing that made the in-session block unusable makes the report line unusable for exactly the same reason. And it is not a free inclusion: it spends the reader's attention on noise and teaches them to discount the rest of the page, which is the more expensive failure.
+
+`safetyEvents` is gone from `ProgressReport` entirely — the field, the observation, the UI section, and the downloadable document. **The events are still written to the event log**, so nothing is lost; re-adding the projection is a small change once a physiotherapist has reviewed the thresholds.
+
+A test feeds a session log that *does* contain a `max_trunk_lean` block verdict and asserts that neither "trunk lean", "crossed the safe", "safe limit" nor the rule id appears anywhere in the resulting report, including the daily ones.
+
+**Two lines in the Groq coach's prompt were corrected while here.** Both still told the model the gate "stopped a set" — untrue since ADR-0012. Hard rule 3's protective intent is unchanged (never help anyone around a warning); it just no longer describes a mechanism that is switched off. The patient app already sent the coach an empty list, so no patient was told anything false, but the prompt would have lied the moment that changed.
+
+---
+
 ## Reports are files now, and exercises are tiles (F1)
 
 **Reports as file cards.** The Sharing tab listed days as inline expanders; they are now a grid of file cards in the shape people already know from Drive and Gmail — a name row with a download button, and a preview beneath. The preview is a real miniature (form score, sessions, reps, and the day's strongest finding) rather than a generic document icon: a wall of identical tiles tells a clinician nothing, and the point of a grid is that a fortnight can be scanned without opening anything.

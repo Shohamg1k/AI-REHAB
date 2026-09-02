@@ -285,6 +285,13 @@ Beyond the headline counts, it carries the detail that makes it actionable:
   "knee pain on rep 6 of sit-to-stand" is something a clinician can change a
   prescription over.
 
+**Safety-gate verdicts are absent, deliberately.** They are still written to
+the event log; they do not reach the report. The thresholds are provisional and
+fire on a single noisy frame, so the flags were mostly false positives
+(ADR-0012) — and a list of them costs a clinician attention while teaching them
+to discount everything else on the page. A test feeds a log containing verdicts
+and asserts none of that text comes out.
+
 **Only reps above the confidence floor feed criterion and compensation stats.**
 A rep the tracker could barely see would otherwise report a confident-looking
 "failed" against a criterion it never measured. Range of motion is the one
