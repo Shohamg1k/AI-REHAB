@@ -171,7 +171,38 @@ describe("reportToHtml", () => {
 });
 
 describe("reportTitle", () => {
+  /**
+   * Asserted by structure, not by string.
+   *
+   * The first version pinned "Wednesday, 2 September 2026", which is what a
+   * en-GB runtime produces — the CI runner is en-US and says "Wednesday,
+   * September 2, 2026". The title is deliberately formatted in the reader's
+   * locale, so the test must check what this function decides (the name, the
+   * separator, the right day) and not what Intl decides.
+   */
   it("names the patient and the day in words", () => {
-    expect(reportTitle(report())).toBe("Asha Narang — Wednesday, 2 September 2026");
+    const title = reportTitle(report());
+    expect(title.startsWith("Asha Narang — ")).toBe(true);
+
+    const formatted = new Date("2026-09-02T12:00:00Z").toLocaleDateString(undefined, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC"
+    });
+    expect(title).toBe(`Asha Narang — ${formatted}`);
+    // Whatever the locale's order, it is the report's own day.
+    expect(title).toContain("2026");
+  });
+
+  it("uses the report's day rather than the period start instant", () => {
+    // The period begins on 1 September UTC; the report is for the 2nd.
+    const title = reportTitle(report());
+    const first = new Date("2026-09-01T12:00:00Z").toLocaleDateString(undefined, {
+      weekday: "long",
+      timeZone: "UTC"
+    });
+    expect(title).not.toContain(first);
   });
 });
