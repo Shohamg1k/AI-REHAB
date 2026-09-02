@@ -127,3 +127,30 @@ describe("the design system stylesheet", () => {
     }
   });
 });
+
+/**
+ * The requested shapes: reports as file cards you open, exercises as square
+ * tiles. Both are easy to revert to a list by someone tidying up, and neither
+ * is visible to any other test.
+ */
+describe("cards and tiles", () => {
+  it("shows reports as openable file cards, not inline expanders", () => {
+    const sharing = FILES.find((f) => f.path === "screens/SharingScreen.tsx")!;
+    expect(sharing.text).toContain("ReportFileCard");
+    expect(sharing.text).toContain("ReportViewer");
+    // A grid, so a fortnight can be scanned at once rather than scrolled.
+    expect(sharing.text).toMatch(/grid[^"]*grid-cols-2/);
+  });
+
+  it("lays the day's exercises out as a square grid", () => {
+    const today = FILES.find((f) => f.path === "screens/TodayScreen.tsx")!;
+    expect(today.text).toContain("aspect-square");
+    expect(today.text).toMatch(/grid[^"]*grid-cols-2/);
+  });
+
+  /** C6 — the rationale is not a casualty of the layout change. */
+  it("still explains why the next exercise was chosen", () => {
+    const today = FILES.find((f) => f.path === "screens/TodayScreen.tsx")!;
+    expect(today.text).toContain("rationale");
+  });
+});

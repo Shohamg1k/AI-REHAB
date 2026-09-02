@@ -33,6 +33,30 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## Reports are files now, and exercises are tiles (F1)
+
+**Reports as file cards.** The Sharing tab listed days as inline expanders; they are now a grid of file cards in the shape people already know from Drive and Gmail — a name row with a download button, and a preview beneath. The preview is a real miniature (form score, sessions, reps, and the day's strongest finding) rather than a generic document icon: a wall of identical tiles tells a clinician nothing, and the point of a grid is that a fortnight can be scanned without opening anything.
+
+Clicking one opens a viewer: dark surround, a toolbar naming the file, the report on a page, Escape to close and the page behind locked from scrolling. Same component for patient and clinician, which is the rule the report itself already follows.
+
+**Downloaded as `asha-narang_2026-09-02.html`** — the patient's name and the report's own day. Not the period start: east of UTC a local day *begins* on the previous UTC date, so naming from the instant would file 2 September under the 1st.
+
+### Self-contained HTML, not a PDF library
+
+A PDF library would be a new dependency and a licence review for something the browser already does well. The viewer's **Print / PDF** button hands the document to the browser's own print-to-PDF, which produces a better PDF than a JS library would and costs nothing; the iframe's title is set so the suggested filename matches the download.
+
+The downloaded `.html` has **no script, no stylesheet, no font, no image** to fetch — it has to open from a downloads folder, offline, years later. It is also real text a clinician can search and copy from, which a screenshot of the app would not be.
+
+**The document is deliberately not a copy of the UI.** A clinical record should read as a document, not as a picture of a phone screen.
+
+**Everything interpolated into it is escaped.** A display name is whatever the patient typed, and this file gets opened in a browser — the one place a stored script would actually run. There is no framework escaping to fall back on in a hand-built string, so it is explicit and tested, including a criterion label arriving from the event log.
+
+Filenames are flattened for anything awkward: accents, punctuation, `../../etc/passwd`, an all-emoji name (which falls back to `patient`). Tested.
+
+**Exercises as square tiles.** Today's list was full-width rows, which made a 1920px window into one long thin column. Six movements chosen by recognition suit a grid — two columns on a phone, four on a desktop, every tile square. The "why this one" rationale (C6) does not fit in a square and was not dropped: it moved below the grid, for the exercise that is up next, which is the only one it was ever about.
+
+---
+
 ## The app stopped being a phone artboard stretched across a desktop (H9)
 
 Every screen pinned itself to `max-w-lg` — 512px — so on a 1920px display three quarters of the window was empty. And the live session, the one screen read from **across the room**, used the same narrow column with 13.5px overlay text.

@@ -20,7 +20,10 @@ export type IconName =
   | "check"
   | "chevron"
   | "warning"
-  | "stop";
+  | "stop"
+  | "download"
+  | "close"
+  | "print";
 
 const PATHS: Record<IconName, JSX.Element> = {
   home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -51,6 +54,21 @@ const PATHS: Record<IconName, JSX.Element> = {
     </>
   ),
   check: <path d="M4 12.5 9 17.5 20 6.5" />,
+  download: (
+    <>
+      <path d="M12 3v12" />
+      <path d="M7 11l5 5 5-5" />
+      <path d="M4 20h16" />
+    </>
+  ),
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  print: (
+    <>
+      <path d="M7 9V3h10v6" />
+      <path d="M7 19H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
+      <path d="M7 15h10v6H7z" />
+    </>
+  ),
   chevron: <path d="M9 5l7 7-7 7" />,
   warning: (
     <>
