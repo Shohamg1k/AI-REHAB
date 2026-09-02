@@ -111,7 +111,7 @@ export function TodayScreen({
   const remaining = exercises.length - done.size;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <header className="flex items-start px-20 pb-14 pt-8">
         <div className="flex flex-1 flex-col gap-4">
           <span className="ds-label">Today</span>

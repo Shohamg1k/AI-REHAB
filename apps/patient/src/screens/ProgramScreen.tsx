@@ -55,7 +55,7 @@ export function ProgramScreen({
   const prescribed = program?.exercises ?? [];
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-14 px-20 pb-10 pt-8">
+    <div className="ds-shell gap-14 px-20 pb-10 pt-8">
       <div className="flex flex-col gap-4">
         <span className="ds-label">Program</span>
         <h1 className="text-d1 text-ink">

@@ -55,7 +55,7 @@ export function ExerciseIntroScreen({
   const steps = spec.referenceMedia?.keyPoints ?? [];
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex items-center gap-12 px-20 pb-12 pt-6">
         <button
           type="button"

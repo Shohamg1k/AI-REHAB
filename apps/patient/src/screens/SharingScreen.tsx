@@ -142,7 +142,7 @@ export function SharingScreen({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex flex-col gap-5 px-20 pt-8">
         <h1 className="text-d1 text-ink">
           Who can see

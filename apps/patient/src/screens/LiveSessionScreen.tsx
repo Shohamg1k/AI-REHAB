@@ -62,7 +62,7 @@ export function LiveSessionScreen({
   const scored = lastRep && lastRep.score.confidence >= FORM_SCORE_CONFIDENCE_FLOOR;
 
   return (
-    <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col bg-night">
+    <div className="ds-stage-shell">
       <CameraStage
         liveState={liveState}
         signalStatus={signalStatus}
@@ -72,13 +72,13 @@ export function LiveSessionScreen({
         // is coaching, and coaching has stopped — leaving a live skeleton
         // running would suggest the set is still being judged.
         topLeft={
-          <div className="flex items-center gap-12">
+          <div className="flex items-center gap-14">
             <button type="button" onClick={onEndExercise} aria-label="End set" className="text-white">
-              <Icon name="chevron" size={20} className="rotate-180" />
+              <Icon name="chevron" size={28} className="rotate-180" />
             </button>
-            <div className="flex flex-col">
-              <span className="text-[16px] font-semibold text-white">{spec.displayName}</span>
-              <span className="font-mono text-[11px] uppercase text-white/60">
+            <div className="flex flex-col gap-2">
+              <span className="ds-stage-title text-white">{spec.displayName}</span>
+              <span className="ds-stage-caption font-mono text-white/65">
                 {paused
                   ? t.session.paused
                   : counting
@@ -88,10 +88,10 @@ export function LiveSessionScreen({
             </div>
             {listening && (
               <span
-                className="flex items-center gap-4 rounded-sm bg-white/15 px-6 py-3 text-[10px] font-medium uppercase tracking-wide text-white/80"
+                className="ds-stage-caption flex items-center gap-6 rounded-sm bg-white/15 px-10 py-5 font-medium tracking-wide text-white/85"
                 aria-label={t.voice.listening}
               >
-                <span className="h-6 w-6 rounded-full bg-[#4ED6A8]" aria-hidden="true" />
+                <span className="h-8 w-8 rounded-full bg-[#4ED6A8]" aria-hidden="true" />
                 {t.voice.listening}
               </span>
             )}
@@ -104,30 +104,28 @@ export function LiveSessionScreen({
               <div
                 role="status"
                 aria-live="polite"
-                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+                className="flex items-center gap-14 rounded-lg bg-white/94 p-16 backdrop-blur-sm"
               >
-                <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
-                  <Icon name="sound" size={15} />
+                <span className="flex h-40 w-40 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
+                  <Icon name="sound" size={22} />
                 </span>
-                <span className="flex flex-col">
-                  <span className="text-[13.5px] font-medium text-ink">{t.session.paused}</span>
-                  <span className="text-[11px] text-ink-3">{t.session.notCountingYet}</span>
+                <span className="flex flex-col gap-2">
+                  <span className="ds-stage-message text-ink">{t.session.paused}</span>
+                  <span className="ds-stage-submessage text-ink-3">{t.session.notCountingYet}</span>
                 </span>
               </div>
             ) : counting ? (
               <div
                 role="status"
                 aria-live="polite"
-                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+                className="flex items-center gap-14 rounded-lg bg-white/94 p-16 backdrop-blur-sm"
               >
-                <span className="flex h-40 w-40 flex-none items-center justify-center rounded-sm bg-teal-wash font-mono text-[19px] font-semibold text-teal-deep tabular-nums">
+                <span className="ds-stage-countdown-badge flex flex-none items-center justify-center rounded-sm bg-teal-wash font-mono text-teal-deep tabular-nums">
                   {countdown}
                 </span>
-                <span className="flex flex-col">
-                  <span className="text-[13.5px] font-medium text-ink">
-                    {t.session.getIntoPosition}
-                  </span>
-                  <span className="text-[11px] text-ink-3">
+                <span className="flex flex-col gap-2">
+                  <span className="ds-stage-message text-ink">{t.session.getIntoPosition}</span>
+                  <span className="ds-stage-submessage text-ink-3">
                     {t.session.startingIn} {countdown}s · {t.session.notCountingYet}
                   </span>
                 </span>
@@ -135,28 +133,28 @@ export function LiveSessionScreen({
             ) : trackingLost ? (
               <div
                 role="status"
-                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+                className="flex items-center gap-14 rounded-lg bg-white/94 p-16 backdrop-blur-sm"
               >
-                <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
-                  <Icon name="warning" size={15} />
+                <span className="flex h-40 w-40 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
+                  <Icon name="warning" size={22} />
                 </span>
-                <span className="text-[13.5px] font-medium text-ink">
+                <span className="ds-stage-message text-ink">
                   {primaryGuidance(captureQuality, signalStatus)}
                 </span>
               </div>
             ) : activeCue ? (
               <div
                 role="status"
-                className="flex items-center gap-11 rounded-lg bg-white/94 p-11 backdrop-blur-sm"
+                className="flex items-center gap-14 rounded-lg bg-white/94 p-16 backdrop-blur-sm"
               >
-                <span className="flex h-26 w-26 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
-                  <Icon name="sound" size={15} />
+                <span className="flex h-40 w-40 flex-none items-center justify-center rounded-sm bg-warn-wash text-warn">
+                  <Icon name="sound" size={22} />
                 </span>
-                <span className="flex flex-col">
-                  <span className="text-[13.5px] font-medium text-ink">
+                <span className="flex flex-col gap-2">
+                  <span className="ds-stage-message text-ink">
                     {localiseCue(activeCue.text, locale)}
                   </span>
-                  <span className="text-[11px] text-ink-3">{t.cue.captionNote}</span>
+                  <span className="ds-stage-submessage text-ink-3">{t.cue.captionNote}</span>
                 </span>
               </div>
             ) : null}
@@ -165,18 +163,18 @@ export function LiveSessionScreen({
                   type="button"
                   onClick={onBookmarkPain}
                   disabled={reps.length === 0}
-                  className="flex h-[74px] items-center justify-center gap-10 rounded-lg bg-[rgba(249,231,220,.96)] disabled:opacity-50"
+                  className="ds-stage-action flex items-center justify-center gap-12 rounded-lg bg-[rgba(249,231,220,.96)] text-pain disabled:opacity-50"
                 >
-                  <span className="h-13 w-13 rounded-pill bg-pain" />
-                  <span className="text-[19px] font-semibold text-pain">That one hurt</span>
+                  <span className="h-16 w-16 rounded-pill bg-pain" />
+                  That one hurt
                 </button>
-                <span className="text-center font-mono text-[10.5px] uppercase tracking-[.04em] text-white/55">
+                <span className="ds-stage-caption text-center font-mono text-white/55">
                   Tags this rep · we ask about it in the break
                 </span>
                 <button
                   type="button"
                   onClick={onEndExercise}
-                  className="flex h-[46px] items-center justify-center gap-8 rounded bg-white/14 text-b2 font-medium text-white"
+                  className="ds-stage-submessage flex min-h-[clamp(2.75rem,6vmin,4rem)] items-center justify-center gap-8 rounded bg-white/14 font-medium text-white"
                 >
                   End set
                 </button>
@@ -185,38 +183,44 @@ export function LiveSessionScreen({
       >
         {/* Readouts sit below the header row rather than in a slot, so they
             keep their position whatever the header contains. */}
-        <div className="pointer-events-none absolute inset-x-18 top-[92px] flex items-start justify-between">
-          <div className="rounded bg-night/68 px-14 py-10 backdrop-blur-sm">
-            <div className="font-mono text-[38px] font-semibold leading-none tracking-[-.03em] text-white">
-              {String(reps.length).padStart(2, "0")}
+        {/*
+          The readouts and the per-rep strip, in one flow rather than two
+          absolutely-positioned layers at hardcoded offsets — the numbers
+          resize with the viewport now, so anything pinned below them by a
+          fixed pixel offset would drift.
+        */}
+        <div className="pointer-events-none absolute inset-x-18 top-[14%] flex flex-col gap-10">
+          <div className="flex items-start justify-between">
+            <div className="rounded bg-night/68 px-16 py-12 backdrop-blur-sm">
+              <div className="ds-stage-count font-mono text-white tabular-nums">
+                {String(reps.length).padStart(2, "0")}
+              </div>
+              <div className="ds-stage-caption font-mono text-white/65">of {targetReps} reps</div>
             </div>
-            <div className="font-mono text-[10.5px] uppercase tracking-[.09em] text-white/65">
-              of {targetReps} reps
+
+            <div className="flex flex-col items-end rounded bg-night/68 px-16 py-12 backdrop-blur-sm">
+              <div
+                className="ds-stage-score font-mono tabular-nums"
+                style={{ color: scored ? "#8DF0BE" : "rgba(255,255,255,.55)" }}
+              >
+                {scored ? Math.round(lastRep.score.score) : "—"}
+              </div>
+              <div className="ds-stage-caption font-mono text-white/65">
+                {lastRep && !scored ? "unscored" : "form"}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-end rounded bg-night/68 px-14 py-10 backdrop-blur-sm">
-            <div
-              className="font-mono text-[26px] font-semibold leading-none"
-              style={{ color: scored ? "#8DF0BE" : "rgba(255,255,255,.55)" }}
-            >
-              {scored ? Math.round(lastRep.score.score) : "—"}
-            </div>
-            <div className="font-mono text-[10.5px] uppercase tracking-[.09em] text-white/65">
-              {lastRep && !scored ? "unscored" : "form"}
-            </div>
+          {/* Per-rep progress, coloured by how each rep actually scored. */}
+          <div className="flex gap-4">
+            {Array.from({ length: targetReps }, (_, i) => (
+              <span
+                key={i}
+                className="h-[clamp(0.375rem,1.1vmin,0.75rem)] flex-1 rounded-xs"
+                style={{ background: repTone(reps[i]) }}
+              />
+            ))}
           </div>
-        </div>
-
-        {/* Per-rep progress, coloured by how each rep actually scored. */}
-        <div className="pointer-events-none absolute inset-x-18 top-[188px] flex gap-3">
-          {Array.from({ length: targetReps }, (_, i) => (
-            <span
-              key={i}
-              className="h-4 flex-1 rounded-xs"
-              style={{ background: repTone(reps[i]) }}
-            />
-          ))}
         </div>
       </CameraStage>
     </div>

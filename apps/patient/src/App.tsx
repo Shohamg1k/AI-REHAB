@@ -263,7 +263,7 @@ export default function App() {
   // disclaimer bar (E4 applies regardless of who's looking at the app).
   if (currentUser?.role === "clinician") {
     return (
-      <div className="min-h-screen flex flex-col bg-page">
+      <div className="ds-zoom min-h-screen flex flex-col bg-page">
         <DisclaimerBar />
         <main className="flex-1 flex flex-col">
           <ClinicianApp user={currentUser} onSignOut={handleSignOut} />
@@ -275,7 +275,7 @@ export default function App() {
   const navTab = NAV_TAB[screen];
 
   return (
-    <div className="min-h-screen flex flex-col bg-page">
+    <div className="ds-zoom min-h-screen flex flex-col bg-page">
       <DisclaimerBar />
       <main className="flex-1 flex flex-col">
         {screen === "welcome" && <WelcomeScreen onStart={handleStart} onSignIn={() => setScreen("auth")} />}
