@@ -98,7 +98,7 @@ export function SessionSummaryScreen({
   const topShortfall = [...shortfalls.entries()].sort((a, b) => b[1] - a[1])[0] ?? null;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex flex-col gap-14 px-20 pt-10">
         <div className="flex flex-col gap-4">
           <span className="ds-label">{exerciseName}</span>

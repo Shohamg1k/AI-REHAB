@@ -40,7 +40,7 @@ export function WelcomeScreen({ onStart, onSignIn }: { onStart: () => void; onSi
   const session = getSession();
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex flex-col gap-16 px-20 pt-8">
         <div className="flex items-center gap-9">
           <span className="h-26 w-26 rounded-sm bg-teal" />

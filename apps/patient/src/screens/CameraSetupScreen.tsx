@@ -25,7 +25,7 @@ export function CameraSetupScreen({
   if (cameraStatus === "denied" || workerStatus === "error") {
     const isPermission = cameraStatus === "denied";
     return (
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-16 px-16 py-24">
+      <div className="ds-shell gap-16 px-16 py-24">
         <div className="flex flex-col gap-8 rounded-lg border border-line bg-surf p-20">
           <span aria-hidden className="text-h1">
             {isPermission ? "📷" : "⚠️"}
@@ -64,7 +64,7 @@ export function CameraSetupScreen({
   const meterTone = ready ? "#4ED6A8" : "#F0B44C";
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col bg-night">
+    <div className="ds-stage-shell">
       <CameraStage
         liveState={liveState}
         signalStatus={signalStatus}

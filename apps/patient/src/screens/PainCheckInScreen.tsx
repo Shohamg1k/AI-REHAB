@@ -33,7 +33,7 @@ export function PainCheckInScreen({
   const [severity, setSeverity] = useState<number | null>(null);
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex items-start gap-12 px-20 pb-12 pt-6">
         <div className="flex flex-1 flex-col gap-2">
           <h1 className="text-h1 text-ink">Set done</h1>

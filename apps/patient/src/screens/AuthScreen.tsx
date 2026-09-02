@@ -42,7 +42,7 @@ export function AuthScreen({ onDone, onBack }: { onDone: (user: User) => void; o
   }
 
   return (
-    <div className="flex flex-col gap-20 px-16 py-24 max-w-lg mx-auto w-full">
+    <div className="ds-shell gap-20 px-16 py-24">
       <div>
         <h1 className="text-h1 text-ink">{mode === "signin" ? "Sign in" : "Create an account"}</h1>
         <p className="text-b2 text-ink-2 mt-4">

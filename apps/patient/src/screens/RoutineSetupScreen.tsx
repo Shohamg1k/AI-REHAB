@@ -30,7 +30,7 @@ export function RoutineSetupScreen({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div className="ds-shell">
       <div className="flex flex-col gap-6 px-20 pt-8">
         <span className="ds-label">Setting up</span>
         <h1 className="text-d1 text-ink">What do you want to work on?</h1>

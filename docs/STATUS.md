@@ -33,6 +33,44 @@ The unit tests stub `fetch` — they prove what we send and refuse to send, whic
 
 ---
 
+## The app stopped being a phone artboard stretched across a desktop (H9)
+
+Every screen pinned itself to `max-w-lg` — 512px — so on a 1920px display three quarters of the window was empty. And the live session, the one screen read from **across the room**, used the same narrow column with 13.5px overlay text.
+
+**The overlay was the real problem.** The patient is far enough from the screen that they cannot reach it — that is the entire reason voice control exists (ADR-0010). Coaching text at 13.5px and a rep counter at 38px are unreadable from there.
+
+### What changed
+
+**One responsive column, `.ds-shell`**, replacing the hardcoded width on all twelve screens. It widens in steps that match real devices rather than arbitrary breakpoints, and stops at 72rem — past that a single column of body text gets *harder* to read, and the answer to a very wide window is bigger type, not longer lines.
+
+**The live session takes the whole window** (`.ds-stage-shell`). It is not a document, it is a mirror.
+
+**The overlay sizes itself from the viewport.** `clamp()` on `vmin` — `vmin` rather than `vw` because on a wide, short desktop window `vw` would produce a rep counter taller than the video. Measured:
+
+| | Desktop 1920 | iPad Pro | iPad landscape | iPhone 15 |
+|---|---|---|---|---|
+| Rep count | 140px | 133px | 107px | 56px |
+| Form score | 86px | 82px | 66px | 36px |
+| Coaching cue | 35px | 33px | 26px | 17px |
+
+Previously 38px, 26px and 13.5px on every device.
+
+**Bigger type past 1280px, via `zoom` on the app root.** The design carries ~45 hardcoded pixel sizes in JSX (`text-[13.5px]` and friends) that a root font-size change would not touch; `zoom` scales all of them and the spacing scale with them, from one declaration. 1.15× at 1280px, 1.3× at 1680px. It is applied to the app root only, so the live session — which sizes itself from the viewport — is unaffected.
+
+### Verified at each target device
+
+No horizontal overflow at any size. Column width as a share of the window: iPhone 100%, iPad portrait 86%, iPad landscape 75%, desktop 78% — against 27% at desktop before.
+
+The live session was checked with a canvas stand-in for the camera (`getUserMedia` stubbed to a `captureStream`), which is the only way to reach that screen in this environment. The stage fills the viewport exactly at every size (802 of 852px on iPhone, the remainder being the disclaimer bar).
+
+**A screenshot artifact worth knowing about:** the Browser pane renders an emulated viewport larger than itself scaled into a corner of the image, so screenshots at 1180×820 and above *look* like the app occupies a third of the window. It does not — DOM measurement confirms it fills the height. Judge those sizes by measurement, not by the picture.
+
+### Guarded
+
+`layout.test.ts` fails the build if a screen reintroduces a fixed phone width, if the live session adopts the reading column, or if type under 18px appears in the overlay. Both guards were confirmed to fail when the regression is reintroduced deliberately.
+
+---
+
 ## Days are the patient's days now (G2)
 
 Everything keyed on the UTC date of `session_started`. For a patient in Kolkata that filed an 11pm Tuesday session under Monday, and **the streak counter agreed with the mistake** — a rehab app that miscounts which day you exercised is wrong about the one thing adherence is for.

@@ -146,7 +146,7 @@ export function HistoryScreen() {
   const milestones = sessions && adherence ? computeMilestones(streak ?? 0, sessions.length) : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-12 px-20 pb-10 pt-8">
+    <div className="ds-shell gap-12 px-20 pb-10 pt-8">
       <h1 className="text-d1 text-ink">Progress</h1>
 
       {error && <p className="text-b2 text-dang">{error}</p>}
