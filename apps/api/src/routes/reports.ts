@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
+import { resolveTimeZone } from "../timezone.js";
 import { forbidden, requireAuth } from "../http/errors.js";
 import type { Store } from "../store/types.js";
 
@@ -37,7 +38,7 @@ function defaultPeriod(days: number): { start: string; end: string } {
  *    of them would be a hole, not a feature.
  */
 export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0], store: Store): void {
-  fastify.get<{ Querystring: { days?: string } }>(
+  fastify.get<{ Querystring: { days?: string; tz?: string } }>(
     "/me/report",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
@@ -48,7 +49,12 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
         return;
       }
       const days = Number(request.query.days) || DEFAULT_PERIOD_DAYS;
-      reply.send(await store.getReport(auth.tenantId, auth.userId, defaultPeriod(days)));
+      reply.send(
+        await store.getReport(auth.tenantId, auth.userId, {
+          ...defaultPeriod(days),
+          timeZone: resolveTimeZone(request.query.tz)
+        })
+      );
     }
   );
 
@@ -60,7 +66,7 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
    * step: finishing another exercise changes the events, and the next read
    * simply says more.
    */
-  fastify.get<{ Querystring: { days?: string } }>(
+  fastify.get<{ Querystring: { days?: string; tz?: string } }>(
     "/me/reports/daily",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
@@ -71,12 +77,15 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
         return;
       }
       reply.send(
-        await store.getDailyReports(auth.tenantId, auth.userId, dailyPeriod(request.query.days))
+        await store.getDailyReports(auth.tenantId, auth.userId, {
+          ...dailyPeriod(request.query.days),
+          timeZone: resolveTimeZone(request.query.tz)
+        })
       );
     }
   );
 
-  fastify.get<{ Params: { patientId: string }; Querystring: { days?: string } }>(
+  fastify.get<{ Params: { patientId: string }; Querystring: { days?: string; tz?: string } }>(
     "/patients/:patientId/report",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
@@ -110,11 +119,16 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
       });
 
       const days = Number(request.query.days) || DEFAULT_PERIOD_DAYS;
-      reply.send(await store.getReport(auth.tenantId, patientId, defaultPeriod(days)));
+      reply.send(
+        await store.getReport(auth.tenantId, patientId, {
+          ...defaultPeriod(days),
+          timeZone: resolveTimeZone(request.query.tz)
+        })
+      );
     }
   );
 
-  fastify.get<{ Params: { patientId: string }; Querystring: { days?: string } }>(
+  fastify.get<{ Params: { patientId: string }; Querystring: { days?: string; tz?: string } }>(
     "/patients/:patientId/reports/daily",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
@@ -149,7 +163,10 @@ export function registerReportRoutes(fastify: Parameters<FastifyPluginAsync>[0],
       });
 
       reply.send(
-        await store.getDailyReports(auth.tenantId, patientId, dailyPeriod(request.query.days))
+        await store.getDailyReports(auth.tenantId, patientId, {
+          ...dailyPeriod(request.query.days),
+          timeZone: resolveTimeZone(request.query.tz)
+        })
       );
     }
   );

@@ -409,8 +409,8 @@ export class PostgresStore implements Store {
     });
   }
 
-  async getAdherence(tenantId: string, userId: string): Promise<AdherenceDay[]> {
-    return computeAdherence(await this.fetchAllSessions(tenantId, userId));
+  async getAdherence(tenantId: string, userId: string, timeZone?: string): Promise<AdherenceDay[]> {
+    return computeAdherence(await this.fetchAllSessions(tenantId, userId), timeZone);
   }
 
   async getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]> {
@@ -424,7 +424,7 @@ export class PostgresStore implements Store {
   async getReport(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport> {
     const [patient, sessions] = await Promise.all([
       this.findUserById(tenantId, patientId),
@@ -434,14 +434,15 @@ export class PostgresStore implements Store {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,
-      periodEnd: period.end
+      periodEnd: period.end,
+      timeZone: period.timeZone
     });
   }
 
   async getDailyReports(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport[]> {
     const [patient, sessions] = await Promise.all([
       this.findUserById(tenantId, patientId),
@@ -451,7 +452,8 @@ export class PostgresStore implements Store {
       patientId,
       patientDisplayName: patient?.displayName ?? "Unknown patient",
       periodStart: period.start,
-      periodEnd: period.end
+      periodEnd: period.end,
+      timeZone: period.timeZone
     });
   }
 

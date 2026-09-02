@@ -104,14 +104,15 @@ export interface Store {
   listSessionEvents(tenantId: string, userId: string, sessionId: string): Promise<SessionEvent[]>;
 
   // --- projections (G2) ---
-  getAdherence(tenantId: string, userId: string): Promise<AdherenceDay[]>;
+  /** `timeZone` is the patient's IANA zone; days are theirs, not UTC's. */
+  getAdherence(tenantId: string, userId: string, timeZone?: string): Promise<AdherenceDay[]>;
   getBaseline(tenantId: string, userId: string): Promise<BaselineEntry[]>;
   getRomTrend(tenantId: string, userId: string): Promise<RomTrendSeries[]>;
   /** F1 — computed on read, never stored. See the doc comment on `ProgressReport`. */
   getReport(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport>;
   /**
    * F1 — one report per day the patient did something, newest first. Days
@@ -121,7 +122,7 @@ export interface Store {
   getDailyReports(
     tenantId: string,
     patientId: string,
-    period: { start: string; end: string }
+    period: { start: string; end: string; timeZone?: string }
   ): Promise<ProgressReport[]>;
 
   // --- messages (F9) ---

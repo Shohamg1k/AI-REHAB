@@ -163,6 +163,22 @@ export const ProgressReportSchema = z.object({
   periodStart: z.string(),
   periodEnd: z.string(),
   /**
+   * The calendar day this report covers, `YYYY-MM-DD`, for a daily report;
+   * null for a multi-day window.
+   *
+   * Carried explicitly rather than derived from `periodStart`, because for a
+   * patient east of UTC a local day *begins* on the previous UTC date —
+   * slicing the instant would label 2 September as 1 September.
+   */
+  periodDate: z.string().nullable(),
+  /**
+   * The IANA zone the period was bucketed in. Days are the patient's local
+   * days, not UTC days; this says whose. Present so a reader can tell which
+   * clock the report is speaking in, and so the UI renders times in the same
+   * one the days were counted in.
+   */
+  timeZone: z.string(),
+  /**
    * The most recent session in the period, or null when there were none.
    *
    * A daily report is recomputed from the event log on every read, so it
